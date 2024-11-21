@@ -7,13 +7,13 @@ const Layout = ({ children }) => {
       <Menubar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col gap-5 p-5">
-        <Nav />
+      <div className="flex-1 flex flex-col bg-[#f2f7ff] text-black">
+        <div className="shadow-sm">
+          <Nav />
+        </div>
 
-        <div className="flex-1 overflow-y-auto bg-gray-100">
-          <div className="bg-white shadow rounded-lg p-6 min-h-full">
-            {children}
-          </div>
+        <div className="flex-1 overflow-y-auto  ">
+          <div className="p-6 min-h-screen">{children}</div>
         </div>
       </div>
     </div>

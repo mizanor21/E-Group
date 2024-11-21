@@ -1,7 +1,11 @@
 import React from "react";
 
 const page = () => {
-  return <div>this is payroll page</div>;
+  return (
+    <div>
+      <p>this is payroll page</p>
+    </div>
+  );
 };
 
 export default page;

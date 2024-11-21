@@ -2,12 +2,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import {
-  MdDashboard,
-  MdOutlinePeople,
-  MdSettings,
-  MdWorkspaces,
-} from "react-icons/md";
+import { MdDashboard, MdOutlinePeople, MdSettings } from "react-icons/md";
 import { BsCashCoin } from "react-icons/bs"; // Import icons
 
 const Menubar = () => {
