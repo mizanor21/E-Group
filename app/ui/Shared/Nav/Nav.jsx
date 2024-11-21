@@ -37,7 +37,7 @@ const Nav = () => {
             <div className="card-body">
               <span className="text-lg font-bold">8 Notifications</span>
               <div className="card-actions">
-                <button className="btn btn-primary btn-block">
+                <button className="btn bg-gradient-to-r from-[#2d63a9] to-[#2d63a9]/50 text-white btn-block">
                   View Notifications
                 </button>
               </div>
