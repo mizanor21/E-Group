@@ -1,9 +1,12 @@
 "use client";
-import { FaUser, FaTrashAlt, FaEnvelope, FaClock } from "react-icons/fa";
-import { formatDistanceToNow, format } from "date-fns";
+import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { IoMdNotifications } from "react-icons/io";
-
+import Image from "next/image";
+import demoProfile from "@/public/icons/profile.gif";
+import user from "@/public/icons/user.png";
+import settings from "@/public/icons/settings.png";
+import logout from "@/public/icons/logout.png";
 const Nav = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -47,28 +50,36 @@ const Nav = () => {
             role="button"
             className="btn btn-ghost btn-circle avatar"
           >
-            <div className="w-10 rounded-full">
-              <img
-                alt="Tailwind CSS Navbar component"
-                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-              />
+            <div className="w-14 rounded-full">
+              <Image alt="User demo profile" src={demoProfile} />
             </div>
           </div>
           <ul
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
           >
-            <li>
-              <a className="justify-between">
-                Profile
-                <span className="badge">New</span>
-              </a>
+            <li className="flex justify-between">
+              <div className="">
+                <Image width={20} height={20} alt="User logo" src={user} />
+                <a className="justify-between">Profile</a>
+              </div>
             </li>
-            <li>
-              <a>Settings</a>
+            <li className="flex justify-between">
+              <div className="">
+                <Image
+                  width={20}
+                  height={20}
+                  alt="settings logo"
+                  src={settings}
+                />
+                <a>Settings</a>
+              </div>
             </li>
-            <li>
-              <a>Logout</a>
+            <li className="flex justify-between">
+              <div className="">
+                <Image width={20} height={20} alt="logout logo" src={logout} />
+                <a>Logout</a>
+              </div>
             </li>
           </ul>
         </div>
