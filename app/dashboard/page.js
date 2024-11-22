@@ -1,11 +1,9 @@
-import React from "react";
-// import Dashboard from "../ui/Dashboard/Dashboard";
-import DashboardData from "../ui/Dashboard/DashboardData";
+import Dashboard from "../ui/Dashboard/Dashboard";
 
 const page = () => {
   return (
     <div>
-      <DashboardData />
+      <Dashboard />
     </div>
   );
 };
