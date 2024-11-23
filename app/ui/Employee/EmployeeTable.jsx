@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React, { useState } from "react";
 
 const EmployeeTable = ({ employees }) => {
@@ -94,9 +95,12 @@ const EmployeeTable = ({ employees }) => {
 
         {/* Add Employee Button */}
         <div className="flex items-center justify-end col-span-1">
-          <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition">
+          <Link
+            href={"/dashboard/add-employee"}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
+          >
             Add New Employee
-          </button>
+          </Link>
         </div>
       </div>
 
