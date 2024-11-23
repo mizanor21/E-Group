@@ -3,13 +3,15 @@ import React, { useState } from "react";
 
 const EmployeeTable = ({ employees }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Default rows per page
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("");
 
   // Pagination Logic
   const totalPages = Math.ceil(employees.length / rowsPerPage);
   const startRow = (currentPage - 1) * rowsPerPage;
+
+  // Handle displayed employees with search and filtering
   const displayedEmployees = employees
     .filter(
       (employee) =>
@@ -20,6 +22,12 @@ const EmployeeTable = ({ employees }) => {
           .includes(searchQuery.toLowerCase())
     )
     .slice(startRow, startRow + rowsPerPage);
+
+  // Handle changing rows per page
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Reset to the first page
+  };
 
   return (
     <div className="rounded-lg space-y-5">
@@ -94,6 +102,25 @@ const EmployeeTable = ({ employees }) => {
 
       {/* Table Section */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold text-gray-800">All Employee</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Showing</span>
+            <select
+              value={rowsPerPage}
+              onChange={handleRowsPerPageChange}
+              className="border px-4 py-2 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+            >
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span className="text-sm text-gray-600">per page</span>
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse bg-white rounded-lg">
             <thead>
