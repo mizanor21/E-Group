@@ -64,7 +64,7 @@ const PaymentInformation = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Employee Work Information */}
-        <div className="col-span-1 border-2 border-dashed p-5 rounded-md">
+        <div className="col-span-1 border p-5 shadow rounded-md">
           <h4 className="text-xl font-semibold text-gray-700 mb-4">
             Employee Work Information
           </h4>
@@ -244,7 +244,7 @@ const PaymentInformation = () => {
 
         <div className="col-span-2 space-y-5">
           {/* Vendor Billing Information */}
-          <div className="border-2 border-dashed p-5 rounded-md">
+          <div className="border p-5 shadow rounded-md">
             <h4 className="text-xl font-semibold text-gray-700 mb-4">
               Vendor Billing Information *
             </h4>
@@ -294,7 +294,7 @@ const PaymentInformation = () => {
           </div>
 
           {/* Customer Billing Information */}
-          <div className="border-2 border-dashed p-5 rounded-md">
+          <div className="border p-5 shadow rounded-md">
             <h4 className="text-xl font-semibold text-gray-700 mb-4">
               Customer Billing Information *
             </h4>
