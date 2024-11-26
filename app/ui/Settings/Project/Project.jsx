@@ -11,5 +11,5 @@ const companies = [
 ];
 
 export default function Project() {
-  return <ProjectTable companies={companies} />;
+  return <ProjectTable initialCompanies={companies} />;
 }

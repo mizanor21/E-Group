@@ -11,5 +11,5 @@ const companies = [
 ];
 
 export default function Group() {
-  return <GroupTable companies={companies} />;
+  return <GroupTable initialCompanies={companies} />;
 }
