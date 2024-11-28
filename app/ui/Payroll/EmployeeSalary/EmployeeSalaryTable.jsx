@@ -38,9 +38,9 @@ const EmployeeSalaryTable = ({ employees }) => {
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-2xl font-bold mb-4">All Employees Salary</h1>
 
-      <div className="lg:flex justify-between">
+      <div className="lg:flex lg:gap-20 justify-between ">
         {/* Filter Section */}
-        <div className="bg-white p-6 rounded-lg shadow mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="lg:w-[70%]  bg-white p-6 rounded-lg shadow mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 ">
           {/* Search Bar */}
           <div>
             <label className="text-sm font-medium text-gray-600">Search</label>
@@ -87,16 +87,16 @@ const EmployeeSalaryTable = ({ employees }) => {
           </div>
         </div>
         {/* download button */}
-        <div className="bg-white p-6 rounded-lg space-y-2 ">
-          <button type="button" class=" btn flex gap-3 text-white w-44  py-2 rounded-2xl bg-gradient-to-r from-orange-600 to-blue-500 hover:from-pink-500 hover:to-orange-500 ...">
+        <div className=" bg-white px-6 py-3 rounded-lg space-y-1 ">
+          <button type="button" class="btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-800 hover:to-orange-500 ...">
             <SiApacheopenoffice className="text-xl" />
             WPS
           </button>
-          <button type="button" class=" btn flex gap-3 text-white w-44  py-2 rounded-2xl bg-gradient-to-r from-teal-400 to-blue-500 hover:from-pink-500 hover:to-orange-500 ...">
+          <button type="button" class=" btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400 ...">
             <LiaFileDownloadSolid className="text-xl" />
             Download
           </button>
-          <button type="button" class=" btn flex gap-3 text-white w-44  py-2 rounded-2xl bg-gradient-to-r from-teal-400 to-blue-500 hover:from-pink-500 hover:to-orange-500 ...">
+          <button type="button" class=" btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400 ...">
             <ImSpinner9 className="text-xl" />
             Refresh
           </button>
@@ -104,7 +104,7 @@ const EmployeeSalaryTable = ({ employees }) => {
       </div>
 
       {/* Employee Table */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-6 rounded-lg shadow mt-10">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse bg-white rounded-lg">
             <thead>
