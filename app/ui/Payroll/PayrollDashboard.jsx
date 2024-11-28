@@ -1,7 +1,7 @@
 import React from "react";
 import SalarySummary from "./SalarySummary";
 import AnnualPayrollSummary from "./AnnualPayrollSummary";
-import EmployeeSalary from "./EmployeeSalary/EmployeeSalary";
+import EmployeeTabs from "./EmployeeTabs";
 
 const PayrollDashboard = () => {
   return (
@@ -10,7 +10,7 @@ const PayrollDashboard = () => {
         <SalarySummary />
         <AnnualPayrollSummary />
       </div>
-      <EmployeeSalary />
+      <EmployeeTabs />
     </div>
   );
 };
