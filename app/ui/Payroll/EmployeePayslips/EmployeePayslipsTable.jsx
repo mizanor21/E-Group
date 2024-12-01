@@ -3,12 +3,15 @@ import React, { useState } from "react";
 import { TbDetails } from "react-icons/tb";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import { ImSpinner9 } from "react-icons/im";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const EmployeePayslipsTable = ({ employees }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
     const [filterDepartment, setFilterDepartment] = useState("");
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Pagination logic
     const totalPages = Math.ceil(employees.length / rowsPerPage);
@@ -32,6 +35,58 @@ const EmployeePayslipsTable = ({ employees }) => {
     const handleRowsPerPageChange = (e) => {
         setRowsPerPage(Number(e.target.value));
         setCurrentPage(1);
+    };
+
+
+    // Reset Function (Refesh)
+    const handleReset = () => {
+        setIsRefreshing(true);
+        setTimeout(() => {
+            setSearchQuery("");
+            setFilterDepartment("");
+            setCurrentPage(1);
+            setIsRefreshing(false);
+        }, 1000);
+    };
+
+    // Download PDF Function
+    const handleDownloadPDF = () => {
+        const doc = new jsPDF();
+        const tableColumn = [
+            "S/N",
+            "Name",
+            "Title",
+            "Level",
+            "Basic Salary",
+            "Allowance",
+            "Gross Salary",
+            "Deduction",
+            "Net salary",
+        ];
+        const tableRows = employees.map((employee, index) => [
+            index + 1,
+            employee.name,
+            employee.title,
+            employee.level,
+            employee.basicSalary,
+            employee.allowance,
+            employee.grossSalary,
+            employee.deduction,
+            employee.netSalary,
+        ]);
+
+        doc.text("Employee Salary List", 14, 15);
+
+        // Generate table
+        doc.autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+            styles: {
+                fontSize: 10,
+            },
+        });
+        doc.save("Employee_Payslips_List.pdf");
     };
 
     return (
@@ -88,12 +143,22 @@ const EmployeePayslipsTable = ({ employees }) => {
                 </div>
                 {/* download button */}
                 <div className=" bg-white px-6 py-3 rounded-lg space-y-1 ">
-                    <button type="button" class=" btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400 ...">
+                    <button
+                        onClick={handleDownloadPDF}
+                        type="button"
+                        className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
+                    >
                         <LiaFileDownloadSolid className="text-xl" />
                         Download
                     </button>
-                    <button type="button" class=" btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400 ...">
-                        <ImSpinner9 className="text-xl" />
+                    <button
+                        onClick={handleReset}
+                        type="button"
+                        className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
+                    >
+                        <ImSpinner9
+                            className={`text-xl ${isRefreshing ? "animate-spin" : ""}`}
+                        />
                         Refresh
                     </button>
                 </div>
