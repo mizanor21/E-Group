@@ -1,14 +1,16 @@
-"use client";
 import React, { useState } from "react";
 import { SiApacheopenoffice } from "react-icons/si";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import { ImSpinner9 } from "react-icons/im";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const EmployeeSalaryTable = ({ employees }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Pagination logic
   const totalPages = Math.ceil(employees.length / rowsPerPage);
@@ -34,18 +36,72 @@ const EmployeeSalaryTable = ({ employees }) => {
     setCurrentPage(1);
   };
 
+  // Reset Function (Refesh)
+  const handleReset = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setSearchQuery("");
+      setFilterDepartment("");
+      setCurrentPage(1);
+      setIsRefreshing(false);
+    }, 1000);
+  };
+
+  // Download PDF Function
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = [
+      "S/N",
+      "Name",
+      "Reg No",
+      "OP BAL",
+      "Salary",
+      "Over Time",
+      "Allowance",
+      "Gross Pay",
+      "Deduction",
+      "Net Payable",
+    ];
+    const tableRows = employees.map((employee, index) => [
+      index + 1,
+      employee.name,
+      employee.regNo,
+      employee.opBal,
+      employee.salary,
+      employee.overtime,
+      employee.allowance,
+      employee.grossPay,
+      employee.deduction,
+      employee.netPayable,
+    ]);
+
+    doc.text("Employee Salary List", 14, 15);
+
+    // Generate table
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      styles: {
+        fontSize: 10,
+      },
+    });
+    doc.save("Employee_Salary_List.pdf");
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-2xl font-bold mb-4">All Employees Salary</h1>
 
       <div className="lg:flex lg:gap-20 justify-between ">
         {/* Filter Section */}
-        <div className="lg:w-[70%]  bg-white p-6 rounded-lg shadow mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 ">
+        <div className="lg:w-[70%] bg-white p-6 rounded-lg shadow mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Search Bar */}
           <div>
             <label className="text-sm font-medium text-gray-600">Search</label>
             <input
               type="text"
+              value={searchQuery}
               placeholder="Search by any field"
               className="mt-2 block w-full border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -86,18 +142,32 @@ const EmployeeSalaryTable = ({ employees }) => {
             </select>
           </div>
         </div>
-        {/* download button */}
-        <div className=" bg-white px-6 py-3 rounded-lg space-y-1 ">
-          <button type="button" class="btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-800 hover:to-orange-500 ...">
+
+        {/* Download and Reset Buttons */}
+        <div className="bg-white px-6 py-3 rounded-lg space-y-1">
+          <button
+            type="button"
+            className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-800 hover:to-orange-500"
+          >
             <SiApacheopenoffice className="text-xl" />
             WPS
           </button>
-          <button type="button" class=" btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400 ...">
+          <button
+            onClick={handleDownloadPDF}
+            type="button"
+            className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
+          >
             <LiaFileDownloadSolid className="text-xl" />
             Download
           </button>
-          <button type="button" class=" btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400 ...">
-            <ImSpinner9 className="text-xl" />
+          <button
+            onClick={handleReset}
+            type="button"
+            className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
+          >
+            <ImSpinner9
+              className={`text-xl ${isRefreshing ? "animate-spin" : ""}`}
+            />
             Refresh
           </button>
         </div>
