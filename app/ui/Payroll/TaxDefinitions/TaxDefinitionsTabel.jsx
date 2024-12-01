@@ -64,7 +64,7 @@ const TaxDefinitionsTabel = ({ employees }) => {
                                     >
                                         <td className="py-2 px-4">{startRow + index + 1}</td>
                                         <td className="py-2 px-4">{employee.taxType}</td>
-                                        <td className="py-2 px-4">{employee.value}</td>
+                                        <td className="py-2 px-4">{employee.value}%</td>
                                         <td className="py-2 px-4">
                                             <div className="flex gap-2">
                                                 <button className="text-blue-500 hover:underline text-sm">
