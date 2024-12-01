@@ -37,7 +37,7 @@ const TaxDefinitionsTabel = ({ employees }) => {
                 <h1 className="text-2xl font-bold mb-4">Tax Definitions</h1>
                 <button
                     onClick={handleOpenModal}
-                    className="btn text-white rounded-lg hover:bg-transparent border-none transition-all duration-300 bg-gradient-to-r from-[#56a7d9] to-[#0a76db] hover:from-[#228cef] hover:to-[#5ccae8]"
+                    className="btn text-white rounded-lg hover:bg-transparent border-none transition-all duration-300 bg-gradient-to-r from-[#5ccae8] to-[#228cef]  hover:from-[#228cef] hover:to-[#5ccae8]"
                 >
                     Create Tax Definitions
                 </button>
