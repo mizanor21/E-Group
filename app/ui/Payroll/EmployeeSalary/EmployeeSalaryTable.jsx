@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import { SiApacheopenoffice } from "react-icons/si";
 import { LiaFileDownloadSolid } from "react-icons/lia";
