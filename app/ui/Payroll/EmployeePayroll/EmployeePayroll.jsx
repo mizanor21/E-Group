@@ -9,7 +9,7 @@ const EmployeePayroll = () => {
         daraGenerated: "12/12/2024",
         paymentMonth: "December",
         paymentYear: "2024",
-        status:"pending"
+        status:"Pending"
 
     }));
     return (

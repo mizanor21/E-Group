@@ -91,9 +91,9 @@ const EmployeePayrollTable = ({ employees }) => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse bg-white rounded-lg">
                         <thead>
-                            <tr className="bg-blue-100 text-gray-800">
+                            <tr className="bg-blue-100 text-gray-800 ">
                                 {["S/N", "Payment Name", "Designation", "Date Generated", "Payment Month", "Payment Year", "Status", "Action"].map((header) => (
-                                    <th key={header} className="py-3 px-4 text-sm font-medium text-gray-700 border-b">
+                                    <th key={header} className="py-3 px-4 text-sm  text-gray-700 border-b font-semibold">
                                         {header}
                                     </th>
                                 ))}
@@ -123,17 +123,16 @@ const EmployeePayrollTable = ({ employees }) => {
                                             </details>
                                         </td>
                                         <td className="py-3 px-4 w-32">
-                                            <div
-                                                className={`inline-flex justify-center items-center px-3 py-1 rounded-full gap-x-2 
+                                            <div className={`inline-flex justify-center items-center px-3 py-1 rounded-full gap-x-2 
                                         transition-all duration-200 hover:shadow-lg
-                                        ${employee.status === 'pending' && 'bg-orange-100/60 text-orange-500'} 
-                                        ${employee.status === 'due' && 'bg-rose-100/60 text-rose-500'} 
-                                        ${employee.status === 'paid' && 'bg-emerald-100/60 text-emerald-500'}`}>
+                                        ${employee.status === 'Pending' && 'bg-orange-100/60 text-orange-500'} 
+                                        ${employee.status === 'Due' && 'bg-rose-100/60 text-rose-500'} 
+                                        ${employee.status === 'Paid' && 'bg-emerald-100/60 text-emerald-500'}`}>
                                                 <span className={`h-1.5 w-1.5 rounded-full 
-                                            ${employee.status === 'pending' && 'bg-orange-700'}
-                                            ${employee.status === 'due' && 'bg-rose-700'}
-                                            ${employee.status === 'paid' && 'bg-emerald-700'}`}
-                                                ></span>
+                                                     ${employee.status === 'Pending' && 'bg-orange-700'}
+                                                     ${employee.status === 'Due' && 'bg-rose-700'}
+                                                     ${employee.status === 'Paid' && 'bg-emerald-700'}`}>
+                                                </span>
                                                 <h2 className="truncate">{employee.status}</h2>
                                             </div>
                                         </td>

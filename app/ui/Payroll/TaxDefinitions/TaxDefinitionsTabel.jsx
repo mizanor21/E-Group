@@ -1,37 +1,34 @@
 "use client";
 import React, { useState } from "react";
-import { SiApacheopenoffice } from "react-icons/si";
-import { LiaFileDownloadSolid } from "react-icons/lia";
-import { ImSpinner9 } from "react-icons/im";
+import CreateTaxModal from "../../component/Modal/CreateTaxModal";
 
 const TaxDefinitionsTabel = ({ employees }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterDepartment, setFilterDepartment] = useState("");
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [employee, setEmployee] = useState(employees);
 
     // Pagination logic
-    const totalPages = Math.ceil(employees.length / rowsPerPage);
+    const totalPages = Math.ceil(employee.length / rowsPerPage);
     const startRow = (currentPage - 1) * rowsPerPage;
-
-    // Filter and search logic
-    const filteredEmployees = employees.filter(
-        (employee) =>
-            (filterDepartment === "" || employee.department === filterDepartment) &&
-            Object.values(employee)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-    );
-
-    const displayedEmployees = filteredEmployees.slice(
-        startRow,
-        startRow + rowsPerPage
-    );
+    const paginatedEmployees = employee.slice(startRow, startRow + rowsPerPage);
 
     const handleRowsPerPageChange = (e) => {
         setRowsPerPage(Number(e.target.value));
         setCurrentPage(1);
+    };
+
+    // Function to add new tax data to the list
+    const addNewTax = (newTax) => {
+        setEmployee((prevEmployee) => [...prevEmployee, newTax]);
+    };
+
+    const handleOpenModal = () => {
+        setIsOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsOpenModal(false);
     };
 
     return (
@@ -39,10 +36,11 @@ const TaxDefinitionsTabel = ({ employees }) => {
             <div className="lg:flex justify-between items-center">
                 <h1 className="text-2xl font-bold mb-4">Tax Definitions</h1>
                 <button
-                    className="btn  text-white rounded-lg hover:bg-transparent border-none transition-all duration-300 bg-gradient-to-r from-[#56a7d9] to-[#0a76db]  hover:from-[#228cef]  hover:to-[#5ccae8]">
+                    onClick={handleOpenModal}
+                    className="btn text-white rounded-lg hover:bg-transparent border-none transition-all duration-300 bg-gradient-to-r from-[#56a7d9] to-[#0a76db] hover:from-[#228cef] hover:to-[#5ccae8]"
+                >
                     Create Tax Definitions
                 </button>
-
             </div>
 
             {/* Employee Table */}
@@ -58,8 +56,8 @@ const TaxDefinitionsTabel = ({ employees }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {displayedEmployees.length > 0 ? (
-                                displayedEmployees.map((employee, index) => (
+                            {paginatedEmployees?.length > 0 ? (
+                                paginatedEmployees.map((employee, index) => (
                                     <tr
                                         key={employee.regNo}
                                         className="border-t hover:bg-gray-100"
@@ -82,7 +80,7 @@ const TaxDefinitionsTabel = ({ employees }) => {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={11}
+                                        colSpan={4}
                                         className="text-center py-4 text-gray-500 italic"
                                     >
                                         No employees found.
@@ -133,6 +131,30 @@ const TaxDefinitionsTabel = ({ employees }) => {
                     </button>
                 </div>
             </div>
+
+            {/* Rows Per Page */}
+            <div className="mt-4">
+                <label htmlFor="rowsPerPage" className="mr-2">
+                    Rows per page:
+                </label>
+                <select
+                    id="rowsPerPage"
+                    value={rowsPerPage}
+                    onChange={handleRowsPerPageChange}
+                    className="border rounded px-3 py-2"
+                >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                </select>
+            </div>
+
+            {/* Modal */}
+            {isOpenModal &&
+                <CreateTaxModal
+                    onClose={handleCloseModal}
+                    addNewTax={addNewTax} />}
         </div>
     );
 };

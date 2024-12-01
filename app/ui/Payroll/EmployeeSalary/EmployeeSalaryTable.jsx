@@ -88,7 +88,7 @@ const EmployeeSalaryTable = ({ employees }) => {
         </div>
         {/* download button */}
         <div className=" bg-white px-6 py-3 rounded-lg space-y-1 ">
-          <button type="button" class="btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-800 hover:to-orange-500 ...">
+          <button type="button" class="btn flex gap-3 text-white w-28  lg:w-44   rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-800 hover:to-orange-500 ...">
             <SiApacheopenoffice className="text-xl" />
             WPS
           </button>
