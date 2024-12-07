@@ -78,7 +78,7 @@ const CompanyTable = ({ initialCompanies = [] }) => {
     const tableColumn = ["ID", "Company Name", "Location", "Category"];
     const tableRows = companies.map((company) => [
       company.id,
-      company.name,
+      company.companyName,
       company.location,
       company.category,
     ]);
@@ -178,7 +178,7 @@ const CompanyTable = ({ initialCompanies = [] }) => {
               displayedCompanies.map((company, index) => (
                 <tr key={company.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{company.name}</td>
+                  <td className="py-2 px-4">{company.companyName}</td>
                   <td className="py-2 px-4">{company.location}</td>
                   <td className="py-2 px-4">{company.category}</td>
                   <td className="py-2 px-4">

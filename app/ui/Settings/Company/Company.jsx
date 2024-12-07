@@ -1,15 +1,9 @@
 import React from "react";
 import CompanyTable from "./CompanyTable";
-
-const companies = [
-  { id: "01", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "02", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "03", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "04", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "05", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "06", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-];
+import { useCompanyData } from "@/app/data/DataFetch";
 
 export default function Company() {
+  const { data: companies } = useCompanyData([]);
+  console.log(companies);
   return <CompanyTable initialCompanies={companies} />;
 }

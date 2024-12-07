@@ -9,7 +9,12 @@ const CompanyModal = ({ data, onClose, onSave }) => {
     formState: { errors },
     reset,
   } = useForm({
-    defaultValues: data || { id: "", name: "", location: "", category: "" },
+    defaultValues: data || {
+      id: "",
+      companyName: "",
+      location: "",
+      category: "",
+    },
   });
 
   // Handle Form Submission
@@ -32,13 +37,17 @@ const CompanyModal = ({ data, onClose, onSave }) => {
             <label className="block text-sm font-medium">Company Name</label>
             <input
               type="text"
-              {...register("name", { required: "Company name is required" })}
+              {...register("companyName", {
+                required: "Company name is required",
+              })}
               className={`w-full border px-4 py-2 rounded-lg ${
                 errors.name ? "border-red-500" : ""
               }`}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            {errors.companyName && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.companyName.message}
+              </p>
             )}
           </div>
 
