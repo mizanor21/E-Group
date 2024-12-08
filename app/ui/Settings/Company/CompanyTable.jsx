@@ -184,7 +184,9 @@ const CompanyTable = ({ initialCompanies = [] }) => {
       {/* Table Section */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-800">All Companies</h2>
+          <h2 className=" text-lg font-bold px-1 rounded-md pl-2">
+            Companies - <span className="">( {companies.length} )</span>
+          </h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Showing</span>
             <select
@@ -215,7 +217,7 @@ const CompanyTable = ({ initialCompanies = [] }) => {
               displayedCompanies.map((company, index) => (
                 <tr key={company.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{company.companyName}</td>
+                  <td className="py-2 px-4">{company.company}</td>
                   <td className="py-2 px-4">{company.location}</td>
                   <td className="py-2 px-4">{company.category}</td>
                   <td className="py-2 px-4">
