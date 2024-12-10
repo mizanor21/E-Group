@@ -1,5 +1,7 @@
+import axios from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 const CompanyModal = ({ data, onClose, onSave }) => {
   // Initialize React Hook Form
@@ -9,15 +11,39 @@ const CompanyModal = ({ data, onClose, onSave }) => {
     formState: { errors },
     reset,
   } = useForm({
-    defaultValues: data || { id: "", name: "", location: "", category: "" },
+    defaultValues: data || {
+      id: "",
+      company: "",
+      location: "",
+      category: "",
+    },
   });
 
   // Handle Form Submission
-  const onSubmit = (formData) => {
-    console.log(formData);
-    onSave(formData); // Pass the data to parent
-    reset(); // Reset form
-    onClose(); // Close modal
+  // const onSubmit = (formData) => {
+  //   console.log(formData);
+  //   onSave(formData); // Pass the data to parent
+  //   reset(); // Reset form
+  //   onClose(); // Close modal
+  // };
+
+  const onSubmit = async (formData) => {
+    try {
+      // Send formData to the server
+      const response = await axios.post("/api/company", formData);
+      console.log(formData);
+
+      // Handle success
+      if (response.status === 201) {
+        toast.success("Company successfully added!");
+        onSave(formData); // Update parent component's state if needed
+        reset(); // Reset form
+        onClose(); // Close modal
+      }
+    } catch (error) {
+      // Handle error
+      toast.error("Failed to add company. Please try again.");
+    }
   };
 
   return (
@@ -32,13 +58,17 @@ const CompanyModal = ({ data, onClose, onSave }) => {
             <label className="block text-sm font-medium">Company Name</label>
             <input
               type="text"
-              {...register("name", { required: "Company name is required" })}
+              {...register("company", {
+                required: "Company name is required",
+              })}
               className={`w-full border px-4 py-2 rounded-lg ${
-                errors.name ? "border-red-500" : ""
+                errors.company ? "border-red-500" : ""
               }`}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            {errors.companyName && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.company.message}
+              </p>
             )}
           </div>
 

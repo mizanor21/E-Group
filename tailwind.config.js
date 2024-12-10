@@ -8,5 +8,12 @@ module.exports = {
   daisyui: {
     themes: ["light"],
   },
+  theme: {
+    extend: {
+      colors: {
+        neon: "#00ffcc",
+      },
+    },
+  },
   plugins: [require("daisyui")],
 };

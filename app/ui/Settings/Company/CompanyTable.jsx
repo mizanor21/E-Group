@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CompanyModal from "./CModal";
+import axios from "axios";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const CompanyTable = ({ initialCompanies = [] }) => {
   const [companies, setCompanies] = useState(initialCompanies); // Company data
@@ -11,6 +14,40 @@ const CompanyTable = ({ initialCompanies = [] }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalData, setModalData] = useState(null); // For modal data
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal open state
+
+  // Handle user deletion with toast notification
+  const handleDelete = (id) => {
+    // Show confirmation dialog
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Make API call to delete
+          await axios.delete(`/api/company?id=${id}`);
+          setCompanies((prevCompanies) =>
+            prevCompanies.filter((company) => company._id !== id)
+          ); // Update the state
+
+          // Show success alert
+          Swal.fire({
+            title: "Deleted!",
+            text: "The company has been deleted.",
+            icon: "success",
+          });
+        } catch (error) {
+          // Handle error
+          toast.error("Failed to delete company. Please try again.");
+        }
+      }
+    });
+  };
 
   // Pagination Logic
   const filteredCompanies = companies.filter((company) =>
@@ -78,7 +115,7 @@ const CompanyTable = ({ initialCompanies = [] }) => {
     const tableColumn = ["ID", "Company Name", "Location", "Category"];
     const tableRows = companies.map((company) => [
       company.id,
-      company.name,
+      company.companyName,
       company.location,
       company.category,
     ]);
@@ -147,7 +184,9 @@ const CompanyTable = ({ initialCompanies = [] }) => {
       {/* Table Section */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-800">All Companies</h2>
+          <h2 className=" text-lg font-bold px-1 rounded-md pl-2">
+            Companies - <span className="">( {companies.length} )</span>
+          </h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Showing</span>
             <select
@@ -178,7 +217,7 @@ const CompanyTable = ({ initialCompanies = [] }) => {
               displayedCompanies.map((company, index) => (
                 <tr key={company.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{company.name}</td>
+                  <td className="py-2 px-4">{company.company}</td>
                   <td className="py-2 px-4">{company.location}</td>
                   <td className="py-2 px-4">{company.category}</td>
                   <td className="py-2 px-4">
@@ -189,7 +228,10 @@ const CompanyTable = ({ initialCompanies = [] }) => {
                       Edit
                     </button>{" "}
                     |{" "}
-                    <button className="text-red-500 hover:underline">
+                    <button
+                      onClick={() => handleDelete(company._id)}
+                      className="text-red-500 hover:underline"
+                    >
                       Delete
                     </button>
                   </td>
