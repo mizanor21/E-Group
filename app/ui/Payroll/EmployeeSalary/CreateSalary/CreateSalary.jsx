@@ -1,10 +1,12 @@
 "use client"
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
+import CreateSalaryModal from "./CreateSalaryModal";
 
 const CreateSalary = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const inputStyle =
         "border rounded-md p-3 px-5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full";
@@ -14,6 +16,9 @@ const CreateSalary = () => {
     const onSubmit = (data) => {
         console.log(data);
     };
+
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
 
     return (
         <div className="bg-white p-10 space-y-10">
@@ -184,10 +189,18 @@ const CreateSalary = () => {
                             placeholder="Enter The Amount"
                             className={inputStyle}
                         />
-                        <button className={btnStyle}>Create Payslip</button>
+                        <button onClick={openModal} className={btnStyle}>
+                            Create Payslip
+                        </button>
                     </div>
                 </div>
             </div>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <CreateSalaryModal
+                    closeModal={closeModal} />
+            )}
         </div>
     );
 };
