@@ -5,6 +5,7 @@ import { LiaFileDownloadSolid } from "react-icons/lia";
 import { ImSpinner9 } from "react-icons/im";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import Link from "next/link";
 
 const EmployeeSalaryTable = ({ employees }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -212,9 +213,11 @@ const EmployeeSalaryTable = ({ employees }) => {
                     <td className="py-2 px-4">{employee.netPayable}</td>
                     <td className="py-2 px-4">
                       <div className="flex gap-2">
-                        <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
-                          Create Salary
-                        </button>
+                        <Link href={"create-salary"}>
+                          <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
+                            Create Salary
+                          </button>
+                        </Link>
                         <button className="text-blue-500 hover:underline text-sm">
                           Edit
                         </button>
