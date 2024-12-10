@@ -115,7 +115,7 @@ const EmployeePayrollTable = ({ employees }) => {
                                         <td className="py-3 px-4">
                                             <details className="dropdown bg-purple-500 hover:bg-purple-800 px-2 text-white rounded">
                                                 <summary className="m-1 cursor-pointer">Status</summary>
-                                                <ul className="menu dropdown-content bg-base-100 rounded-box z-[1] w-full text-black p-2 shadow">
+                                                <ul className="menu dropdown-content bg-neutral-100 rounded z-[1] w-full text-black p-2 shadow ">
                                                     <li><a>Pending</a></li>
                                                     <li><a>Due</a></li>
                                                     <li><a>Paid</a></li>

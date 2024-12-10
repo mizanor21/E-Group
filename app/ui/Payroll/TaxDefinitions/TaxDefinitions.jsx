@@ -6,7 +6,7 @@ const TaxDefinitions = () => {
     const empSalary = Array.from({ length: 100 }, (_, index) => ({
         id: index + 1,
         taxType: "NHIS",
-        value: "15%",
+        value: "15",
 
     }));
 
