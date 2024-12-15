@@ -70,7 +70,7 @@ const WpsTable = ({ employees, closeModal }) => {
     };
 
     // Pagination logic for 5 page buttons at a time
-    const maxPageButtons = 5;  // Show a maximum of 5 page buttons
+    const maxPageButtons = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
     let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
@@ -127,7 +127,7 @@ const WpsTable = ({ employees, closeModal }) => {
                     <button
                         onClick={handleDownloadPDF}
                         type="button"
-                        className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
+                        className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
                     >
                         <LiaFileDownloadSolid className="text-xl" />
                         Download
@@ -135,7 +135,7 @@ const WpsTable = ({ employees, closeModal }) => {
                     <button
                         onClick={handleReset}
                         type="button"
-                        className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
+                        className="btn flex gap-3 text-white  lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
                     >
                         <ImSpinner9 className={`text-xl ${isRefreshing ? "animate-spin" : ""}`} />
                         Refresh

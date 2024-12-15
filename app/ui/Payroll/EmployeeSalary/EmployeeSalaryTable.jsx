@@ -16,6 +16,7 @@ const EmployeeSalaryTable = ({ employees }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
   // Pagination logic
   const totalPages = Math.ceil(employees.length / rowsPerPage);
   const startRow = (currentPage - 1) * rowsPerPage;
@@ -271,7 +272,7 @@ const EmployeeSalaryTable = ({ employees }) => {
       </div>
 
       {/* WPS Modal */}
-      {isModalOpen && <WpsModal onClose={closeModal} />}
+      {isModalOpen && <WpsModal closeModal={closeModal} />}
     </div>
   );
 };

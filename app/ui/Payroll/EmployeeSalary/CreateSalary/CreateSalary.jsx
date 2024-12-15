@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
 import CreateSalaryModal from "./CreateSalaryModal";
+import { IoArrowRedoOutline } from "react-icons/io5";
 
 const CreateSalary = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
@@ -189,8 +190,11 @@ const CreateSalary = () => {
                             placeholder="Enter The Amount"
                             className={inputStyle}
                         />
-                        <button onClick={openModal} className={btnStyle}>
+                        <button
+                            onClick={openModal}
+                            className={`${btnStyle} flex gap-2  `}>
                             Create Payslip
+                            <IoArrowRedoOutline  className="text-2xl animate-pulse"/>
                         </button>
                     </div>
                 </div>
