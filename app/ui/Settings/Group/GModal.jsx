@@ -1,5 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 const GroupModal = ({ data, onClose, onSave }) => {
   // Initialize React Hook Form
@@ -9,36 +10,50 @@ const GroupModal = ({ data, onClose, onSave }) => {
     formState: { errors },
     reset,
   } = useForm({
-    defaultValues: data || { id: "", name: "", location: "", category: "" },
+    defaultValues: data || { group: "", location: "", category: "" },
   });
 
   // Handle Form Submission
-  const onSubmit = (formData) => {
-    console.log(formData);
-    onSave(formData); // Pass the data to parent
-    reset(); // Reset form
-    onClose(); // Close modal
+  const onSubmit = async (formData) => {
+    try {
+      // Send formData to the server
+      const response = await axios.post("/api/group", formData);
+      console.log(formData);
+
+      // Handle success
+      if (response.status === 201) {
+        toast.success("Group successfully added!");
+        onSave(formData); // Update parent component's state if needed
+        reset(); // Reset form
+        onClose(); // Close modal
+      }
+    } catch (error) {
+      // Handle error
+      toast.error("Failed to add group. Please try again.");
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg w-full max-w-lg">
         <h2 className="text-xl font-bold mb-4">
-          {data ? "Edit Company" : "Add New Company"}
+          {data ? "Edit Group" : "Add New Group"}
         </h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Company Name */}
+          {/* Group Name */}
           <div>
-            <label className="block text-sm font-medium">Company Name</label>
+            <label className="block text-sm font-medium">Group Name</label>
             <input
               type="text"
-              {...register("name", { required: "Company name is required" })}
+              {...register("group", { required: "Group name is required" })}
               className={`w-full border px-4 py-2 rounded-lg ${
-                errors.name ? "border-red-500" : ""
+                errors.group ? "border-red-500" : ""
               }`}
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            {errors.group && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.group.message}
+              </p>
             )}
           </div>
 

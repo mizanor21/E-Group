@@ -4,8 +4,8 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import GroupModal from "./GModal";
 
-const GroupTable = ({ initialCompanies = [] }) => {
-  const [companies, setCompanies] = useState(initialCompanies); // Company data
+const GroupTable = ({ groupsData = [] }) => {
+  const [groups, setGroups] = useState(groupsData); // group data
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default rows per page
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,17 +13,17 @@ const GroupTable = ({ initialCompanies = [] }) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal open state
 
   // Pagination Logic
-  const filteredCompanies = companies.filter((company) =>
-    Object.values(company)
+  const filteredGroups = groups.filter((group) =>
+    Object.values(group)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-  const totalPages = Math.ceil(filteredCompanies.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredGroups.length / rowsPerPage);
   const startRow = (currentPage - 1) * rowsPerPage;
 
-  // Filter and paginate the displayed companies
-  const displayedCompanies = filteredCompanies.slice(
+  // Filter and paginate the displayed groups
+  const displayedGroups = filteredGroups.slice(
     startRow,
     startRow + rowsPerPage
   );
@@ -34,31 +34,29 @@ const GroupTable = ({ initialCompanies = [] }) => {
     setCurrentPage(1); // Reset to first page
   };
 
-  // Open Add Company Modal
-  const handleAddCompany = () => {
+  // Open Add group Modal
+  const handleAddGroup = () => {
     setModalData(null); // Reset modal data
     setIsModalOpen(true); // Open modal
   };
 
-  // Open Edit Company Modal
-  const handleEditCompany = (company) => {
-    setModalData(company); // Set data to edit
+  // Open Edit group Modal
+  const handleEditGroup = (group) => {
+    setModalData(group); // Set data to edit
     setIsModalOpen(true); // Open modal
   };
 
-  // Handle Save Company (Add or Edit)
-  const handleSaveCompany = (newData) => {
+  // Handle Save group (Add or Edit)
+  const handleSaveGroup = (newData) => {
     if (newData.id) {
-      // Edit existing company
-      setCompanies((prevCompanies) =>
-        prevCompanies.map((company) =>
-          company.id === newData.id ? newData : company
-        )
+      // Edit existing group
+      setGroups((prevGroups) =>
+        prevGroups.map((group) => (group.id === newData.id ? newData : group))
       );
     } else {
-      // Add new company
-      setCompanies((prevCompanies) => [
-        ...prevCompanies,
+      // Add new group
+      setGroups((prevGroups) => [
+        ...prevGroups,
         { ...newData, id: Date.now().toString() }, // Assign unique ID
       ]);
     }
@@ -75,22 +73,22 @@ const GroupTable = ({ initialCompanies = [] }) => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
 
-    const tableColumn = ["ID", "Company Name", "Location", "Category"];
-    const tableRows = companies.map((company) => [
-      company.id,
-      company.name,
-      company.location,
-      company.category,
+    const tableColumn = ["ID", "Group Name", "Location", "Category"];
+    const tableRows = groups.map((group) => [
+      group.id,
+      group.group,
+      group.location,
+      group.category,
     ]);
 
-    doc.text("Company List", 14, 15);
+    doc.text("Group List", 14, 15);
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
       startY: 20,
     });
 
-    doc.save("Company_List.pdf");
+    doc.save("group_List.pdf");
   };
 
   return (
@@ -136,10 +134,10 @@ const GroupTable = ({ initialCompanies = [] }) => {
             Download All as PDF
           </button>
           <button
-            onClick={handleAddCompany}
+            onClick={handleAddGroup}
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
           >
-            Add New Company
+            Add New group
           </button>
         </div>
       </div>
@@ -147,7 +145,7 @@ const GroupTable = ({ initialCompanies = [] }) => {
       {/* Table Section */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-800">All Companies</h2>
+          <h2 className="text-lg font-bold text-gray-800">All groups</h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Showing</span>
             <select
@@ -167,23 +165,23 @@ const GroupTable = ({ initialCompanies = [] }) => {
           <thead>
             <tr className="bg-blue-100 text-gray-800">
               <th className="py-2 px-4">ID No.</th>
-              <th className="py-2 px-4">Company Name</th>
+              <th className="py-2 px-4">Group Name</th>
               <th className="py-2 px-4">Location</th>
               <th className="py-2 px-4">Category</th>
               <th className="py-2 px-4">Action</th>
             </tr>
           </thead>
           <tbody>
-            {displayedCompanies.length > 0 ? (
-              displayedCompanies.map((company, index) => (
-                <tr key={company.id} className="border-t hover:bg-gray-100">
+            {displayedGroups.length > 0 ? (
+              displayedGroups.map((group, index) => (
+                <tr key={group.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{company.name}</td>
-                  <td className="py-2 px-4">{company.location}</td>
-                  <td className="py-2 px-4">{company.category}</td>
+                  <td className="py-2 px-4">{group.group}</td>
+                  <td className="py-2 px-4">{group.location}</td>
+                  <td className="py-2 px-4">{group.category}</td>
                   <td className="py-2 px-4">
                     <button
-                      onClick={() => handleEditCompany(company)}
+                      onClick={() => handleEditGroup(group)}
                       className="text-blue-500 hover:underline"
                     >
                       Edit
@@ -201,7 +199,7 @@ const GroupTable = ({ initialCompanies = [] }) => {
                   colSpan={5}
                   className="text-center py-4 text-gray-500 italic"
                 >
-                  No companies found.
+                  No groups found.
                 </td>
               </tr>
             )}
@@ -252,12 +250,12 @@ const GroupTable = ({ initialCompanies = [] }) => {
         </div>
       </div>
 
-      {/* Company Modal */}
+      {/* group Modal */}
       {isModalOpen && (
         <GroupModal
           data={modalData}
           onClose={handleCloseModal}
-          onSave={handleSaveCompany}
+          onSave={handleSaveGroup}
         />
       )}
     </div>
