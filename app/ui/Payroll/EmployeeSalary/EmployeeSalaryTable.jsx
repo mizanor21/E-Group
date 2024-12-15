@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { SiApacheopenoffice } from "react-icons/si";
 import { LiaFileDownloadSolid } from "react-icons/lia";
@@ -6,6 +6,7 @@ import { ImSpinner9 } from "react-icons/im";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import Link from "next/link";
+import WpsModal from "./WPS/WpsModal";
 
 const EmployeeSalaryTable = ({ employees }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,6 +14,7 @@ const EmployeeSalaryTable = ({ employees }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Pagination logic
   const totalPages = Math.ceil(employees.length / rowsPerPage);
@@ -38,7 +40,7 @@ const EmployeeSalaryTable = ({ employees }) => {
     setCurrentPage(1);
   };
 
-  // Reset Function (Refesh)
+  // Reset Function (Refresh)
   const handleReset = () => {
     setIsRefreshing(true);
     setTimeout(() => {
@@ -91,11 +93,15 @@ const EmployeeSalaryTable = ({ employees }) => {
     doc.save("Employee_Salary_List.pdf");
   };
 
+  // WPS Modal
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-2xl font-bold mb-4">All Employees Salary</h1>
 
-      <div className="lg:flex lg:gap-20 justify-between ">
+      <div className="lg:flex lg:gap-20 justify-between">
         {/* Filter Section */}
         <div className="lg:w-[70%] bg-white p-6 rounded-lg shadow mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Search Bar */}
@@ -148,6 +154,7 @@ const EmployeeSalaryTable = ({ employees }) => {
         {/* Download and Reset Buttons */}
         <div className="bg-white px-6 py-3 rounded-lg space-y-1">
           <button
+            onClick={openModal}
             type="button"
             className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-800 hover:to-orange-500"
           >
@@ -231,10 +238,10 @@ const EmployeeSalaryTable = ({ employees }) => {
               ) : (
                 <tr>
                   <td
-                    colSpan={11}
-                    className="text-center py-4 text-gray-500 italic"
+                    colSpan="11"
+                    className="text-center py-4 text-gray-500"
                   >
-                    No employees found.
+                    No records found
                   </td>
                 </tr>
               )}
@@ -243,45 +250,28 @@ const EmployeeSalaryTable = ({ employees }) => {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
+        <div className="mt-4 flex justify-end space-x-2">
           <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-lg ${currentPage === 1
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
+            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${currentPage === 1 && "opacity-50 cursor-not-allowed"
               }`}
           >
             Previous
           </button>
-          <div className="flex gap-2">
-            {Array.from({ length: totalPages }).map((_, pageIndex) => (
-              <button
-                key={pageIndex}
-                onClick={() => setCurrentPage(pageIndex + 1)}
-                className={`px-4 py-2 rounded-lg ${currentPage === pageIndex + 1
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-              >
-                {pageIndex + 1}
-              </button>
-            ))}
-          </div>
           <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded-lg ${currentPage === totalPages
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
+            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${currentPage === totalPages && "opacity-50 cursor-not-allowed"
               }`}
           >
             Next
           </button>
         </div>
       </div>
+
+      {/* WPS Modal */}
+      {isModalOpen && <WpsModal onClose={closeModal} />}
     </div>
   );
 };
