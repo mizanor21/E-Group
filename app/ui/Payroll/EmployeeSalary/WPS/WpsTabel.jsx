@@ -1,48 +1,27 @@
-"use client"
+"use client";
 import React, { useState } from "react";
-import { SiApacheopenoffice } from "react-icons/si";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import { ImSpinner9 } from "react-icons/im";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
+import { RxCross1 } from "react-icons/rx";
 
-const WpsTable = ({ employees }) => {
+const WpsTable = ({ employees, closeModal }) => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterDepartment, setFilterDepartment] = useState("");
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const rowsPerPage = 5; // Set the number of rows per page
 
     // Pagination logic
     const totalPages = Math.ceil(employees.length / rowsPerPage);
     const startRow = (currentPage - 1) * rowsPerPage;
 
-    // Filter and search logic
-    const filteredEmployees = employees.filter(
-        (employee) =>
-            (filterDepartment === "" || employee.department === filterDepartment) &&
-            Object.values(employee)
-                .join(" ")
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-    );
+    const displayedEmployees = employees.slice(startRow, startRow + rowsPerPage);
 
-    const displayedEmployees = filteredEmployees.slice(
-        startRow,
-        startRow + rowsPerPage
-    );
-
-    const handleRowsPerPageChange = (e) => {
-        setRowsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-    };
-
-    // Reset Function (Refesh)
+    // Reset Function (Refresh)
     const handleReset = () => {
         setIsRefreshing(true);
         setTimeout(() => {
-            setSearchQuery("");
-            setFilterDepartment("");
             setCurrentPage(1);
             setIsRefreshing(false);
         }, 1000);
@@ -90,73 +69,65 @@ const WpsTable = ({ employees }) => {
         doc.save("Employee_Salary_List.pdf");
     };
 
+    // Pagination logic for 5 page buttons at a time
+    const maxPageButtons = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+    if (endPage - startPage < maxPageButtons - 1) {
+        startPage = Math.max(1, endPage - maxPageButtons + 1);
+    }
+
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
-            <h1 className="text-2xl font-bold mb-4">All Employees Salary</h1>
+        <div className="bg-gray-100 p-2">
+            <div className="flex justify-between">
+                <h1 className="text-2xl font-bold ">WPS Information</h1>
+                <button
+                    onClick={closeModal}
+                    className="text-2xl bg-white p-1 rounded mb-2  text-gray-500 hover:text-rose-500 focus:outline-none">
+                    <RxCross1 />
+                </button>
 
-            <div className="lg:flex lg:gap-20 justify-between ">
-                {/* Filter Section */}
-                <div className="lg:w-[70%] bg-white p-6 rounded-lg shadow mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Search Bar */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-600">Search</label>
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            placeholder="Search by any field"
-                            className="mt-2 block w-full border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
+            </div>
+            <div className="lg:flex lg:gap- justify-between items-center">
+                {/* Filter Input field */}
+                <div>
+                    <div className="border border-gray-300 rounded-lg p-5 shadow-sm">
+                        <h3 className="text-base font-semibold">Payer Information</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                            {[
+                                { label: "Employer EID", type: "number", placeholder: "Enter Employer EID" },
+                                { label: "Payer EID", type: "number", placeholder: "Enter Payer EID" },
+                                { label: "Payer QID", type: "number", placeholder: "Enter Payer QID" },
+                                { label: "Payer Bank Name", type: "text", placeholder: "Enter Payer Bank Name" },
+                                { label: "Payer IBAN", type: "text", placeholder: "Enter Payer IBAN" },
+                                { label: "Salary Creation Date", type: "date" },
+                                { label: "Total Salaries", type: "number", placeholder: "Enter total salaries" },
+                                { label: "Total Records", type: "number", placeholder: "Enter total record" },
+                                { label: "File creation Date", type: "date" },
+                            ].map((input, index) => (
+                                <div key={index}>
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        {input.label}
+                                    </label>
+                                    <input
+                                        type={input.type}
+                                        placeholder={input.placeholder}
+                                        className="mt-1 block w-full rounded px-3 py-2 focus:border-sky-500 focus:ring-sky-500 focus:outline-none sm:text-sm border border-gray-300"
+                                    />
+                                </div>
+                            ))}
+                        </div>
 
-                    {/* Filter by Department */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-600">
-                            Filter by Department
-                        </label>
-                        <select
-                            value={filterDepartment}
-                            onChange={(e) => setFilterDepartment(e.target.value)}
-                            className="mt-2 block w-full border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
-                        >
-                            <option value="">All Departments</option>
-                            <option value="HR">HR</option>
-                            <option value="IT">IT</option>
-                            <option value="Finance">Finance</option>
-                        </select>
-                    </div>
-
-                    {/* Rows per Page */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-600">
-                            Rows per Page
-                        </label>
-                        <select
-                            value={rowsPerPage}
-                            onChange={handleRowsPerPageChange}
-                            className="mt-2 block w-full border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
-                        >
-                            <option value="10">10</option>
-                            <option value="20">20</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
                     </div>
                 </div>
 
                 {/* Download and Reset Buttons */}
-                <div className="bg-white px-6 py-3 rounded-lg space-y-1">
-                    <button
-                        type="button"
-                        className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-800 hover:to-orange-500"
-                    >
-                        <SiApacheopenoffice className="text-xl" />
-                        WPS
-                    </button>
+                <div className="p-3 rounded-lg space-y-2">
                     <button
                         onClick={handleDownloadPDF}
                         type="button"
-                        className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
+                        className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
                     >
                         <LiaFileDownloadSolid className="text-xl" />
                         Download
@@ -164,22 +135,20 @@ const WpsTable = ({ employees }) => {
                     <button
                         onClick={handleReset}
                         type="button"
-                        className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
+                        className="btn flex gap-3 text-white  lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
                     >
-                        <ImSpinner9
-                            className={`text-xl ${isRefreshing ? "animate-spin" : ""}`}
-                        />
+                        <ImSpinner9 className={`text-xl ${isRefreshing ? "animate-spin" : ""}`} />
                         Refresh
                     </button>
                 </div>
             </div>
 
             {/* Employee Table */}
-            <div className="bg-white p-6 rounded-lg shadow mt-10">
+            <div className="bg-white p-4 rounded-lg shadow mt-10">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse bg-white rounded-lg">
                         <thead>
-                            <tr className="bg-blue-100 text-gray-800">
+                            <tr className="bg-blue-100 text-gray-800 text-sm">
                                 <th className="py-2 px-4">S/N</th>
                                 <th className="py-2 px-4">Name</th>
                                 <th className="py-2 px-4">Reg No</th>
@@ -190,7 +159,6 @@ const WpsTable = ({ employees }) => {
                                 <th className="py-2 px-4">Gross Pay</th>
                                 <th className="py-2 px-4">Deduction</th>
                                 <th className="py-2 px-4">Net Payable</th>
-                                <th className="py-2 px-4">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -198,7 +166,7 @@ const WpsTable = ({ employees }) => {
                                 displayedEmployees.map((employee, index) => (
                                     <tr
                                         key={employee.regNo}
-                                        className="border-t hover:bg-gray-100"
+                                        className="border-t hover:bg-gray-100 text-sm"
                                     >
                                         <td className="py-2 px-4">{startRow + index + 1}</td>
                                         <td className="py-2 px-4">{employee.name}</td>
@@ -210,25 +178,12 @@ const WpsTable = ({ employees }) => {
                                         <td className="py-2 px-4">{employee.grossPay}</td>
                                         <td className="py-2 px-4">{employee.deduction}</td>
                                         <td className="py-2 px-4">{employee.netPayable}</td>
-                                        <td className="py-2 px-4">
-                                            <div className="flex gap-2">
-                                                <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
-                                                    Create Salary
-                                                </button>
-                                                <button className="text-blue-500 hover:underline text-sm">
-                                                    Edit
-                                                </button>
-                                                <button className="text-red-500 hover:underline text-sm">
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={11}
+                                        colSpan={10}
                                         className="text-center py-4 text-gray-500 italic"
                                     >
                                         No employees found.
@@ -240,7 +195,7 @@ const WpsTable = ({ employees }) => {
                 </div>
 
                 {/* Pagination */}
-                <div className="flex justify-between items-center mt-6">
+                <div className="flex justify-evenly items-center mt-6">
                     <button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
@@ -249,33 +204,37 @@ const WpsTable = ({ employees }) => {
                             : "bg-blue-500 text-white hover:bg-blue-600"
                             }`}
                     >
-                        Previous
+                        <FaLongArrowAltLeft />
                     </button>
+
+                    {/* Pagination Buttons */}
                     <div className="flex gap-2">
-                        {Array.from({ length: totalPages }).map((_, pageIndex) => (
-                            <button
-                                key={pageIndex}
-                                onClick={() => setCurrentPage(pageIndex + 1)}
-                                className={`px-4 py-2 rounded-lg ${currentPage === pageIndex + 1
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                    }`}
-                            >
-                                {pageIndex + 1}
-                            </button>
-                        ))}
+                        {Array.from({ length: Math.min(maxPageButtons, totalPages) }).map((_, index) => {
+                            const pageNumber = startPage + index;
+                            return (
+                                <button
+                                    key={pageNumber}
+                                    onClick={() => setCurrentPage(pageNumber)}
+                                    className={`px-3 py-1.5 rounded-lg ${currentPage === pageNumber
+                                        ? "bg-orange-600 text-white"
+                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                        }`}
+                                >
+                                    {pageNumber}
+                                </button>
+                            );
+                        })}
                     </div>
+
                     <button
-                        onClick={() =>
-                            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                        }
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
                         className={`px-4 py-2 rounded-lg ${currentPage === totalPages
                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                             : "bg-blue-500 text-white hover:bg-blue-600"
                             }`}
                     >
-                        Next
+                        <FaLongArrowAltRight />
                     </button>
                 </div>
             </div>
