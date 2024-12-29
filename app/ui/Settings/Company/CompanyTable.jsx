@@ -114,8 +114,8 @@ const CompanyTable = ({ initialCompanies = [] }) => {
 
     const tableColumn = ["ID", "Company Name", "Location", "Category"];
     const tableRows = companies.map((company) => [
-      company.id,
-      company.companyName,
+      company._id,
+      company.company,
       company.location,
       company.category,
     ]);

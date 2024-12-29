@@ -75,7 +75,7 @@ const GroupTable = ({ initialCompanies = [] }) => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
 
-    const tableColumn = ["ID", "Company Name", "Location", "Category"];
+    const tableColumn = ["ID", "Project Name", "Location", "Category"];
     const tableRows = companies.map((company) => [
       company.id,
       company.name,
@@ -83,14 +83,14 @@ const GroupTable = ({ initialCompanies = [] }) => {
       company.category,
     ]);
 
-    doc.text("Company List", 14, 15);
+    doc.text("Project List", 14, 15);
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
       startY: 20,
     });
 
-    doc.save("Company_List.pdf");
+    doc.save("Project_List.pdf");
   };
 
   return (
@@ -167,7 +167,7 @@ const GroupTable = ({ initialCompanies = [] }) => {
           <thead>
             <tr className="bg-blue-100 text-gray-800">
               <th className="py-2 px-4">ID No.</th>
-              <th className="py-2 px-4">Company Name</th>
+              <th className="py-2 px-4">Project Name</th>
               <th className="py-2 px-4">Location</th>
               <th className="py-2 px-4">Category</th>
               <th className="py-2 px-4">Action</th>
