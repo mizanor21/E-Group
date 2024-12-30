@@ -7,7 +7,6 @@ const DashboardSection = ({
   payments = [],
   employees = [],
 }) => {
-  console.log(stats[0].bgFrom);
   return (
     <div className="space-y-8 min-h-screen">
       {/* Statistics Section */}
