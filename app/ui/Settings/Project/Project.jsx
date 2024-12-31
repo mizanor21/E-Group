@@ -1,15 +1,8 @@
 import React from "react";
 import ProjectTable from "./ProjectTable";
-
-const companies = [
-  { id: "01", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "02", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "03", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "04", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "05", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-  { id: "06", name: "Goinnovior Limited", location: "Dhaka", category: "Tech" },
-];
+import { useProjectData } from "@/app/data/DataFetch";
 
 export default function Project() {
-  return <ProjectTable initialCompanies={companies} />;
+  const { data: projects } = useProjectData([]);
+  return <ProjectTable projectsData={projects} />;
 }

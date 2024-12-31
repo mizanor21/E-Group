@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import GroupModal from "./GModal";
+import Swal from "sweetalert2";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const GroupTable = ({ groupsData = [] }) => {
   const [groups, setGroups] = useState(groupsData); // group data
@@ -91,6 +94,40 @@ const GroupTable = ({ groupsData = [] }) => {
     doc.save("group_List.pdf");
   };
 
+  // Handle user deletion with toast notification
+  const handleDelete = (id) => {
+    // Show confirmation dialog
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Make API call to delete
+          await axios.delete(`/api/group?id=${id}`);
+          setGroups((prevGroup) =>
+            prevGroup.filter((group) => group._id !== id)
+          ); // Update the state
+
+          // Show success alert
+          Swal.fire({
+            title: "Deleted!",
+            text: "The group has been deleted.",
+            icon: "success",
+          });
+        } catch (error) {
+          // Handle error
+          toast.error("Failed to delete group. Please try again.");
+        }
+      }
+    });
+  };
+
   return (
     <div className="rounded-lg space-y-5">
       {/* Header Section */}
@@ -176,7 +213,7 @@ const GroupTable = ({ groupsData = [] }) => {
               displayedGroups.map((group, index) => (
                 <tr key={group.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{group.group}</td>
+                  <td className="py-2 px-4">{group.company}</td>
                   <td className="py-2 px-4">{group.location}</td>
                   <td className="py-2 px-4">{group.category}</td>
                   <td className="py-2 px-4">
@@ -187,7 +224,10 @@ const GroupTable = ({ groupsData = [] }) => {
                       Edit
                     </button>{" "}
                     |{" "}
-                    <button className="text-red-500 hover:underline">
+                    <button
+                      onClick={() => handleDelete(group._id)}
+                      className="text-red-500 hover:underline"
+                    >
                       Delete
                     </button>
                   </td>

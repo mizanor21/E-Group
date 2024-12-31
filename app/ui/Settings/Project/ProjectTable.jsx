@@ -2,10 +2,14 @@
 import React, { useState } from "react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import projectsModal from "./PModal";
+import axios from "axios";
+import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 import ProjectModal from "./PModal";
 
-const GroupTable = ({ initialCompanies = [] }) => {
-  const [companies, setCompanies] = useState(initialCompanies); // Company data
+const GroupTable = ({ projectsData = [] }) => {
+  const [projects, setProjects] = useState(projectsData); // Company data
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default rows per page
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,20 +17,54 @@ const GroupTable = ({ initialCompanies = [] }) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal open state
 
   // Pagination Logic
-  const filteredCompanies = companies.filter((company) =>
+  const filteredProjects = projects.filter((company) =>
     Object.values(company)
       .join(" ")
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-  const totalPages = Math.ceil(filteredCompanies.length / rowsPerPage);
+  const totalPages = Math.ceil(filteredProjects.length / rowsPerPage);
   const startRow = (currentPage - 1) * rowsPerPage;
 
-  // Filter and paginate the displayed companies
-  const displayedCompanies = filteredCompanies.slice(
+  // Filter and paginate the displayed projects
+  const displayedProjects = filteredProjects.slice(
     startRow,
     startRow + rowsPerPage
   );
+
+  // Handle user deletion with toast notification
+  const handleDelete = (id) => {
+    // Show confirmation dialog
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Make API call to delete
+          await axios.delete(`/api/projects?id=${id}`);
+          setProjects((prevProjects) =>
+            prevProjects.filter((projects) => projects._id !== id)
+          ); // Update the state
+
+          // Show success alert
+          Swal.fire({
+            title: "Deleted!",
+            text: "The projects has been deleted.",
+            icon: "success",
+          });
+        } catch (error) {
+          // Handle error
+          toast.error("Failed to delete projects. Please try again.");
+        }
+      }
+    });
+  };
 
   // Handle Rows per Page Change
   const handleRowsPerPageChange = (e) => {
@@ -35,30 +73,30 @@ const GroupTable = ({ initialCompanies = [] }) => {
   };
 
   // Open Add Company Modal
-  const handleAddCompany = () => {
+  const handleAddProject = () => {
     setModalData(null); // Reset modal data
     setIsModalOpen(true); // Open modal
   };
 
   // Open Edit Company Modal
-  const handleEditCompany = (company) => {
-    setModalData(company); // Set data to edit
+  const handleEditProject = (project) => {
+    setModalData(project); // Set data to edit
     setIsModalOpen(true); // Open modal
   };
 
   // Handle Save Company (Add or Edit)
-  const handleSaveCompany = (newData) => {
+  const handleSaveProject = (newData) => {
     if (newData.id) {
       // Edit existing company
-      setCompanies((prevCompanies) =>
-        prevCompanies.map((company) =>
-          company.id === newData.id ? newData : company
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project.id === newData.id ? newData : project
         )
       );
     } else {
       // Add new company
-      setCompanies((prevCompanies) => [
-        ...prevCompanies,
+      setProjects((prevProjects) => [
+        ...prevProjects,
         { ...newData, id: Date.now().toString() }, // Assign unique ID
       ]);
     }
@@ -75,22 +113,22 @@ const GroupTable = ({ initialCompanies = [] }) => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
 
-    const tableColumn = ["ID", "Project Name", "Location", "Category"];
-    const tableRows = companies.map((company) => [
-      company.id,
-      company.name,
-      company.location,
-      company.category,
+    const tableColumn = ["ID", "projects Name", "Location", "Category"];
+    const tableRows = projects.map((project) => [
+      project.id,
+      project.name,
+      project.location,
+      project.category,
     ]);
 
-    doc.text("Project List", 14, 15);
+    doc.text("projects List", 14, 15);
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
       startY: 20,
     });
 
-    doc.save("Project_List.pdf");
+    doc.save("projects_List.pdf");
   };
 
   return (
@@ -136,10 +174,10 @@ const GroupTable = ({ initialCompanies = [] }) => {
             Download All as PDF
           </button>
           <button
-            onClick={handleAddCompany}
+            onClick={handleAddProject}
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
           >
-            Add New Company
+            Add New Project
           </button>
         </div>
       </div>
@@ -147,7 +185,7 @@ const GroupTable = ({ initialCompanies = [] }) => {
       {/* Table Section */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-800">All Companies</h2>
+          <h2 className="text-lg font-bold text-gray-800">All projects</h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Showing</span>
             <select
@@ -167,29 +205,32 @@ const GroupTable = ({ initialCompanies = [] }) => {
           <thead>
             <tr className="bg-blue-100 text-gray-800">
               <th className="py-2 px-4">ID No.</th>
-              <th className="py-2 px-4">Project Name</th>
+              <th className="py-2 px-4">projects Name</th>
               <th className="py-2 px-4">Location</th>
               <th className="py-2 px-4">Category</th>
               <th className="py-2 px-4">Action</th>
             </tr>
           </thead>
           <tbody>
-            {displayedCompanies.length > 0 ? (
-              displayedCompanies.map((company, index) => (
-                <tr key={company.id} className="border-t hover:bg-gray-100">
+            {displayedProjects.length > 0 ? (
+              displayedProjects.map((project, index) => (
+                <tr key={project.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{company.name}</td>
-                  <td className="py-2 px-4">{company.location}</td>
-                  <td className="py-2 px-4">{company.category}</td>
+                  <td className="py-2 px-4">{project.company}</td>
+                  <td className="py-2 px-4">{project.location}</td>
+                  <td className="py-2 px-4">{project.category}</td>
                   <td className="py-2 px-4">
                     <button
-                      onClick={() => handleEditCompany(company)}
+                      onClick={() => handleEditProject(project)}
                       className="text-blue-500 hover:underline"
                     >
                       Edit
                     </button>{" "}
                     |{" "}
-                    <button className="text-red-500 hover:underline">
+                    <button
+                      onClick={() => handleDelete(project._id)}
+                      className="text-red-500 hover:underline"
+                    >
                       Delete
                     </button>
                   </td>
@@ -201,7 +242,7 @@ const GroupTable = ({ initialCompanies = [] }) => {
                   colSpan={5}
                   className="text-center py-4 text-gray-500 italic"
                 >
-                  No companies found.
+                  No projects found.
                 </td>
               </tr>
             )}
@@ -257,7 +298,7 @@ const GroupTable = ({ initialCompanies = [] }) => {
         <ProjectModal
           data={modalData}
           onClose={handleCloseModal}
-          onSave={handleSaveCompany}
+          onSave={handleSaveProject}
         />
       )}
     </div>

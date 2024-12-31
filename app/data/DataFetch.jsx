@@ -6,3 +6,13 @@ export const useCompanyData = () => {
   const { data, error } = useSWR("http://localhost:3000/api/company", fetcher);
   return { data, error, isLoading: !data && !error };
 };
+
+export const useProjectData = () => {
+  const { data, error } = useSWR("http://localhost:3000/api/company", fetcher);
+  return { data, error, isLoading: !data && !error };
+};
+
+export const useGroupData = () => {
+  const { data, error } = useSWR("http://localhost:3000/api/company", fetcher);
+  return { data, error, isLoading: !data && !error };
+};
