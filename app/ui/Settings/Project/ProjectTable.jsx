@@ -116,7 +116,7 @@ const GroupTable = ({ projectsData = [] }) => {
     const tableColumn = ["ID", "projects Name", "Location", "Category"];
     const tableRows = projects.map((project) => [
       project.id,
-      project.name,
+      project.project,
       project.location,
       project.category,
     ]);
@@ -216,7 +216,7 @@ const GroupTable = ({ projectsData = [] }) => {
               displayedProjects.map((project, index) => (
                 <tr key={project.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{project.company}</td>
+                  <td className="py-2 px-4">{project.project}</td>
                   <td className="py-2 px-4">{project.location}</td>
                   <td className="py-2 px-4">{project.category}</td>
                   <td className="py-2 px-4">

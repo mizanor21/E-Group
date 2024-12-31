@@ -213,7 +213,7 @@ const GroupTable = ({ groupsData = [] }) => {
               displayedGroups.map((group, index) => (
                 <tr key={group.id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{group.company}</td>
+                  <td className="py-2 px-4">{group.group}</td>
                   <td className="py-2 px-4">{group.location}</td>
                   <td className="py-2 px-4">{group.category}</td>
                   <td className="py-2 px-4">
