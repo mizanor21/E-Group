@@ -1,57 +1,64 @@
 "use client";
 import Link from "next/link";
 import React from "react";
+import bg from "@/public/assets/technology_bg.jpg";
 
 const Login = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
-      <div className="bg-gray-900/80 rounded-lg shadow-lg p-8 w-full max-w-sm relative border border-gray-700">
-        {/* Neon Glow */}
-        <div className="absolute rounded-lg border-2 border-[#00ffcc] blur-md"></div>
+    <div
+      className="min-h-screen flex items-center justify-center relative"
+      style={{
+        backgroundImage: `url(${bg.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Background Overlay */}
+      <div className="absolute inset-0 bg-black/30"></div>
 
-        {/* Content */}
-        <h2 className="text-center text-2xl font-extrabold text-[#00ffcc] mb-6">
-          E Group
+      {/* Glassy Form Container */}
+      <div className="relative z-10 bg-white/10 backdrop-blur-md rounded-lg shadow-xl px-8 py-16 w-full max-w-md">
+        {/* Header */}
+        <h2 className="text-center text-3xl font-bold text-white mb-6">
+          Welcome to E Group
         </h2>
+
+        {/* Form */}
         <form>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-300"
-            >
+          <div className="mb-6">
+            <label htmlFor="email" className="block text-sm font-medium">
               Email Address
             </label>
             <input
               type="email"
               id="email"
-              className="mt-1 w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00ffcc] text-white"
-              placeholder="example@gamer.com"
+              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] text-white transition-all"
+              placeholder="Registered Email Address"
             />
           </div>
-          <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-300"
-            >
+          <div className="mb-8">
+            <label htmlFor="password" className="block text-sm font-medium ">
               Password
             </label>
             <input
               type="password"
               id="password"
-              className="mt-1 w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00ffcc] text-white"
+              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] text-white transition-all"
               placeholder="••••••••"
             />
           </div>
           <Link
-            href={"/dashboard"}
-            className="w-full btn bg-[#00ffcc] text-gray-900 font-semibold py-2 rounded-lg hover:bg-[#00e6b3] transition-all duration-200 focus:ring-2 focus:ring-[#00ffcc] focus:ring-offset-2"
+            href="/dashboard"
+            className="w-full inline-block text-center bg-gradient-to-r from-[#FFD700] via-[#FFC107] to-[#FF8C00] text-gray-900 font-semibold py-3 rounded-lg hover:shadow-lg hover:from-[#FFC107] hover:to-[#FFD700] transition-all duration-300 focus:ring-2 focus:ring-offset-2 focus:ring-[#FFD700]"
           >
             Login
           </Link>
         </form>
-        <p className="text-sm text-gray-400 mt-4 text-center">
+
+        {/* Footer */}
+        <p className="text-sm text-gray-400 mt-6 text-center">
           Don’t have an account?{" "}
-          <Link href="/register" className="text-[#00ffcc] hover:underline">
+          <Link href="#" className="text-[#FFD700] hover:underline">
             Register
           </Link>
         </p>
