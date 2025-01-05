@@ -20,10 +20,10 @@ const Login = () => {
       <div className="relative z-10 bg-white/10 backdrop-blur-md rounded-lg shadow-xl px-8 py-16 w-full max-w-md">
         {/* Header */}
         <h2 className="text-center text-3xl font-bold text-white mb-6">
-          Welcome to E Group
+          SIGN IN
         </h2>
 
-        {/* Form */}
+        {/* /* Form */}
         <form>
           <div className="mb-6">
             <label htmlFor="email" className="block text-sm font-medium">
@@ -32,33 +32,38 @@ const Login = () => {
             <input
               type="email"
               id="email"
-              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] text-white transition-all"
+              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D9BC65] text-white transition-all"
               placeholder="Registered Email Address"
             />
           </div>
           <div className="mb-8">
-            <label htmlFor="password" className="block text-sm font-medium ">
+            <label htmlFor="password" className="block text-sm font-medium">
               Password
             </label>
             <input
               type="password"
               id="password"
-              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD700] text-white transition-all"
+              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D9BC65] text-white transition-all"
               placeholder="••••••••"
             />
           </div>
           <Link
             href="/dashboard"
-            className="w-full inline-block text-center bg-gradient-to-r from-[#FFD700] via-[#FFC107] to-[#FF8C00] text-gray-900 font-semibold py-3 rounded-lg hover:shadow-lg hover:from-[#FFC107] hover:to-[#FFD700] transition-all duration-300 focus:ring-2 focus:ring-offset-2 focus:ring-[#FFD700]"
+            className="w-full inline-block text-center font-semibold py-3 rounded-lg hover:shadow-lg transition-all duration-300 focus:ring-2 focus:ring-offset-2 hover:bg-[#D9BC65] hover:text-black"
+            style={{
+              background:
+                "linear-gradient(90deg, #D9BC65 10%, #E0C264 30%, #B6953A 70%, #DFBA60 100%)",
+              color: "#000",
+            }}
           >
             Login
           </Link>
         </form>
 
-        {/* Footer */}
+        {/* /* Footer */}
         <p className="text-sm text-gray-400 mt-6 text-center">
           Don’t have an account?{" "}
-          <Link href="#" className="text-[#FFD700] hover:underline">
+          <Link href="#" className="text-[#D9BC65] hover:underline">
             Register
           </Link>
         </p>
