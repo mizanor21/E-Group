@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const EmployeeInformation = () => {
   const [employeeID] = useState(`EMP${Date.now()}`); // Auto-generate Employee ID
@@ -129,9 +131,21 @@ const EmployeeInformation = () => {
     }
     setValue(isPermanent ? "permanentCity" : "presentCity", ""); // Reset city on division change
   };
-  const onSubmit = (data) => {
-    console.log("Employee Information:", data);
-    reset(); // Reset form after submission
+  const onSubmit = async (data) => {
+    try {
+      // Send formData to the server
+      const response = await axios.post("/api/employees", data);
+      console.log(data);
+
+      // Handle success
+      if (response.status === 201) {
+        toast.success("Employees successfully added!");
+        // reset(); // Reset form
+      }
+    } catch (error) {
+      // Handle error
+      toast.error(`${error.message}, Please valid info provide and try again.`);
+    }
   };
 
   const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -177,9 +191,6 @@ const EmployeeInformation = () => {
             </p>
             <input
               type="file"
-              {...register("profilePhoto", {
-                required: "Profile photo is required",
-              })}
               className="mt-2 w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
             />
             {errors.profilePhoto && (
