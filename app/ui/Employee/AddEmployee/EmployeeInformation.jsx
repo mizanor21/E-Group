@@ -8,9 +8,127 @@ const EmployeeInformation = () => {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm();
 
+  // const isSameAddress = watch("isSameAddress");
+
+  const [availableCities, setAvailableCities] = useState([]);
+  const [isSameAddress, setIsSameAddress] = useState(false);
+
+  const divisionsData = {
+    dhaka: [
+      "Dhaka",
+      "Narayanganj",
+      "Madaripur",
+      "Munshiganj",
+      "Manikganj",
+      "Tangail",
+      "Gazipur",
+      "Madhupur",
+    ],
+    chittagong: [
+      "Chittagong",
+      "Cox's Bazar",
+      "Feni",
+      "Comilla",
+      "Noakhali",
+      "Lakshmipur",
+      "Chandpur",
+      "Brahmanbaria",
+    ],
+    rajshahi: [
+      "Rajshahi",
+      "Bogura",
+      "Pabna",
+      "Naogaon",
+      "Chirirbandar",
+      "Chapainawabganj",
+      "Joypurhat",
+      "Rajbari",
+    ],
+    khulna: [
+      "Khulna",
+      "Jessore",
+      "Satkhira",
+      "Bagerhat",
+      "Meherpur",
+      "Chuadanga",
+      "Kusumgram",
+    ],
+    sylhet: [
+      "Sylhet",
+      "Moulvibazar",
+      "Habiganj",
+      "Sunamganj",
+      "Jaintiapur",
+      "Balaganj",
+      "Osmaninagar",
+    ],
+    barisal: [
+      "Barisal",
+      "Patuakhali",
+      "Bhola",
+      "Jhalokathi",
+      "Barisal Sadar",
+      "Pirojpur",
+      "Kuakata",
+    ],
+    rangpur: [
+      "Rangpur",
+      "Kurigram",
+      "Gaibandha",
+      "Nilphamari",
+      "Dinajpur",
+      "Thakurgaon",
+      "Lalmonirhat",
+    ],
+    meherpur: [
+      "Meherpur",
+      "Chuadanga",
+      "Kusumgram",
+      "Rangamati",
+      "Brahmanbaria",
+      "Rajshahi",
+    ],
+    khagrachari: [
+      "Khagrachari",
+      "Lakshmipur",
+      "Moulvibazar",
+      "Bandarban",
+      "Rajbari",
+      "Saidpur",
+      "Chapainawabganj",
+    ],
+    madhupur: [
+      "Madhupur",
+      "Tangail",
+      "Sirajganj",
+      "Narsingdi",
+      "Barisal",
+      "Munshiganj",
+    ],
+    mymensingh: [
+      "Mymensingh",
+      "Jamalpur",
+      "Netrokona",
+      "Sherpur",
+      "Kishoreganj",
+    ],
+  };
+
+  const handleDivisionChange = (event, isPermanent) => {
+    const division = event.target.value;
+    const cities = divisionsData[division] || [];
+    if (isPermanent) {
+      setAvailableCities(cities);
+    } else {
+      setAvailableCities(cities);
+    }
+    setValue(isPermanent ? "permanentCity" : "presentCity", ""); // Reset city on division change
+  };
   const onSubmit = (data) => {
     console.log("Employee Information:", data);
     reset(); // Reset form after submission
@@ -381,6 +499,426 @@ const EmployeeInformation = () => {
                   {errors.project.message}
                 </p>
               )}
+            </div>
+          </div>
+        </div>
+        {/* Present Address */}
+        <h3 className="text-2xl font-bold text-gray-800 my-4">Address</h3>
+        <div className="bg-white rounded-lg p-5">
+          <div>
+            <h3 className="text-lg text-gray-800">Present Address</h3>
+            <div className="border border-dashed border-gray-300 rounded-lg p-4 ">
+              <div className="flex gap-4 w-full">
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-600">
+                    Street Address 1
+                  </label>
+                  <input
+                    type="text"
+                    {...register("presentAddress1", {
+                      required: "Street Address 1 is required",
+                    })}
+                    className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                      errors.presentAddress1
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  {errors.presentAddress1 && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.presentAddress1.message}
+                    </p>
+                  )}
+                </div>
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-600">
+                    Street Address 2
+                  </label>
+                  <input
+                    type="text"
+                    {...register("presentAddress2")}
+                    className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                      errors.presentAddress2
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  {errors.presentAddress2 && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.presentAddress2.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Additional fields for Present Address */}
+              <div className="mt-4 grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">
+                    Division
+                  </label>
+                  <select
+                    {...register("presentDivision", {
+                      required: "Division is required",
+                    })}
+                    onChange={(e) => handleDivisionChange(e, false)}
+                    className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                      errors.presentDivision
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <option value="">Select Division</option>
+                    <option value="dhaka">Dhaka</option>
+                    <option value="chittagong">Chittagong</option>
+                    <option value="rajshahi">Rajshahi</option>
+                    <option value="khulna">Khulna</option>
+                    <option value="sylhet">Sylhet</option>
+                    <option value="barisal">Barisal</option>
+                    <option value="rangpur">Rangpur</option>
+                    <option value="meherpur">Meherpur</option>
+                    <option value="khagrachari">Khagrachari</option>
+                    <option value="madhupur">Madhupur</option>
+                    <option value="mymensingh">Mymensingh</option>
+                  </select>
+                  {errors.presentDivision && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.presentDivision.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">
+                    City
+                  </label>
+                  <select
+                    {...register("presentCity", {
+                      required: "City is required",
+                    })}
+                    className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                      errors.presentCity ? "border-red-500" : "border-gray-300"
+                    }`}
+                  >
+                    <option value="">Select City</option>
+                    {availableCities.map((city, index) => (
+                      <option key={index} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.presentCity && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.presentCity.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-600">
+                    Post code / Zip code
+                  </label>
+                  <input
+                    type="text"
+                    {...register("presentPostOrZipCode", {
+                      required: "Post or Zip code is required",
+                    })}
+                    className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                      errors.presentPostOrZipCode
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  {errors.presentPostOrZipCode && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.presentPostOrZipCode.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {/* /* Checkbox for same address */}
+              <div className="mt-4 ">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    {...register("isSameAddress")}
+                    onChange={() => setIsSameAddress(!isSameAddress)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-5 w-5"
+                  />
+                  <span className="ml-2 text-gray-600 text-md">
+                    Select if Present and Permanent address are the same
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Permanent Address */}
+          {!isSameAddress && (
+            <div className="my-4">
+              <h3 className="font-medium text-lg">Permanent Address</h3>
+              <div className="border border-dashed border-gray-300 rounded-lg p-4">
+                <div className="flex gap-4 w-full">
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Street Address 1
+                    </label>
+                    <input
+                      type="text"
+                      {...register("permanentAddress1", {
+                        required:
+                          "Street Address 1 is required for permanent address",
+                      })}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.permanentAddress1
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                    {errors.permanentAddress1 && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.permanentAddress1.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Street Address 2
+                    </label>
+                    <input
+                      type="text"
+                      {...register("permanentAddress2")}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.permanentAddress2
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                    {errors.permanentAddress2 && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.permanentAddress2.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Additional fields for Permanent Address */}
+                <div className="my-4 grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">
+                      Division
+                    </label>
+                    <select
+                      {...register("permanentDivision", {
+                        required: "Division is required for permanent address",
+                      })}
+                      onChange={(e) => handleDivisionChange(e, true)}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.permanentDivision
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">Select Division</option>
+                      <option value="dhaka">Dhaka</option>
+                      <option value="chittagong">Chittagong</option>
+                      <option value="rajshahi">Rajshahi</option>
+                      <option value="khulna">Khulna</option>
+                      <option value="sylhet">Sylhet</option>
+                      <option value="barisal">Barisal</option>
+                      <option value="rangpur">Rangpur</option>
+                      <option value="meherpur">Meherpur</option>
+                      <option value="khagrachari">Khagrachari</option>
+                      <option value="madhupur">Madhupur</option>
+                      <option value="mymensingh">Mymensingh</option>
+                    </select>
+                    {errors.permanentDivision && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.permanentDivision.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600">
+                      City
+                    </label>
+                    <select
+                      {...register("permanentCity", {
+                        required: "City is required for permanent address",
+                      })}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.permanentCity
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      <option value="">Select City</option>
+                      {availableCities.map((city, index) => (
+                        <option key={index} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.permanentCity && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.permanentCity.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Post code / Zip code
+                    </label>
+                    <input
+                      type="text"
+                      {...register("permanentPostOrZipCode", {
+                        required: "Post or Zip code is required",
+                      })}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.permanentPostOrZipCode
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                    {errors.permanentPostOrZipCode && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.permanentPostOrZipCode.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Qualification Contact */}
+        <div>
+          <h3 className="text-2xl font-bold text-gray-800 my-4">
+            Qualification
+          </h3>
+          <div className="bg-white rounded-lg p-5">
+            <div>
+              <h3 className="text-lg text-gray-800">Present Address</h3>
+              <div className="border border-dashed border-gray-300 rounded-lg p-4 ">
+                <div className="flex gap-4 w-full">
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Qualification *
+                    </label>
+                    <input
+                      type="text"
+                      {...register("qualification", {
+                        required: "Qualification is required",
+                      })}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.qualification
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                    {errors.qualification && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.qualification.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Accommodation
+                    </label>
+                    <input
+                      type="text"
+                      {...register("accommodation")}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.accommodation
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                    {errors.accommodation && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.accommodation.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Additional fields for Present Address */}
+                <div className="mt-4 grid grid-cols-4 gap-4 pb-5">
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Experience
+                    </label>
+                    <input
+                      type="text"
+                      {...register("experience")}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.experience ? "border-red-500" : "border-gray-300"
+                      }`}
+                    />
+                    {errors.experience && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.experience.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Actual Job
+                    </label>
+                    <input
+                      type="text"
+                      {...register("actualJob")}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.actualJob ? "border-red-500" : "border-gray-300"
+                      }`}
+                    />
+                    {errors.actualJob && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.actualJob.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Current Job
+                    </label>
+                    <input
+                      type="text"
+                      {...register("currentJob")}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.currentJob ? "border-red-500" : "border-gray-300"
+                      }`}
+                    />
+                    {errors.currentJob && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.currentJob.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-600">
+                      Remarks
+                    </label>
+                    <input
+                      type="text"
+                      {...register("remarks")}
+                      className={`border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 w-full ${
+                        errors.remarks ? "border-red-500" : "border-gray-300"
+                      }`}
+                    />
+                    {errors.remarks && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.remarks.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
