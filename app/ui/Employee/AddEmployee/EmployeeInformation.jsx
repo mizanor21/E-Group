@@ -133,17 +133,13 @@ const EmployeeInformation = () => {
   };
   const onSubmit = async (data) => {
     try {
-      // Send formData to the server
       const response = await axios.post("/api/employees", data);
-      console.log(data);
 
-      // Handle success
       if (response.status === 201) {
         toast.success("Employees successfully added!");
         // reset(); // Reset form
       }
     } catch (error) {
-      // Handle error
       toast.error(`${error.message}, Please valid info provide and try again.`);
     }
   };
