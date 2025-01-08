@@ -9,12 +9,12 @@ const EmployeeTable = ({ employees }) => {
   const [filterRole, setFilterRole] = useState("");
 
   // Pagination Logic
-  const totalPages = Math.ceil(employees.length / rowsPerPage);
+  const totalPages = Math.ceil(employees?.length / rowsPerPage);
   const startRow = (currentPage - 1) * rowsPerPage;
 
   // Handle displayed employees with search and filtering
   const displayedEmployees = employees
-    .filter(
+    ?.filter(
       (employee) =>
         (filterRole === "" || employee.role === filterRole) &&
         Object.values(employee)
@@ -68,7 +68,7 @@ const EmployeeTable = ({ employees }) => {
 
         {/* Total Employees */}
         <div className="text-center col-span-1">
-          <h2 className="text-3xl font-bold">{employees.length}</h2>
+          <h2 className="text-3xl font-bold">{employees?.length}</h2>
           <p className="text-sm text-gray-500">Total Employees</p>
         </div>
 
@@ -141,7 +141,7 @@ const EmployeeTable = ({ employees }) => {
               </tr>
             </thead>
             <tbody>
-              {displayedEmployees.length > 0 ? (
+              {displayedEmployees?.length > 0 ? (
                 displayedEmployees.map((employee, index) => (
                   <tr
                     key={employee.employeeID}

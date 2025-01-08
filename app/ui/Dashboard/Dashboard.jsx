@@ -1,3 +1,5 @@
+"use client";
+import { useEmployeeData } from "@/app/data/DataFetch";
 import DashboardSection from "./DashboardSection";
 
 const stats = [
@@ -66,6 +68,7 @@ const employees = [
 ];
 
 export default function Dashboard() {
+  const { data } = useEmployeeData([]);
   return (
     <DashboardSection
       stats={stats}
@@ -73,6 +76,7 @@ export default function Dashboard() {
       meetings={meetings}
       payments={payments}
       employees={employees}
+      employeeData={data}
     />
   );
 }

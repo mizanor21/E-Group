@@ -6,6 +6,7 @@ const DashboardSection = ({
   meetings = [],
   payments = [],
   employees = [],
+  employeeData = [],
 }) => {
   return (
     <div className="space-y-8 min-h-screen">

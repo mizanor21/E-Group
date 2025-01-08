@@ -1,17 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import EmployeeTable from "./EmployeeTable";
+import { useEmployeeData } from "@/app/data/DataFetch";
 
 export default function Employee() {
-  const [employees, setEmployees] = useState([]);
-
-  useEffect(() => {
-    fetch("http://localhost:3000/api/employees")
-      .then((response) => response.json())
-      .then((data) => setEmployees(data))
-      .catch((error) => console.error("Error fetching employees:", error));
-  }, []);
+  const { data: employees } = useEmployeeData([]);
 
   return <EmployeeTable employees={employees} />;
 }

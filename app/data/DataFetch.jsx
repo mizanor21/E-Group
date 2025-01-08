@@ -1,3 +1,4 @@
+"use client";
 import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -14,5 +15,13 @@ export const useProjectData = () => {
 
 export const useGroupData = () => {
   const { data, error } = useSWR("http://localhost:3000/api/group", fetcher);
+  return { data, error, isLoading: !data && !error };
+};
+
+export const useEmployeeData = () => {
+  const { data, error } = useSWR(
+    "http://localhost:3000/api/employees",
+    fetcher
+  );
   return { data, error, isLoading: !data && !error };
 };
