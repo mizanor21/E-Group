@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const employeeSchema = new mongoose.Schema(
   {
+    //Employee Information
     accommodation: { type: String, default: "NAN" },
     actualJob: { type: String },
     bloodGroup: { type: String },
@@ -33,6 +34,33 @@ const employeeSchema = new mongoose.Schema(
     religion: { type: String },
     remarks: { type: String, default: "NAN" },
     role: { type: String },
+
+    //HR Details
+    annualLeave: String,
+    contractNumber: String,
+    documents: mongoose.Schema.Types.Mixed, // Use Mixed type for flexibility
+    fileFolder: mongoose.Schema.Types.Mixed, // Use Mixed type for flexibility
+    healthCardExpiryDate: String,
+    healthCardNumber: String,
+    insuranceExpiryDate: String,
+    insuranceNumber: String,
+    lastTicket: String,
+    licenseExpiryDate: String,
+    licenseNumber: String,
+    medicalCardExpiryDate: String,
+    medicalCardNumber: String,
+    offDay: String,
+    passportExpiryDate: String,
+    passportIssueDate: String,
+    passportNumber: String,
+    passportWith: String,
+    rpIdExpiryDate: String,
+    rpIdIssueDate: String,
+    rpIdNumber: String,
+    settlementDate: String,
+    sponsor: String,
+    sponsorIdNumber: String,
+    ticketDuration: String,
   },
   { timestamps: true }
 );

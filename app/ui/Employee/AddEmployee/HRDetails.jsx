@@ -1,6 +1,8 @@
 "use client";
+import axios from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 const InputField = ({
   label,
@@ -35,9 +37,17 @@ const HRDetails = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("HR Details Submitted:", data);
-    reset();
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post("/api/employees", data);
+
+      if (response.status === 201) {
+        toast.success("HR Info successfully added!");
+        // reset(); // Reset form
+      }
+    } catch (error) {
+      toast.error(`${error.message}, Please valid info provide and try again.`);
+    }
   };
 
   return (
@@ -229,9 +239,7 @@ const HRDetails = () => {
               </label>
               <input
                 type="file"
-                {...register("documents", {
-                  required: "Documents are required",
-                })}
+                {...register("documents")}
                 className={`border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200 w-full ${
                   errors.documents ? "border-red-500" : "border-gray-300"
                 }`}

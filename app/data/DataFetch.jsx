@@ -16,3 +16,11 @@ export const useGroupData = () => {
   const { data, error } = useSWR("http://localhost:3000/api/group", fetcher);
   return { data, error, isLoading: !data && !error };
 };
+
+export const useEmployeeData = () => {
+  const { data, error } = useSWR(
+    "http://localhost:3000/api/employees",
+    fetcher
+  );
+  return { data, error, isLoading: !data && !error };
+};
