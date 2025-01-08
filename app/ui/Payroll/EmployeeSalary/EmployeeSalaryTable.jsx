@@ -16,13 +16,12 @@ const EmployeeSalaryTable = ({ employees }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
   // Pagination logic
-  const totalPages = Math.ceil(employees.length / rowsPerPage);
+  const totalPages = Math.ceil(employees?.length / rowsPerPage);
   const startRow = (currentPage - 1) * rowsPerPage;
 
   // Filter and search logic
-  const filteredEmployees = employees.filter(
+  const filteredEmployees = employees?.filter(
     (employee) =>
       (filterDepartment === "" || employee.department === filterDepartment) &&
       Object.values(employee)
@@ -31,7 +30,7 @@ const EmployeeSalaryTable = ({ employees }) => {
         .includes(searchQuery.toLowerCase())
   );
 
-  const displayedEmployees = filteredEmployees.slice(
+  const displayedEmployees = filteredEmployees?.slice(
     startRow,
     startRow + rowsPerPage
   );
@@ -183,7 +182,7 @@ const EmployeeSalaryTable = ({ employees }) => {
         </div>
       </div>
 
-      {/* Employee Table */}
+      {/* /* Employee Table  */}
       <div className="bg-white p-6 rounded-lg shadow mt-10">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse bg-white rounded-lg">
@@ -203,14 +202,14 @@ const EmployeeSalaryTable = ({ employees }) => {
               </tr>
             </thead>
             <tbody>
-              {displayedEmployees.length > 0 ? (
+              {displayedEmployees?.length > 0 ? (
                 displayedEmployees.map((employee, index) => (
                   <tr
                     key={employee.regNo}
                     className="border-t hover:bg-gray-100"
                   >
                     <td className="py-2 px-4">{startRow + index + 1}</td>
-                    <td className="py-2 px-4">{employee.name}</td>
+                    <td className="py-2 px-4">{`${employee?.firstName} ${employee?.lastName}`}</td>
                     <td className="py-2 px-4">{employee.regNo}</td>
                     <td className="py-2 px-4">{employee.opBal}</td>
                     <td className="py-2 px-4">{employee.salary}</td>
@@ -238,10 +237,7 @@ const EmployeeSalaryTable = ({ employees }) => {
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan="11"
-                    className="text-center py-4 text-gray-500"
-                  >
+                  <td colSpan="11" className="text-center py-4 text-gray-500">
                     No records found
                   </td>
                 </tr>
@@ -255,16 +251,18 @@ const EmployeeSalaryTable = ({ employees }) => {
           <button
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${currentPage === 1 && "opacity-50 cursor-not-allowed"
-              }`}
+            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
+              currentPage === 1 && "opacity-50 cursor-not-allowed"
+            }`}
           >
             Previous
           </button>
           <button
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${currentPage === totalPages && "opacity-50 cursor-not-allowed"
-              }`}
+            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
+              currentPage === totalPages && "opacity-50 cursor-not-allowed"
+            }`}
           >
             Next
           </button>
