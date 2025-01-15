@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import EmployeeSalary from "./EmployeeSalary/EmployeeSalary";
 import EmployeePayslips from "./EmployeePayslips/EmployeePayslips";
 import EmployeePayroll from "./EmployeePayroll/EmployeePayroll";
-import TaxDefinitions from "./TaxDefinitions/TaxDefinitions";
+// import TaxDefinitions from "./TaxDefinitions/TaxDefinitions";
 
 const EmployeeTabs = () => {
   const [activeTab, setActiveTab] = useState("employeeSalary"); // Manage active tab
@@ -42,7 +42,7 @@ const EmployeeTabs = () => {
         >
           Employee Payroll
         </button>
-        <button
+        {/* <button
           onClick={() => setActiveTab("taxDefinitions")}
           className={`${
             activeTab === "taxDefinitions"
@@ -51,14 +51,14 @@ const EmployeeTabs = () => {
           } pb-2 font-medium`}
         >
           Tax Definitions
-        </button>
+        </button> */}
       </div>
 
       {/* Render Components Based on Active Tab */}
       {activeTab === "employeeSalary" && <EmployeeSalary />}
       {activeTab === "employeePayslips" && <EmployeePayslips />}
       {activeTab === "employeePayroll" && <EmployeePayroll />}
-      {activeTab === "taxDefinitions" && <TaxDefinitions />}
+      {/* {activeTab === "taxDefinitions" && <TaxDefinitions />} */}
     </div>
   );
 };

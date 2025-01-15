@@ -57,7 +57,7 @@ const EmployeeSalaryTable = ({ employees }) => {
     const tableColumn = [
       "S/N",
       "Name",
-      "Reg No",
+      "Employee ID",
       "OP BAL",
       "Salary",
       "Over Time",
@@ -69,7 +69,7 @@ const EmployeeSalaryTable = ({ employees }) => {
     const tableRows = employees.map((employee, index) => [
       index + 1,
       employee.name,
-      employee.regNo,
+      employee.employeeID,
       employee.opBal,
       employee.salary,
       employee.overtime,
@@ -190,7 +190,7 @@ const EmployeeSalaryTable = ({ employees }) => {
               <tr className="bg-blue-100 text-gray-800">
                 <th className="py-2 px-4">S/N</th>
                 <th className="py-2 px-4">Name</th>
-                <th className="py-2 px-4">Reg No</th>
+                <th className="py-2 px-4">Employee ID</th>
                 <th className="py-2 px-4">OP BAL</th>
                 <th className="py-2 px-4">Salary</th>
                 <th className="py-2 px-4">Over Time</th>
@@ -210,7 +210,7 @@ const EmployeeSalaryTable = ({ employees }) => {
                   >
                     <td className="py-2 px-4">{startRow + index + 1}</td>
                     <td className="py-2 px-4">{`${employee?.firstName} ${employee?.lastName}`}</td>
-                    <td className="py-2 px-4">{employee.regNo}</td>
+                    <td className="py-2 px-4">{employee.employeeID}</td>
                     <td className="py-2 px-4">{employee.opBal}</td>
                     <td className="py-2 px-4">{employee.salary}</td>
                     <td className="py-2 px-4">{employee.overtime}</td>
