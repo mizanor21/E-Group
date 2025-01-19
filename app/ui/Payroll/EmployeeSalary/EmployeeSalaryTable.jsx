@@ -7,6 +7,9 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import Link from "next/link";
 import WpsModal from "./WPS/WpsModal";
+import { CiEdit } from "react-icons/ci";
+import { FaMoneyCheckDollar } from "react-icons/fa6";
+import { RiDeleteBin6Fill } from "react-icons/ri";
 
 const EmployeeSalaryTable = ({ employees }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -187,7 +190,7 @@ const EmployeeSalaryTable = ({ employees }) => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse bg-white rounded-lg">
             <thead>
-              <tr className="bg-blue-100 text-gray-800">
+              <tr className="bg-blue-100 text-gray-800 text-sm">
                 <th className="py-2 px-4">S/N</th>
                 <th className="py-2 px-4">Name</th>
                 <th className="py-2 px-4">Employee ID</th>
@@ -198,7 +201,7 @@ const EmployeeSalaryTable = ({ employees }) => {
                 <th className="py-2 px-4">Gross Pay</th>
                 <th className="py-2 px-4">Deduction</th>
                 <th className="py-2 px-4">Net Payable</th>
-                <th className="py-2 px-4">Action</th>
+                <th className="py-2 px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -209,27 +212,43 @@ const EmployeeSalaryTable = ({ employees }) => {
                     className="border-t hover:bg-gray-100"
                   >
                     <td className="py-2 px-4">{startRow + index + 1}</td>
-                    <td className="py-2 px-4">{`${employee?.firstName} ${employee?.lastName}`}</td>
-                    <td className="py-2 px-4">{employee.employeeID}</td>
-                    <td className="py-2 px-4">{employee.opBal}</td>
-                    <td className="py-2 px-4">{employee.salary}</td>
-                    <td className="py-2 px-4">{employee.overtime}</td>
-                    <td className="py-2 px-4">{employee.allowance}</td>
-                    <td className="py-2 px-4">{employee.grossPay}</td>
-                    <td className="py-2 px-4">{employee.deduction}</td>
-                    <td className="py-2 px-4">{employee.netPayable}</td>
+                    <td className="py-2 px-4">
+                      {`${employee?.firstName || ""} ${
+                        employee?.lastName || ""
+                      }`}
+                    </td>
+                    <td className="py-2 px-4">{employee?.employeeID || ""}</td>
+                    <td className="py-2 px-4">
+                      {employee?.opBal ? employee.opBal : "0.00"}
+                    </td>
+                    <td className="py-2 px-4">{employee?.salary || "0.00"}</td>
+                    <td className="py-2 px-4">
+                      {employee?.overtime || "0.00"}
+                    </td>
+                    <td className="py-2 px-4">
+                      {employee?.allowance || "0.00"}
+                    </td>
+                    <td className="py-2 px-4">
+                      {employee?.grossPay || "0.00"}
+                    </td>
+                    <td className="py-2 px-4">
+                      {employee?.deduction || "0.00"}
+                    </td>
+                    <td className="py-2 px-4">
+                      {employee?.netPayable || "0.00"}
+                    </td>
                     <td className="py-2 px-4">
                       <div className="flex gap-2">
-                        <Link href={"create-salary"}>
+                        <Link href={`/dashboard/payroll/${employee._id}`}>
                           <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
-                            Create Salary
+                            <FaMoneyCheckDollar />
                           </button>
                         </Link>
                         <button className="text-blue-500 hover:underline text-sm">
-                          Edit
+                          <CiEdit />
                         </button>
                         <button className="text-red-500 hover:underline text-sm">
-                          Delete
+                          <RiDeleteBin6Fill />
                         </button>
                       </div>
                     </td>
