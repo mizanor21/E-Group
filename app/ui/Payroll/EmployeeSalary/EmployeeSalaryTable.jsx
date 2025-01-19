@@ -244,9 +244,9 @@ const EmployeeSalaryTable = ({ employees }) => {
                             <FaMoneyCheckDollar />
                           </button>
                         </Link>
-                        <button className="text-blue-500 hover:underline text-sm">
+                        {/* <button className="text-blue-500 hover:underline text-sm">
                           <CiEdit />
-                        </button>
+                        </button> */}
                         <button className="text-red-500 hover:underline text-sm">
                           <RiDeleteBin6Fill />
                         </button>
