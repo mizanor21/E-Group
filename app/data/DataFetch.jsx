@@ -25,3 +25,11 @@ export const useEmployeeData = () => {
   );
   return { data, error, isLoading: !data && !error };
 };
+
+export const useEmployeeDetailsData = ({ params }) => {
+  const { data, error } = useSWR(
+    params?.id ? `http://localhost:3000/api/employees/${params.id}` : null,
+    fetcher
+  );
+  return { data, error, isLoading: !data && !error };
+};
