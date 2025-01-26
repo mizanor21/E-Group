@@ -68,13 +68,19 @@ const CreateSalary = ({ id }) => {
         <h4 className="text-lg font-semibold">Working Days</h4>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex items-center gap-4  border rounded-xl p-5"
+          className="flex items-center gap-4 border rounded-xl p-5"
         >
           <input
-            {...register("workingDays", { required: "This field is required" })}
+            {...register("workingDays", {
+              required: "This field is required",
+              min: { value: 1, message: "Value must be at least 1" },
+              max: { value: 30, message: "Value cannot exceed 30" },
+            })}
             type="number"
             className={inputStyle}
             placeholder="Enter days"
+            min="1"
+            max="30"
           />
           {errors.workingDays && (
             <p className="text-red-500 text-sm">{errors.workingDays.message}</p>
