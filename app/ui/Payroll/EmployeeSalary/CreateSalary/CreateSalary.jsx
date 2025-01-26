@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { CiEdit } from "react-icons/ci";
 import CreateSalaryModal from "./CreateSalaryModal";
@@ -16,6 +16,8 @@ const CreateSalary = ({ id }) => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -25,8 +27,88 @@ const CreateSalary = ({ id }) => {
     "bg-sky-600 text-white px-10 py-3 rounded-md text-center hover:bg-white hover:border hover:border-sky-600 hover:text-sky-600 transition-all duration-500 mt-6";
 
   const onSubmit = (data) => {
-    console.log(data);
+    // Smart calculations
+    const basicSalary = 20000; // Assume a basic salary, adjust as needed
+    const workingDays = Number.parseInt(data.workingDays) || 0;
+    const normalOverTime = Number.parseFloat(data.normalOverTime) || 0;
+    const holidayOverTime = Number.parseFloat(data.holidayOverTime) || 0;
+
+    // Calculate daily rate
+    const dailyRate = basicSalary / 30; // Assuming 30 days in a month
+
+    // Calculate base salary for worked days
+    const baseSalary = dailyRate * workingDays;
+
+    // Calculate overtime earnings
+    const normalOTRate = (dailyRate / 8) * 1.25; // Assume 1.25x rate for normal OT
+    const holidayOTRate = (dailyRate / 8) * 1.5; // Assume 1.5x rate for holiday OT
+    const normalOTEarning = normalOverTime * normalOTRate;
+    const holidayOTEarning = holidayOverTime * holidayOTRate;
+
+    // Calculate allowances
+    const totalAllowances = Object.keys(data)
+      .filter((key) =>
+        [
+          "allowances",
+          "specialAllowances",
+          "accommodation",
+          "foodAllowance",
+          "telephoneAllowance",
+          "transportAllowance",
+        ].includes(key)
+      )
+      .reduce((sum, key) => sum + (Number.parseFloat(data[key]) || 0), 0);
+
+    // Calculate deductions
+    const totalDeductions = Object.keys(data)
+      .filter((key) =>
+        ["dedLeave", "dedFines", "dedDoc", "dedOthers"].includes(key)
+      )
+      .reduce((sum, key) => sum + (Number.parseFloat(data[key]) || 0), 0);
+
+    // Calculate other earnings
+    const otherEarnings =
+      (Number.parseFloat(data.arrearPayments) || 0) +
+      (Number.parseFloat(data.advRecovery) || 0);
+
+    // Calculate net salary
+    const netSalary =
+      baseSalary +
+      normalOTEarning +
+      holidayOTEarning +
+      totalAllowances +
+      otherEarnings -
+      totalDeductions;
+
+    // Update form values
+    setValue("baseSalary", baseSalary.toFixed(2));
+    setValue("normalOverTimeEarning", normalOTEarning.toFixed(2));
+    setValue("holidayOverTimeEarning", holidayOTEarning.toFixed(2));
+    setValue("allowanceEarning", totalAllowances.toFixed(2));
+    setValue("deduction", totalDeductions.toFixed(2));
+    setValue("otherEarning", otherEarnings.toFixed(2));
+    setValue("netSalary", netSalary.toFixed(2));
+
+    console.log("Smart calculations completed", {
+      workingDays,
+      baseSalary,
+      netSalary,
+      normalOTEarning,
+      holidayOTEarning,
+      totalAllowances,
+      totalDeductions,
+      otherEarnings,
+    });
   };
+
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (type === "change") {
+        handleSubmit(onSubmit)();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, handleSubmit]);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -68,7 +150,7 @@ const CreateSalary = ({ id }) => {
         <h4 className="text-lg font-semibold">Working Days</h4>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex items-center gap-4 border rounded-xl p-5"
+          className="flex flex-col items-start gap-4 border rounded-xl p-5"
         >
           <input
             {...register("workingDays", {
@@ -85,9 +167,16 @@ const CreateSalary = ({ id }) => {
           {errors.workingDays && (
             <p className="text-red-500 text-sm">{errors.workingDays.message}</p>
           )}
-          <button className="bg-sky-600 text-white px-10 py-3 rounded-md text-center hover:bg-white hover:border hover:border-sky-600 hover:text-sky-600 transition-all duration-500">
-            Process
-          </button>
+          <div>
+            <label className="block mb-2">Base Salary (for worked days)</label>
+            <input
+              {...register("baseSalary")}
+              type="text"
+              className={inputStyle}
+              placeholder="Base salary will be calculated automatically"
+              readOnly
+            />
+          </div>
         </form>
       </div>
 
@@ -102,9 +191,7 @@ const CreateSalary = ({ id }) => {
             <div>
               <label className="block mb-2">Normal Day Over Time</label>
               <input
-                {...register("normalOverTime", {
-                  required: "This field is required",
-                })}
+                {...register("normalOverTime")}
                 type="number"
                 className={inputStyle}
                 placeholder="Enter Hours"
@@ -113,9 +200,7 @@ const CreateSalary = ({ id }) => {
             <div>
               <label className="block mb-2">Holiday Over Time</label>
               <input
-                {...register("holidayOverTime", {
-                  required: "This field is required",
-                })}
+                {...register("holidayOverTime")}
                 type="number"
                 className={inputStyle}
                 placeholder="Enter Hours"
@@ -145,11 +230,11 @@ const CreateSalary = ({ id }) => {
                 readOnly
               />
             </div>
-            <button className={btnStyle}>Process</button>
           </form>
+
           <div className="mt-6 border border-sky-600 rounded-lg p-6">
             <h4 className="text-lg font-semibold text-center">
-              Total Allowance Earning
+              Total Overtime Earning
             </h4>
             <div className="text-center text-gray-500 mt-4">
               <p>Leave It Empty It will Auto Generate</p>
@@ -204,7 +289,7 @@ const CreateSalary = ({ id }) => {
                 className={inputStyle}
               />
             </form>
-            <button className={btnStyle}>Process</button>
+            {/*Removed Process button */}
             <h4 className="font-bold text-center mt-4">Allowance Earning</h4>
             <input
               {...register("allowanceEarning")}
@@ -255,7 +340,7 @@ const CreateSalary = ({ id }) => {
                 className={inputStyle}
               />
             </form>
-            <button className={btnStyle}>Process</button>
+            {/*Removed Process button */}
             <h4 className="font-bold text-red-500 text-center mt-4">
               Deduction
             </h4>
@@ -298,7 +383,7 @@ const CreateSalary = ({ id }) => {
                 className={inputStyle}
               />
             </form>
-            <button className={btnStyle}>Process</button>
+            {/*Removed Process button */}
             <h4 className="font-bold text-center text-2xl mt-4">
               Other Earning
             </h4>
@@ -318,16 +403,23 @@ const CreateSalary = ({ id }) => {
             <input
               {...register("netSalary")}
               type="text"
-              placeholder="Enter The Amount"
               className={inputStyle}
+              readOnly
             />
-            <button onClick={openModal} className={`${btnStyle} flex gap-2  `}>
+            <button
+              onClick={openModal}
+              className={`${btnStyle} flex gap-2 mt-4`}
+            >
               Create Payslip
               <IoArrowRedoOutline className="text-2xl animate-pulse" />
             </button>
           </div>
         </div>
       </div>
+
+      <button onClick={handleSubmit(onSubmit)} className={`${btnStyle} w-full`}>
+        Calculate Salary
+      </button>
 
       {/* Modal */}
       {isModalOpen && <CreateSalaryModal closeModal={closeModal} />}
