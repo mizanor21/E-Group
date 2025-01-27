@@ -12,6 +12,9 @@ const CreateSalary = ({ id }) => {
   //   const { id } = params; // Extract `id` from params
   const { data, error, isLoading } = useEmployeeDetailsData({ params: { id } });
 
+  const eID = data?.employeeID;
+  const eName = data?.firstName + data?.lastName;
+
   const {
     register,
     handleSubmit,
@@ -63,11 +66,13 @@ const CreateSalary = ({ id }) => {
       .reduce((sum, key) => sum + (Number.parseFloat(data[key]) || 0), 0);
 
     // Calculate deductions
-    const totalDeductions = Object.keys(data)
-      .filter((key) =>
-        ["dedLeave", "dedFines", "dedDoc", "dedOthers"].includes(key)
-      )
-      .reduce((sum, key) => sum + (Number.parseFloat(data[key]) || 0), 0);
+    const numberOfLeave = Number.parseInt(data.numberOfLeave) || 0;
+    const leaveDeduction = numberOfLeave * dailyRate;
+    const otherDeductions = ["dedFines", "dedDoc", "dedOthers"].reduce(
+      (sum, key) => sum + (Number.parseFloat(data[key]) || 0),
+      0
+    );
+    const totalDeductions = leaveDeduction + otherDeductions;
 
     // Calculate other earnings
     const otherEarnings =
@@ -93,6 +98,8 @@ const CreateSalary = ({ id }) => {
     setValue("netSalary", netSalary.toFixed(2));
 
     console.log("Smart calculations completed", {
+      eID,
+      eName,
       workingDays,
       baseSalary,
       netSalary,
@@ -134,7 +141,6 @@ const CreateSalary = ({ id }) => {
       allowanceEarning: watch("allowanceEarning"),
       deductions: {
         numberOfLeave: watch("numberOfLeave"),
-        dedLeave: watch("dedLeave"),
         dedFines: watch("dedFines"),
         dedDoc: watch("dedDoc"),
         dedOthers: watch("dedOthers"),
@@ -350,14 +356,8 @@ const CreateSalary = ({ id }) => {
             >
               <input
                 {...register("numberOfLeave")}
-                type="text"
-                placeholder="Number of Leave"
-                className={inputStyle}
-              />
-              <input
-                {...register("dedLeave")}
-                type="text"
-                placeholder="Ded Leave"
+                type="number"
+                placeholder="Number of Leave Days"
                 className={inputStyle}
               />
               <input
@@ -379,7 +379,6 @@ const CreateSalary = ({ id }) => {
                 className={inputStyle}
               />
             </form>
-            {/*Removed Process button */}
             <h4 className="font-bold text-red-500 text-center mt-4">
               Deduction
             </h4>
