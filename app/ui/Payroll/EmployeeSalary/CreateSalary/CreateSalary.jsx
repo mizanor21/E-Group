@@ -20,6 +20,10 @@ const CreateSalary = ({ id }) => {
     watch,
   } = useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState({
+    isOpen: false,
+    salaryData: null,
+  });
 
   const inputStyle =
     "border rounded-md p-3 px-5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full";
@@ -110,8 +114,44 @@ const CreateSalary = ({ id }) => {
     return () => subscription.unsubscribe();
   }, [watch, handleSubmit]);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openModal = () => {
+    const salaryData = {
+      name: `${data?.firstName} ${data?.lastName}`,
+      designation: `${data?.currentJob} | ${data?.department}`,
+      workingDays: watch("workingDays"),
+      baseSalary: watch("baseSalary"),
+      normalOverTime: watch("normalOverTime"),
+      holidayOverTime: watch("holidayOverTime"),
+      normalOverTimeEarning: watch("normalOverTimeEarning"),
+      holidayOverTimeEarning: watch("holidayOverTimeEarning"),
+      allowances: {
+        allowances: watch("allowances"),
+        specialAllowances: watch("specialAllowances"),
+        accommodation: watch("accommodation"),
+        foodAllowance: watch("foodAllowance"),
+        telephoneAllowance: watch("telephoneAllowance"),
+        transportAllowance: watch("transportAllowance"),
+      },
+      allowanceEarning: watch("allowanceEarning"),
+      deductions: {
+        numberOfLeave: watch("numberOfLeave"),
+        dedLeave: watch("dedLeave"),
+        dedFines: watch("dedFines"),
+        dedDoc: watch("dedDoc"),
+        dedOthers: watch("dedOthers"),
+      },
+      deduction: watch("deduction"),
+      otherEarnings: {
+        advRecovery: watch("advRecovery"),
+        arrearPayments: watch("arrearPayments"),
+        currentBalance: watch("currentBalance"),
+      },
+      otherEarning: watch("otherEarning"),
+      netSalary: watch("netSalary"),
+    };
+    setModalData({ isOpen: true, salaryData });
+  };
+  const closeModal = () => setModalData({ isOpen: false, salaryData: null });
 
   return (
     <div className="bg-white p-10 space-y-10">
@@ -156,13 +196,13 @@ const CreateSalary = ({ id }) => {
             {...register("workingDays", {
               required: "This field is required",
               min: { value: 1, message: "Value must be at least 1" },
-              max: { value: 30, message: "Value cannot exceed 30" },
+              max: { value: 31, message: "Value cannot exceed 31" },
             })}
             type="number"
             className={inputStyle}
             placeholder="Enter days"
             min="1"
-            max="30"
+            max="31"
           />
           {errors.workingDays && (
             <p className="text-red-500 text-sm">{errors.workingDays.message}</p>
@@ -422,7 +462,12 @@ const CreateSalary = ({ id }) => {
       </button>
 
       {/* Modal */}
-      {isModalOpen && <CreateSalaryModal closeModal={closeModal} />}
+      {modalData.isOpen && (
+        <CreateSalaryModal
+          closeModal={closeModal}
+          salaryData={modalData.salaryData}
+        />
+      )}
     </div>
   );
 };
