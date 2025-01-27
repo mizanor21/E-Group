@@ -19,7 +19,6 @@ const CreateSalary = ({ id }) => {
     setValue,
     watch,
   } = useForm();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState({
     isOpen: false,
     salaryData: null,
@@ -72,7 +71,7 @@ const CreateSalary = ({ id }) => {
 
     // Calculate other earnings
     const otherEarnings =
-      (Number.parseFloat(data.arrearPayments) || 0) +
+      (Number.parseFloat(data.arrearPayments) || 0) -
       (Number.parseFloat(data.advRecovery) || 0);
 
     // Calculate net salary
@@ -407,7 +406,7 @@ const CreateSalary = ({ id }) => {
               <input
                 {...register("advRecovery")}
                 type="text"
-                placeholder="Adv Recovery"
+                placeholder="Advance Recovery"
                 className={inputStyle}
               />
               <input
@@ -447,7 +446,10 @@ const CreateSalary = ({ id }) => {
               readOnly
             />
             <button
-              onClick={openModal}
+              onClick={() => {
+                handleSubmit(onSubmit)(); // Execute handleSubmit with onSubmit
+                openModal(); // Call openModal
+              }}
               className={`${btnStyle} flex gap-2 mt-4`}
             >
               Create Payslip
@@ -456,10 +458,6 @@ const CreateSalary = ({ id }) => {
           </div>
         </div>
       </div>
-
-      <button onClick={handleSubmit(onSubmit)} className={`${btnStyle} w-full`}>
-        Calculate Salary
-      </button>
 
       {/* Modal */}
       {modalData.isOpen && (
