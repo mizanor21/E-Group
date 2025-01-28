@@ -9,11 +9,10 @@ import { GoArrowLeft } from "react-icons/go";
 import Link from "next/link";
 
 const CreateSalary = ({ id }) => {
-  //   const { id } = params; // Extract `id` from params
   const { data, error, isLoading } = useEmployeeDetailsData({ params: { id } });
 
   const eID = data?.employeeID;
-  const eName = data?.firstName + data?.lastName;
+  const eName = data?.firstName + " " + data?.lastName;
 
   const {
     register,
@@ -27,45 +26,37 @@ const CreateSalary = ({ id }) => {
     salaryData: null,
   });
 
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7)); // Default to current month
+
   const inputStyle =
     "border rounded-md p-3 px-5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full";
   const btnStyle =
     "bg-sky-600 text-white px-10 py-3 rounded-md text-center hover:bg-white hover:border hover:border-sky-600 hover:text-sky-600 transition-all duration-500 mt-6";
 
   const onSubmit = (data) => {
-    // Smart calculations
+    // Perform calculations
     const basicSalary = 20000; // Assume a basic salary, adjust as needed
     const workingDays = Number.parseInt(data.workingDays) || 0;
     const normalOverTime = Number.parseFloat(data.normalOverTime) || 0;
     const holidayOverTime = Number.parseFloat(data.holidayOverTime) || 0;
 
-    // Calculate daily rate
     const dailyRate = basicSalary / 30; // Assuming 30 days in a month
-
-    // Calculate base salary for worked days
     const baseSalary = dailyRate * workingDays;
 
-    // Calculate overtime earnings
     const normalOTRate = (dailyRate / 8) * 1.25; // Assume 1.25x rate for normal OT
     const holidayOTRate = (dailyRate / 8) * 1.5; // Assume 1.5x rate for holiday OT
     const normalOTEarning = normalOverTime * normalOTRate;
     const holidayOTEarning = holidayOverTime * holidayOTRate;
 
-    // Calculate allowances
-    const totalAllowances = Object.keys(data)
-      .filter((key) =>
-        [
-          "allowances",
-          "specialAllowances",
-          "accommodation",
-          "foodAllowance",
-          "telephoneAllowance",
-          "transportAllowance",
-        ].includes(key)
-      )
-      .reduce((sum, key) => sum + (Number.parseFloat(data[key]) || 0), 0);
+    const totalAllowances = [
+      "allowances",
+      "specialAllowances",
+      "accommodation",
+      "foodAllowance",
+      "telephoneAllowance",
+      "transportAllowance",
+    ].reduce((sum, key) => sum + (Number.parseFloat(data[key]) || 0), 0);
 
-    // Calculate deductions
     const numberOfLeave = Number.parseInt(data.numberOfLeave) || 0;
     const leaveDeduction = numberOfLeave * dailyRate;
     const otherDeductions = ["dedFines", "dedDoc", "dedOthers"].reduce(
@@ -74,12 +65,10 @@ const CreateSalary = ({ id }) => {
     );
     const totalDeductions = leaveDeduction + otherDeductions;
 
-    // Calculate other earnings
     const otherEarnings =
       (Number.parseFloat(data.arrearPayments) || 0) -
       (Number.parseFloat(data.advRecovery) || 0);
 
-    // Calculate net salary
     const netSalary =
       baseSalary +
       normalOTEarning +
@@ -96,66 +85,77 @@ const CreateSalary = ({ id }) => {
     setValue("deduction", totalDeductions.toFixed(2));
     setValue("otherEarning", otherEarnings.toFixed(2));
     setValue("netSalary", netSalary.toFixed(2));
-
-    console.log("Smart calculations completed", {
-      eID,
-      eName,
-      workingDays,
-      baseSalary,
-      netSalary,
-      normalOTEarning,
-      holidayOTEarning,
-      totalAllowances,
-      totalDeductions,
-      otherEarnings,
-    });
   };
 
   useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
-      if (type === "change") {
-        handleSubmit(onSubmit)();
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, handleSubmit]);
+    //handleSubmit(onSubmit)() //Removed this line
+  }, []); //Removed onSubmit from dependency array
 
-  const openModal = () => {
+  const openModal = async () => {
     const salaryData = {
-      name: `${data?.firstName} ${data?.lastName}`,
-      designation: `${data?.currentJob} | ${data?.department}`,
-      workingDays: watch("workingDays"),
-      baseSalary: watch("baseSalary"),
-      normalOverTime: watch("normalOverTime"),
-      holidayOverTime: watch("holidayOverTime"),
-      normalOverTimeEarning: watch("normalOverTimeEarning"),
-      holidayOverTimeEarning: watch("holidayOverTimeEarning"),
+      employeeId: eID,
+      name: eName,
+      month: month,
+      workingDays: Number(watch("workingDays")),
+      baseSalary: Number(watch("baseSalary")),
+      overtime: {
+        normal: {
+          hours: Number(watch("normalOverTime")),
+          earning: Number(watch("normalOverTimeEarning")),
+        },
+        holiday: {
+          hours: Number(watch("holidayOverTime")),
+          earning: Number(watch("holidayOverTimeEarning")),
+        },
+      },
       allowances: {
-        allowances: watch("allowances"),
-        specialAllowances: watch("specialAllowances"),
-        accommodation: watch("accommodation"),
-        foodAllowance: watch("foodAllowance"),
-        telephoneAllowance: watch("telephoneAllowance"),
-        transportAllowance: watch("transportAllowance"),
+        allowances: Number(watch("allowances")),
+        specialAllowances: Number(watch("specialAllowances")),
+        accommodation: Number(watch("accommodation")),
+        foodAllowance: Number(watch("foodAllowance")),
+        telephoneAllowance: Number(watch("telephoneAllowance")),
+        transportAllowance: Number(watch("transportAllowance")),
+        total: Number(watch("allowanceEarning")),
       },
-      allowanceEarning: watch("allowanceEarning"),
       deductions: {
-        numberOfLeave: watch("numberOfLeave"),
-        dedFines: watch("dedFines"),
-        dedDoc: watch("dedDoc"),
-        dedOthers: watch("dedOthers"),
+        numberOfLeave: Number(watch("numberOfLeave")),
+        dedFines: Number(watch("dedFines")),
+        dedDoc: Number(watch("dedDoc")),
+        dedOthers: Number(watch("dedOthers")),
+        total: Number(watch("deduction")),
       },
-      deduction: watch("deduction"),
       otherEarnings: {
-        advRecovery: watch("advRecovery"),
-        arrearPayments: watch("arrearPayments"),
-        currentBalance: watch("currentBalance"),
+        advRecovery: Number(watch("advRecovery")),
+        arrearPayments: Number(watch("arrearPayments")),
+        currentBalance: Number(watch("currentBalance")),
+        total: Number(watch("otherEarning")),
       },
-      otherEarning: watch("otherEarning"),
-      netSalary: watch("netSalary"),
+      netSalary: Number(watch("netSalary")),
     };
-    setModalData({ isOpen: true, salaryData });
+
+    try {
+      const response = await fetch("/api/salary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(salaryData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create salary");
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+      setModalData({ isOpen: true, salaryData });
+    } catch (error) {
+      console.error("Error creating salary:", error);
+      // Handle error (e.g., show error message to user)
+    }
   };
+
   const closeModal = () => setModalData({ isOpen: false, salaryData: null });
 
   return (
@@ -189,6 +189,17 @@ const CreateSalary = ({ id }) => {
       </div>
 
       <hr />
+
+      {/* Month Selection */}
+      <div className="mb-6">
+        <h4 className="text-lg font-semibold">Salary Month</h4>
+        <input
+          type="month"
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+          className={inputStyle}
+        />
+      </div>
 
       {/* Working Days Section */}
       <div className="mb-6">
@@ -276,15 +287,6 @@ const CreateSalary = ({ id }) => {
               />
             </div>
           </form>
-
-          <div className="mt-6 border border-sky-600 rounded-lg p-6">
-            <h4 className="text-lg font-semibold text-center">
-              Total Overtime Earning
-            </h4>
-            <div className="text-center text-gray-500 mt-4">
-              <p>Leave It Empty It will Auto Generate</p>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -334,7 +336,6 @@ const CreateSalary = ({ id }) => {
                 className={inputStyle}
               />
             </form>
-            {/*Removed Process button */}
             <h4 className="font-bold text-center mt-4">Allowance Earning</h4>
             <input
               {...register("allowanceEarning")}
@@ -421,7 +422,6 @@ const CreateSalary = ({ id }) => {
                 className={inputStyle}
               />
             </form>
-            {/*Removed Process button */}
             <h4 className="font-bold text-center text-2xl mt-4">
               Other Earning
             </h4>
