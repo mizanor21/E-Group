@@ -88,8 +88,13 @@ const CreateSalary = ({ id }) => {
   };
 
   useEffect(() => {
-    //handleSubmit(onSubmit)() //Removed this line
-  }, []); //Removed onSubmit from dependency array
+    const subscription = watch((value, { name, type }) => {
+      if (type === "change") {
+        handleSubmit(onSubmit)();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, handleSubmit, onSubmit]); // Added onSubmit to dependencies
 
   const openModal = async () => {
     const salaryData = {
