@@ -122,11 +122,23 @@ const SalaryTable = ({ employees, closeModal }) => {
     );
 
     // Combine header and employee data
-    const wsData = [...headerRows, ...employeeRows];
+    const wsData = [
+      ...headerRows.filter((row) => Object.keys(row).length > 0),
+      ...employeeRows,
+    ];
 
-    // Create workbook and add worksheet
+    // Create workbook and worksheet
     const wb = utils.book_new();
-    const ws = utils.json_to_sheet(wsData, { skipHeader: false });
+    const ws = utils.json_to_sheet([]); // Start with an empty sheet
+
+    // Append headerRows first
+    utils.sheet_add_json(ws, headerRows, { skipHeader: false, origin: "A1" });
+
+    // Append employeeRows starting from a new row (e.g., after the last header row)
+    utils.sheet_add_json(ws, employeeRows, { skipHeader: false, origin: 2 });
+
+    // Add worksheet to workbook
+    utils.book_append_sheet(wb, ws, "Sheet1");
 
     // Generate dynamic filename
     const now = new Date();
@@ -250,7 +262,7 @@ const SalaryTable = ({ employees, closeModal }) => {
             </div>
 
             {/* Download and Reset Buttons */}
-            <div className="flex justify-end items-center p-3 rounded-lg space-x-2">
+            <div className="flex justify-end items-center p-3 rounded-lg gap-2">
               <button
                 type="submit"
                 className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-800 hover:to-green-400"
