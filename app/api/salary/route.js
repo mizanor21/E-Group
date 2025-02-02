@@ -2,6 +2,14 @@ import { connectToDB } from "@/app/lib/connectToDB";
 import Salaries from "@/app/lib/EmployeeSalary/modal";
 import { NextResponse } from "next/server";
 
+export async function GET() {
+  await connectToDB();
+  const salaries = await Salaries.find();
+  const response = NextResponse.json(salaries);
+  response.headers.set("Access-Control-Allow-Origin", "*");
+  return response;
+}
+
 export async function POST(req) {
   try {
     await connectToDB();
