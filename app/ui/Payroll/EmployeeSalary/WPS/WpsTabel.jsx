@@ -12,21 +12,33 @@ const SalaryTable = ({ employees, closeModal }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [filteredEmployees, setFilteredEmployees] = useState(employees);
-  const [filterMonth, setFilterMonth] = useState("");
+  const [filterMonth, setFilterMonth] = useState(() => {
+    const currentMonth = new Date().toISOString().slice(0, 7); // Format: YYYY-MM
+    return currentMonth;
+  });
   const [filterDepartment, setFilterDepartment] = useState("");
   const [filterProject, setFilterProject] = useState("");
 
   const rowsPerPage = 5;
 
   useEffect(() => {
-    const filtered = employees.filter((employee) => {
-      return (
-        (!filterMonth ||
-          employee.salaries.some((salary) => salary.month === filterMonth)) &&
-        (!filterDepartment || employee.department === filterDepartment) &&
-        (!filterProject || employee.project === filterProject)
-      );
-    });
+    const filtered = employees
+      .filter((employee) => {
+        const matchingMonthSalary = employee.salaries.find(
+          (salary) => !filterMonth || salary.month === filterMonth
+        );
+        return (
+          matchingMonthSalary &&
+          (!filterDepartment || employee.department === filterDepartment) &&
+          (!filterProject || employee.project === filterProject)
+        );
+      })
+      .map((employee) => ({
+        ...employee,
+        salaries: employee.salaries.filter(
+          (salary) => !filterMonth || salary.month === filterMonth
+        ),
+      }));
     setFilteredEmployees(filtered);
     setCurrentPage(1);
   }, [employees, filterMonth, filterDepartment, filterProject]);
