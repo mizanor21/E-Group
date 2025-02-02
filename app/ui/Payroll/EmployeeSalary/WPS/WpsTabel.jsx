@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LiaFileDownloadSolid } from "react-icons/lia";
 import { ImSpinner9 } from "react-icons/im";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { utils } from "xlsx";
+import { useForm } from "react-hook-form";
 
 const SalaryTable = ({ employees, closeModal }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,21 +61,47 @@ const SalaryTable = ({ employees, closeModal }) => {
     }, 1000);
   };
 
-  const handleDownloadExcel = () => {
-    // Create worksheet data
-    const wsData = filteredEmployees.flatMap((employee) => {
-      const now = new Date();
-      const fileCreationDate = now.toISOString().slice(0, 10).replace(/-/g, "");
-      const fileCreationTime = now
-        .toLocaleTimeString("en-US", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-        .replace(":", "");
+  const now = new Date();
+  const { register, handleSubmit, watch } = useForm({
+    defaultValues: {
+      employerEID: "17219975",
+      fileCreationDate: new Date().toISOString().slice(0, 10),
+      fileCreationTime: `${now.getHours()}${now
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`,
+      payerEID: "17198214",
+      payerQID: "",
+      payerBankName: "QNB",
+      payerIBAN: "QA32QNBA0000000",
+      salaryYearMonth: filterMonth.replace(/-/g, ""),
+      totalSalaries: "40913",
+      totalRecords: "27",
+    },
+  });
 
-      return employee.salaries.map((salary) => ({
-        "Record Sequence": "1",
+  const handleDownloadExcel = (formData) => {
+    // Create header rows for payer information
+    const headerRows = [
+      {
+        "Employer EID": formData.employerEID,
+        "File Creation Date": formData.fileCreationDate.replace(/-/g, ""),
+        "File Creation Time": formData.fileCreationTime,
+        "Payer EID": formData.payerEID,
+        "Payer QID": formData.payerQID,
+        "Payer Bank Short Name": formData.payerBankName,
+        "Payer IBAN": formData.payerIBAN,
+        "Salary Year and Month": formData.salaryYearMonth,
+        "Total Salaries": formData.totalSalaries,
+        "Total Records": formData.totalRecords,
+      },
+      {}, // Empty row for spacing
+    ];
+
+    // Create employee data rows
+    const employeeRows = filteredEmployees.flatMap((employee, index) =>
+      employee.salaries.map((salary) => ({
+        "Record Sequence": (index + 1).toString(),
         "Employee QID": employee.employeeId,
         "Employee Visa ID": "",
         "Employee Name": employee.name,
@@ -92,25 +118,23 @@ const SalaryTable = ({ employees, closeModal }) => {
         Deductions: salary.deductions.total,
         "Payment Type": "SALARY",
         "Notes / Comments": "",
-      }));
-    });
+      }))
+    );
+
+    // Combine header and employee data
+    const wsData = [...headerRows, ...employeeRows];
 
     // Create workbook and add worksheet
     const wb = utils.book_new();
-    const ws = utils.json_to_sheet(wsData);
+    const ws = utils.json_to_sheet(wsData, { skipHeader: false });
 
     // Generate dynamic filename
     const now = new Date();
-    const dateStr =
-      now.getFullYear().toString().slice(-2) + // YY
-      String(now.getMonth() + 1).padStart(2, "0") + // MM
-      String(now.getDate()).padStart(2, "0") + // DD
-      String(now.getHours()).padStart(2, "0") + // HH
-      String(now.getMinutes()).padStart(2, "0"); // MM
+    const dateStr = formData.fileCreationDate.replace(/-/g, "");
 
-    const employerId = employees[0]?.employeeId?.slice(0, 8) || "17219975";
-    const bankName = "QNB";
-    const fileName = `SIF_${employerId}_${bankName}_${dateStr}.csv`;
+    const timeStr = formData.fileCreationTime;
+
+    const fileName = `SIF_${formData.employerEID}_${formData.payerBankName}_${dateStr}_${timeStr}.csv`;
 
     // Convert to CSV and download
     const csvContent = utils.sheet_to_csv(ws);
@@ -133,7 +157,7 @@ const SalaryTable = ({ employees, closeModal }) => {
   }
 
   return (
-    <div className="bg-gray-100 p-2">
+    <div className="bg-gray-100 p-2 max-h-[600px] overflow-scroll">
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">WPS Information</h1>
         <button
@@ -148,80 +172,103 @@ const SalaryTable = ({ employees, closeModal }) => {
         {/* Payer Information */}
         <div className="border border-gray-300 rounded-lg p-5 shadow-sm">
           <h3 className="text-base font-semibold">Payer Information</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-            {[
-              {
-                label: "Employer EID",
-                type: "number",
-                placeholder: "Enter Employer EID",
-              },
-              {
-                label: "Payer EID",
-                type: "number",
-                placeholder: "Enter Payer EID",
-              },
-              {
-                label: "Payer QID",
-                type: "number",
-                placeholder: "Enter Payer QID",
-              },
-              {
-                label: "Payer Bank Name",
-                type: "text",
-                placeholder: "Enter Payer Bank Name",
-              },
-              {
-                label: "Payer IBAN",
-                type: "text",
-                placeholder: "Enter Payer IBAN",
-              },
-              { label: "Salary Creation Date", type: "date" },
-              {
-                label: "Total Salaries",
-                type: "number",
-                placeholder: "Enter total salaries",
-              },
-              {
-                label: "Total Records",
-                type: "number",
-                placeholder: "Enter total record",
-              },
-              { label: "File creation Date", type: "date" },
-            ].map((input, index) => (
-              <div key={index}>
-                <label className="block text-sm font-medium text-gray-700">
-                  {input.label}
-                </label>
-                <input
-                  type={input.type}
-                  placeholder={input.placeholder}
-                  className="mt-1 block w-full rounded px-3 py-2 focus:border-sky-500 focus:ring-sky-500 focus:outline-none sm:text-sm border border-gray-300"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+          <form onSubmit={handleSubmit(handleDownloadExcel)}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              {[
+                {
+                  label: "Employer EID",
+                  name: "employerEID",
+                  type: "text",
+                  placeholder: "Enter Employer EID",
+                },
+                {
+                  label: "File Creation Date",
+                  name: "fileCreationDate",
+                  type: "date",
+                },
+                {
+                  label: "File Creation Time",
+                  name: "fileCreationTime",
+                  type: "text",
+                  placeholder: "HHMM",
+                },
+                {
+                  label: "Payer EID",
+                  name: "payerEID",
+                  type: "text",
+                  placeholder: "Enter Payer EID",
+                },
+                {
+                  label: "Payer QID",
+                  name: "payerQID",
+                  type: "text",
+                  placeholder: "Enter Payer QID",
+                },
+                {
+                  label: "Payer Bank Name",
+                  name: "payerBankName",
+                  type: "text",
+                  placeholder: "Enter Payer Bank Name",
+                },
+                {
+                  label: "Payer IBAN",
+                  name: "payerIBAN",
+                  type: "text",
+                  placeholder: "Enter Payer IBAN",
+                },
+                {
+                  label: "Salary Year and Month",
+                  name: "salaryYearMonth",
+                  type: "text",
+                  placeholder: "YYYYMM",
+                },
+                {
+                  label: "Total Salaries",
+                  name: "totalSalaries",
+                  type: "text",
+                  placeholder: "Enter total salaries",
+                },
+                {
+                  label: "Total Records",
+                  name: "totalRecords",
+                  type: "text",
+                  placeholder: "Enter total records",
+                },
+              ].map((input, index) => (
+                <div key={index}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {input.label}
+                  </label>
+                  <input
+                    {...register(input.name)}
+                    type={input.type}
+                    placeholder={input.placeholder}
+                    className="mt-1 block w-full rounded px-3 py-2 focus:border-sky-500 focus:ring-sky-500 focus:outline-none sm:text-sm border border-gray-300"
+                  />
+                </div>
+              ))}
+            </div>
 
-        {/* Download and Reset Buttons */}
-        <div className="p-3 rounded-lg space-y-2">
-          <button
-            onClick={handleDownloadExcel}
-            type="button"
-            className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
-          >
-            <LiaFileDownloadSolid className="text-xl" />
-            Download
-          </button>
-          <button
-            onClick={handleReset}
-            type="button"
-            className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
-          >
-            <ImSpinner9
-              className={`text-xl ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </button>
+            {/* Download and Reset Buttons */}
+            <div className="flex justify-end items-center p-3 rounded-lg space-x-2">
+              <button
+                type="submit"
+                className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-800 hover:to-green-400"
+              >
+                Download Excel
+              </button>
+              <button
+                onClick={handleReset}
+                type="button"
+                className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
+              >
+                <ImSpinner9
+                  className={`text-xl ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
