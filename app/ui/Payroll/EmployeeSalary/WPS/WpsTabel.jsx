@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import { LiaFileDownloadSolid } from "react-icons/lia";
 import { ImSpinner9 } from "react-icons/im";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
+import { utils } from "xlsx";
 
 const SalaryTable = ({ employees, closeModal }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,7 +52,8 @@ const SalaryTable = ({ employees, closeModal }) => {
   const handleReset = () => {
     setIsRefreshing(true);
     setTimeout(() => {
-      setFilterMonth("");
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      setFilterMonth(currentMonth);
       setFilterDepartment("");
       setFilterProject("");
       setCurrentPage(1);
@@ -61,39 +61,67 @@ const SalaryTable = ({ employees, closeModal }) => {
     }, 1000);
   };
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    const tableColumn = [
-      "Employee ID",
-      "Name",
-      "Month",
-      "Base Salary",
-      "Overtime",
-      "Allowances",
-      "Deductions",
-      "Net Salary",
-    ];
-    const tableRows = filteredEmployees.flatMap((employee) =>
-      employee.salaries.map((salary) => [
-        employee.employeeId,
-        employee.name,
-        salary.month,
-        salary.baseSalary,
-        salary.overtime.normal.earning + salary.overtime.holiday.earning,
-        salary.allowances.total,
-        salary.deductions.total,
-        salary.netSalary,
-      ])
-    );
+  const handleDownloadExcel = () => {
+    // Create worksheet data
+    const wsData = filteredEmployees.flatMap((employee) => {
+      const now = new Date();
+      const fileCreationDate = now.toISOString().slice(0, 10).replace(/-/g, "");
+      const fileCreationTime = now
+        .toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        .replace(":", "");
 
-    doc.text("Employee Salary List", 14, 15);
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      styles: { fontSize: 8 },
+      return employee.salaries.map((salary) => ({
+        "Record Sequence": "1",
+        "Employee QID": employee.employeeId,
+        "Employee Visa ID": "",
+        "Employee Name": employee.name,
+        "Employee Bank Short Name": employee.payerBank || "QNB",
+        "Employee Account": employee.payerIban || "",
+        "Salary Frequency": "M",
+        "Number of Working days": salary.workingDays,
+        "Net Salary": salary.netSalary,
+        "Basic Salary": salary.baseSalary,
+        "Extra hours":
+          salary.overtime.normal.hours + salary.overtime.holiday.hours,
+        "Extra income":
+          salary.overtime.normal.earning + salary.overtime.holiday.earning,
+        Deductions: salary.deductions.total,
+        "Payment Type": "SALARY",
+        "Notes / Comments": "",
+      }));
     });
-    doc.save("Employee_Salary_List.pdf");
+
+    // Create workbook and add worksheet
+    const wb = utils.book_new();
+    const ws = utils.json_to_sheet(wsData);
+
+    // Generate dynamic filename
+    const now = new Date();
+    const dateStr =
+      now.getFullYear().toString().slice(-2) + // YY
+      String(now.getMonth() + 1).padStart(2, "0") + // MM
+      String(now.getDate()).padStart(2, "0") + // DD
+      String(now.getHours()).padStart(2, "0") + // HH
+      String(now.getMinutes()).padStart(2, "0"); // MM
+
+    const employerId = employees[0]?.employeeId?.slice(0, 8) || "17219975";
+    const bankName = "QNB";
+    const fileName = `SIF_${employerId}_${bankName}_${dateStr}.csv`;
+
+    // Convert to CSV and download
+    const csvContent = utils.sheet_to_csv(ws);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const maxPageButtons = 5;
@@ -107,7 +135,7 @@ const SalaryTable = ({ employees, closeModal }) => {
   return (
     <div className="bg-gray-100 p-2">
       <div className="flex justify-between">
-        <h1 className="text-2xl font-bold">Salary Information</h1>
+        <h1 className="text-2xl font-bold">WPS Information</h1>
         <button
           onClick={closeModal}
           className="text-2xl bg-white p-1 rounded mb-2 text-gray-500 hover:text-rose-500 focus:outline-none"
@@ -116,42 +144,78 @@ const SalaryTable = ({ employees, closeModal }) => {
         </button>
       </div>
 
-      <div className="lg:flex lg:gap-4 justify-between items-center mb-4">
-        <div className="flex flex-wrap gap-2">
-          <input
-            type="month"
-            value={filterMonth}
-            onChange={(e) => setFilterMonth(e.target.value)}
-            className="border rounded px-2 py-1"
-            placeholder="Filter by Month"
-          />
-          <input
-            type="text"
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-            className="border rounded px-2 py-1"
-            placeholder="Filter by Department"
-          />
-          <input
-            type="text"
-            value={filterProject}
-            onChange={(e) => setFilterProject(e.target.value)}
-            className="border rounded px-2 py-1"
-            placeholder="Filter by Project"
-          />
+      <div className="lg:flex lg:gap-4 justify-between items-center">
+        {/* Payer Information */}
+        <div className="border border-gray-300 rounded-lg p-5 shadow-sm">
+          <h3 className="text-base font-semibold">Payer Information</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+            {[
+              {
+                label: "Employer EID",
+                type: "number",
+                placeholder: "Enter Employer EID",
+              },
+              {
+                label: "Payer EID",
+                type: "number",
+                placeholder: "Enter Payer EID",
+              },
+              {
+                label: "Payer QID",
+                type: "number",
+                placeholder: "Enter Payer QID",
+              },
+              {
+                label: "Payer Bank Name",
+                type: "text",
+                placeholder: "Enter Payer Bank Name",
+              },
+              {
+                label: "Payer IBAN",
+                type: "text",
+                placeholder: "Enter Payer IBAN",
+              },
+              { label: "Salary Creation Date", type: "date" },
+              {
+                label: "Total Salaries",
+                type: "number",
+                placeholder: "Enter total salaries",
+              },
+              {
+                label: "Total Records",
+                type: "number",
+                placeholder: "Enter total record",
+              },
+              { label: "File creation Date", type: "date" },
+            ].map((input, index) => (
+              <div key={index}>
+                <label className="block text-sm font-medium text-gray-700">
+                  {input.label}
+                </label>
+                <input
+                  type={input.type}
+                  placeholder={input.placeholder}
+                  className="mt-1 block w-full rounded px-3 py-2 focus:border-sky-500 focus:ring-sky-500 focus:outline-none sm:text-sm border border-gray-300"
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="flex gap-2">
+        {/* Download and Reset Buttons */}
+        <div className="p-3 rounded-lg space-y-2">
           <button
-            onClick={handleDownloadPDF}
-            className="btn flex gap-3 text-white px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
+            onClick={handleDownloadExcel}
+            type="button"
+            className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-800 hover:from-green-800 hover:to-green-400"
           >
             <LiaFileDownloadSolid className="text-xl" />
             Download
           </button>
           <button
             onClick={handleReset}
-            className="btn flex gap-3 text-white px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
+            type="button"
+            className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-800 hover:from-blue-800 hover:to-blue-400"
           >
             <ImSpinner9
               className={`text-xl ${isRefreshing ? "animate-spin" : ""}`}
@@ -161,7 +225,33 @@ const SalaryTable = ({ employees, closeModal }) => {
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow">
+      {/* Filtering options */}
+      <div className="my-4 flex flex-wrap gap-2">
+        <input
+          type="month"
+          value={filterMonth}
+          onChange={(e) => setFilterMonth(e.target.value)}
+          className="border rounded px-2 py-1"
+          placeholder="Filter by Month"
+        />
+        <input
+          type="text"
+          value={filterDepartment}
+          onChange={(e) => setFilterDepartment(e.target.value)}
+          className="border rounded px-2 py-1"
+          placeholder="Filter by Department"
+        />
+        <input
+          type="text"
+          value={filterProject}
+          onChange={(e) => setFilterProject(e.target.value)}
+          className="border rounded px-2 py-1"
+          placeholder="Filter by Project"
+        />
+      </div>
+
+      {/* Employee Table */}
+      <div className="bg-white p-4 rounded-lg shadow mt-10">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse bg-white rounded-lg">
             <thead>
@@ -212,6 +302,7 @@ const SalaryTable = ({ employees, closeModal }) => {
           </table>
         </div>
 
+        {/* Pagination */}
         <div className="flex justify-evenly items-center mt-6">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
