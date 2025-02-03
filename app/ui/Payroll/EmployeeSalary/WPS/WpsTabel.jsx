@@ -348,9 +348,6 @@ const SalaryTable = ({ employees, closeModal }) => {
         </div>
       </div>
 
-      {/* Add the SummarySection here, just before the Employee Table */}
-      {/* <SummarySection totalSalaries={totalSalaries} totalRecords={totalRecords} filterMonth={filterMonth} /> */}
-
       {/* Employee Table */}
       <div className="bg-white p-4 rounded-lg shadow mt-10">
         <div className="overflow-x-auto">
@@ -380,12 +377,18 @@ const SalaryTable = ({ employees, closeModal }) => {
                       <td className="py-2 px-4">{salary.month}</td>
                       <td className="py-2 px-4">{salary.baseSalary}</td>
                       <td className="py-2 px-4">
-                        {salary.overtime.normal.earning +
-                          salary.overtime.holiday.earning}
+                        {(
+                          salary.overtime.normal.earning +
+                          salary.overtime.holiday.earning
+                        ).toFixed(2)}
                       </td>
                       <td className="py-2 px-4">{salary.allowances.total}</td>
-                      <td className="py-2 px-4">{salary.deductions.total}</td>
-                      <td className="py-2 px-4">{salary.netSalary}</td>
+                      <td className="py-2 px-4">
+                        {salary.deductions.total.toFixed(2)}
+                      </td>
+                      <td className="py-2 px-4">
+                        {salary.netSalary.toFixed(2)}
+                      </td>
                     </tr>
                   ))
                 )
