@@ -6,6 +6,7 @@ import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { utils } from "xlsx";
 import { useForm } from "react-hook-form";
+// import SummarySection from "./summary-section"
 
 const SalaryTable = ({ employees, closeModal }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,6 +18,8 @@ const SalaryTable = ({ employees, closeModal }) => {
   });
   const [filterDepartment, setFilterDepartment] = useState("");
   const [filterProject, setFilterProject] = useState("");
+  const [totalSalaries, setTotalSalaries] = useState(""); // Added state for totalSalaries
+  const [totalRecords, setTotalRecords] = useState(""); // Added state for totalRecords
 
   const rowsPerPage = 5;
 
@@ -40,6 +43,16 @@ const SalaryTable = ({ employees, closeModal }) => {
       }));
     setFilteredEmployees(filtered);
     setCurrentPage(1);
+    setTotalSalaries(
+      filtered
+        .reduce(
+          (sum, emp) =>
+            sum + emp.salaries.reduce((s, sal) => s + sal.netSalary, 0),
+          0
+        )
+        .toString()
+    ); // Calculate totalSalaries
+    setTotalRecords(filtered.length.toString()); // Calculate totalRecords
   }, [employees, filterMonth, filterDepartment, filterProject]);
 
   const totalPages = Math.ceil(filteredEmployees.length / rowsPerPage);
@@ -74,9 +87,9 @@ const SalaryTable = ({ employees, closeModal }) => {
       payerQID: "",
       payerBankName: "QNB",
       payerIBAN: "QA32QNBA0000000",
-      salaryYearMonth: filterMonth.replace(/-/g, ""),
-      totalSalaries: "40913",
-      totalRecords: "27",
+      // salaryYearMonth: filterMonth.replace(/-/g, ""),
+      // totalSalaries: totalSalaries, // Use the state variable
+      // totalRecords: totalRecords, // Use the state variable
     },
   });
 
@@ -91,9 +104,9 @@ const SalaryTable = ({ employees, closeModal }) => {
         "Payer QID": formData.payerQID,
         "Payer Bank Short Name": formData.payerBankName,
         "Payer IBAN": formData.payerIBAN,
-        "Salary Year and Month": formData.salaryYearMonth,
-        "Total Salaries": formData.totalSalaries,
-        "Total Records": formData.totalRecords,
+        "Salary Year and Month": filterMonth,
+        "Total Salaries": totalSalaries,
+        "Total Records": totalRecords,
       },
       {}, // Empty row for spacing
     ];
@@ -228,24 +241,24 @@ const SalaryTable = ({ employees, closeModal }) => {
                   type: "text",
                   placeholder: "Enter Payer IBAN",
                 },
-                {
-                  label: "Salary Year and Month",
-                  name: "salaryYearMonth",
-                  type: "text",
-                  placeholder: "YYYYMM",
-                },
-                {
-                  label: "Total Salaries",
-                  name: "totalSalaries",
-                  type: "text",
-                  placeholder: "Enter total salaries",
-                },
-                {
-                  label: "Total Records",
-                  name: "totalRecords",
-                  type: "text",
-                  placeholder: "Enter total records",
-                },
+                // {
+                //   label: "Salary Year and Month",
+                //   name: "salaryYearMonth",
+                //   type: "text",
+                //   placeholder: "YYYYMM",
+                // },
+                // {
+                //   label: "Total Salaries",
+                //   name: "totalSalaries",
+                //   type: "text",
+                //   placeholder: "Enter total salaries",
+                // },
+                // {
+                //   label: "Total Records",
+                //   name: "totalRecords",
+                //   type: "text",
+                //   placeholder: "Enter total records",
+                // },
               ].map((input, index) => (
                 <div key={index}>
                   <label className="block text-sm font-medium text-gray-700">
@@ -262,7 +275,7 @@ const SalaryTable = ({ employees, closeModal }) => {
             </div>
 
             {/* Download and Reset Buttons */}
-            <div className="flex justify-end items-center p-3 rounded-lg gap-2">
+            <div className="flex justify-end items-center mt-5 rounded-lg gap-2">
               <button
                 type="submit"
                 className="btn flex gap-3 text-white lg:w-44 rounded-2xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-800 hover:to-green-400"
@@ -285,29 +298,58 @@ const SalaryTable = ({ employees, closeModal }) => {
       </div>
 
       {/* Filtering options */}
-      <div className="my-4 flex flex-wrap gap-2">
-        <input
-          type="month"
-          value={filterMonth}
-          onChange={(e) => setFilterMonth(e.target.value)}
-          className="border rounded px-2 py-1"
-          placeholder="Filter by Month"
-        />
-        <input
-          type="text"
-          value={filterDepartment}
-          onChange={(e) => setFilterDepartment(e.target.value)}
-          className="border rounded px-2 py-1"
-          placeholder="Filter by Department"
-        />
-        <input
-          type="text"
-          value={filterProject}
-          onChange={(e) => setFilterProject(e.target.value)}
-          className="border rounded px-2 py-1"
-          placeholder="Filter by Project"
-        />
+      <div className="my-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div>
+          <label
+            htmlFor="filterMonth"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Filter by Month
+          </label>
+          <input
+            id="filterMonth"
+            type="month"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="filterDepartment"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Filter by Department
+          </label>
+          <input
+            id="filterDepartment"
+            type="text"
+            value={filterDepartment}
+            onChange={(e) => setFilterDepartment(e.target.value)}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter department"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="filterProject"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Filter by Project
+          </label>
+          <input
+            id="filterProject"
+            type="text"
+            value={filterProject}
+            onChange={(e) => setFilterProject(e.target.value)}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter project"
+          />
+        </div>
       </div>
+
+      {/* Add the SummarySection here, just before the Employee Table */}
+      {/* <SummarySection totalSalaries={totalSalaries} totalRecords={totalRecords} filterMonth={filterMonth} /> */}
 
       {/* Employee Table */}
       <div className="bg-white p-4 rounded-lg shadow mt-10">
