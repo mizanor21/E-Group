@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useMemo } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,6 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { useSalaryData } from "@/app/data/DataFetch";
 
 // Register required Chart.js components
 ChartJS.register(
@@ -22,64 +23,89 @@ ChartJS.register(
 );
 
 const AnnualPayrollSummary = () => {
-  // Chart data
-  const chartData = {
-    labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ],
-    datasets: [
-      {
-        label: "Net Salary",
-        data: [300, 500, 400, 450, 500, 350, 400, 420, 480, 530, 500, 550],
-        backgroundColor: "#1E90FF", // Blue color for net salary
-      },
-      {
-        label: "Loan",
-        data: [50, 100, 80, 120, 60, 70, 90, 50, 100, 150, 100, 200],
-        backgroundColor: "#9370DB", // Purple color for loan
-      },
-    ],
-  };
+  const { data, isLoading, error } = useSalaryData();
 
-  // Chart options
+  const chartData = useMemo(() => {
+    if (!data || data.length === 0) return null;
+
+    const currentYear = new Date().getFullYear();
+    const monthsData = Array(12).fill(0);
+
+    data.forEach((employee) => {
+      employee.salaries.forEach((salary) => {
+        const [year, month] = salary.month.split("-").map(Number);
+        if (year === currentYear) {
+          monthsData[month - 1] += salary.netSalary;
+        }
+      });
+    });
+
+    return {
+      labels: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+      datasets: [
+        {
+          label: "Net Salary",
+          data: monthsData,
+          backgroundColor: "#1E90FF", // Blue color for net salary
+        },
+      ],
+    };
+  }, [data]);
+
   const chartOptions = {
     responsive: true,
     plugins: {
       legend: {
-        position: "top", // Position of the legend
+        position: "top",
       },
       title: {
         display: true,
-        text: "Annual Payroll Summary", // Chart title
+        text: `Annual Payroll Summary ${new Date().getFullYear()}`,
       },
     },
     scales: {
       x: {
-        type: "category", // Ensure the x-axis is categorical
         title: {
           display: true,
-          text: "Months", // X-axis title
+          text: "Months",
         },
       },
       y: {
         title: {
           display: true,
-          text: "Amount (in thousands)", // Y-axis title
+          text: "Net Salary (QAR)",
         },
+        beginAtZero: true,
       },
     },
   };
+
+  if (isLoading) return <div className="text-center p-4">Loading...</div>;
+  if (error)
+    return (
+      <div className="text-center p-4 text-red-500">
+        Error loading salary data
+      </div>
+    );
+  if (!chartData)
+    return (
+      <div className="text-center p-4">
+        No salary data available for the current year
+      </div>
+    );
 
   return (
     <div className="p-6 bg-white rounded-lg shadow">
