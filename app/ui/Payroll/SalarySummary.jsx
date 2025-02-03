@@ -1,50 +1,88 @@
-import React from "react";
+"use client";
 
-const SalarySummary = () => {
-  const data = [
-    {
-      title: "Gross salary this month",
-      value: "5,205,350.00",
-      trend: "+2% more than last month",
-      iconColor: "bg-yellow-100 text-yellow-600",
-      trendColor: "text-green-500",
-    },
-    {
-      title: "Net salary this month",
-      value: "4,550,350.00",
-      trend: "+2.1% more than last month",
-      iconColor: "bg-blue-100 text-blue-600",
-      trendColor: "text-green-500",
-    },
-    {
-      title: "Overtime this month",
-      value: "150,350.00",
-      trend: "-1.5% less than last month",
-      iconColor: "bg-purple-100 text-purple-600",
-      trendColor: "text-red-500",
-    },
-  ];
+import { useMemo } from "react";
+import { FaDollarSign, FaChartLine, FaClock } from "react-icons/fa";
+
+const SalarySummary = ({ data, isLoading, error }) => {
+  const summaryData = useMemo(() => {
+    if (!data || data.length === 0) return null;
+
+    // Find the most recent month
+    const allMonths = data
+      .flatMap((emp) => emp.salaries.map((s) => s.month))
+      .sort()
+      .reverse();
+    const mostRecentMonth = allMonths[0];
+    const previousMonth = allMonths.find((month) => month !== mostRecentMonth);
+
+    if (!previousMonth) return null;
+
+    let totalGrossSalary = 0;
+    let totalNetSalary = 0;
+    let totalOvertime = 0;
+
+    data.forEach((employee) => {
+      const prevMonthSalary = employee.salaries.find(
+        (s) => s.month === previousMonth
+      );
+      if (prevMonthSalary) {
+        totalGrossSalary +=
+          prevMonthSalary.baseSalary +
+          prevMonthSalary.allowances.total +
+          prevMonthSalary.overtime.normal.earning +
+          prevMonthSalary.overtime.holiday.earning;
+        totalNetSalary += prevMonthSalary.netSalary;
+        totalOvertime +=
+          prevMonthSalary.overtime.normal.earning +
+          prevMonthSalary.overtime.holiday.earning;
+      }
+    });
+
+    return {
+      month: previousMonth,
+      grossSalary: totalGrossSalary,
+      netSalary: totalNetSalary,
+      overtime: totalOvertime,
+    };
+  }, [data]);
+
+  if (!summaryData)
+    return (
+      <div className="text-center">
+        No data available for the previous month
+      </div>
+    );
+
+  const SummaryCard = ({ title, amount, icon }) => (
+    <div className="p-6 bg-white rounded-lg shadow flex items-center justify-between">
+      <div>
+        <p className="text-2xl font-bold">{amount.toFixed(2)}</p>
+        <p className="text-sm text-gray-500">{title}</p>
+        <p className="text-sm mt-2 text-blue-500">For {summaryData.month}</p>
+      </div>
+      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+        {icon}
+      </div>
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {data.map((item, index) => (
-        <div
-          key={index}
-          className="p-6 bg-white rounded-lg shadow flex items-center justify-between"
-        >
-          <div>
-            <p className="text-2xl font-bold">{item.value}</p>
-            <p className="text-sm text-gray-500">{item.title}</p>
-            <p className={`text-sm mt-2 ${item.trendColor}`}>{item.trend}</p>
-          </div>
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center ${item.iconColor}`}
-          >
-            {/* Placeholder icon */}
-            <span className="text-2xl">📊</span>
-          </div>
-        </div>
-      ))}
+      <SummaryCard
+        title="Total Gross Salary"
+        amount={summaryData.grossSalary}
+        icon={<FaDollarSign />}
+      />
+      <SummaryCard
+        title="Total Net Salary"
+        amount={summaryData.netSalary}
+        icon={<FaChartLine />}
+      />
+      <SummaryCard
+        title="Total Overtime"
+        amount={summaryData.overtime}
+        icon={<FaClock />}
+      />
     </div>
   );
 };
