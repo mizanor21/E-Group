@@ -6,7 +6,6 @@ const DashboardSection = ({
   meetings = [],
   payments = [],
   employees = [],
-  employeeData = [],
 }) => {
   return (
     <div className="space-y-8 min-h-screen">
@@ -111,12 +110,14 @@ const DashboardSection = ({
               </tr>
             </thead>
             <tbody>
-              {employees.map((employee, index) => (
+              {employees.slice(-5).map((employee, index) => (
                 <tr key={index} className="border-b hover:bg-gray-50">
                   <td className="py-2 px-3">{index + 1}</td>
-                  <td className="py-2 px-3">{employee.name}</td>
+                  <td className="py-2 px-3">
+                    {employee.firstName} {employee.lastName}
+                  </td>
                   <td className="py-2 px-3">{employee.role}</td>
-                  <td className="py-2 px-3">{employee.designation}</td>
+                  <td className="py-2 px-3">{employee.currentJob}</td>
                 </tr>
               ))}
             </tbody>

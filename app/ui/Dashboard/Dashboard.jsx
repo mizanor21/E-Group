@@ -1,33 +1,10 @@
 "use client";
-import { useEmployeeData } from "@/app/data/DataFetch";
+import {
+  useCompanyData,
+  useEmployeeData,
+  useProjectData,
+} from "@/app/data/DataFetch";
 import DashboardSection from "./DashboardSection";
-
-const stats = [
-  {
-    title: "Total Employee",
-    value: "234",
-    percentage: "14",
-    bgFrom: "#f97316", // Orange-400
-    bgTo: "#ea580c", // Orange-500
-    icon: "👥",
-  },
-  {
-    title: "Total Projects",
-    value: "3567",
-    percentage: "14",
-    bgFrom: "#ef4444", // Red-400
-    bgTo: "#dc2626", // Red-500
-    icon: "📂",
-  },
-  {
-    title: "Total Company",
-    value: "2145",
-    percentage: "14",
-    bgFrom: "#3b82f6", // Blue-400
-    bgTo: "#2563eb", // Blue-500
-    icon: "🏢",
-  },
-];
 
 const feed = [
   {
@@ -59,24 +36,52 @@ const payments = [
   },
 ];
 
-const employees = [
-  {
-    name: "Abubakar Ismaila Goje",
-    role: "Admin",
-    designation: "Human Resource Dept.",
-  },
-];
+// const employees = [
+//   {
+//     name: "Abubakar Ismaila Goje",
+//     role: "Admin",
+//     designation: "Human Resource Dept.",
+//   },
+// ];
 
 export default function Dashboard() {
-  const { data } = useEmployeeData([]);
+  const { data: allEmployees } = useEmployeeData([]);
+  const { data: Companies } = useCompanyData([]);
+  const { data: Projects } = useProjectData([]);
+  const stats = [
+    {
+      title: "Total Employee",
+      value: allEmployees?.length || "0", // Use data length dynamically
+      percentage: "14",
+      bgFrom: "#f97316", // Orange-400
+      bgTo: "#ea580c", // Orange-500
+      icon: "👥",
+    },
+    {
+      title: "Total Projects",
+      value: Projects?.length || "0",
+      percentage: "14",
+      bgFrom: "#ef4444", // Red-400
+      bgTo: "#dc2626", // Red-500
+      icon: "📂",
+    },
+    {
+      title: "Total Company",
+      value: Companies?.length || "0",
+      percentage: "14",
+      bgFrom: "#3b82f6", // Blue-400
+      bgTo: "#2563eb", // Blue-500
+      icon: "🏢",
+    },
+  ];
   return (
     <DashboardSection
       stats={stats}
       feed={feed}
       meetings={meetings}
       payments={payments}
-      employees={employees}
-      employeeData={data}
+      employees={allEmployees}
+      // employeeData={data}
     />
   );
 }
