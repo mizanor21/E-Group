@@ -8,38 +8,34 @@ const SalarySummary = ({ data, isLoading, error }) => {
     if (!data || data.length === 0) return null;
 
     // Find the most recent month
-    const allMonths = data
+    const mostRecentMonth = data
       .flatMap((emp) => emp.salaries.map((s) => s.month))
       .sort()
-      .reverse();
-    const mostRecentMonth = allMonths[0];
-    const previousMonth = allMonths.find((month) => month !== mostRecentMonth);
-
-    if (!previousMonth) return null;
+      .reverse()[0];
 
     let totalGrossSalary = 0;
     let totalNetSalary = 0;
     let totalOvertime = 0;
 
     data.forEach((employee) => {
-      const prevMonthSalary = employee.salaries.find(
-        (s) => s.month === previousMonth
+      const recentSalary = employee.salaries.find(
+        (s) => s.month === mostRecentMonth
       );
-      if (prevMonthSalary) {
+      if (recentSalary) {
         totalGrossSalary +=
-          prevMonthSalary.baseSalary +
-          prevMonthSalary.allowances.total +
-          prevMonthSalary.overtime.normal.earning +
-          prevMonthSalary.overtime.holiday.earning;
-        totalNetSalary += prevMonthSalary.netSalary;
+          recentSalary.baseSalary +
+          recentSalary.allowances.total +
+          recentSalary.overtime.normal.earning +
+          recentSalary.overtime.holiday.earning;
+        totalNetSalary += recentSalary.netSalary;
         totalOvertime +=
-          prevMonthSalary.overtime.normal.earning +
-          prevMonthSalary.overtime.holiday.earning;
+          recentSalary.overtime.normal.earning +
+          recentSalary.overtime.holiday.earning;
       }
     });
 
     return {
-      month: previousMonth,
+      month: mostRecentMonth,
       grossSalary: totalGrossSalary,
       netSalary: totalNetSalary,
       overtime: totalOvertime,
@@ -49,7 +45,7 @@ const SalarySummary = ({ data, isLoading, error }) => {
   if (!summaryData)
     return (
       <div className="text-center">
-        No data available for the previous month
+        No data available for the most recent month
       </div>
     );
 
