@@ -1,4 +1,7 @@
-import React from "react";
+"use client";
+
+import AnnualPayrollSummary from "../Payroll/AnnualPayrollSummary";
+import YearlySalaryChart from "./YearlySalaryChart";
 
 const DashboardSection = ({
   stats = [],
@@ -6,6 +9,7 @@ const DashboardSection = ({
   meetings = [],
   payments = [],
   employees = [],
+  salaryData = [],
 }) => {
   return (
     <div className="space-y-8 min-h-screen">
@@ -31,23 +35,46 @@ const DashboardSection = ({
         ))}
       </div>
 
-      {/* Salary & Expense Chart */}
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">
-            Salary & Expense
-          </h3>
-          <button className="bg-gray-200 text-sm px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300">
-            Yearly
-          </button>
-        </div>
-        <div className="w-full h-64 flex items-center justify-center bg-gray-50 rounded-lg border-dashed border-2 border-gray-300">
-          <p className="text-gray-400">[Insert Chart Here]</p>
-        </div>
-      </div>
+      {/* Yearly Salary Chart */}
+      {/* <YearlySalaryChart data={salaryData} /> */}
+      <AnnualPayrollSummary />
 
       {/* Payment Vouchers and Employee List */}
       <div className="grid grid-cols-2 gap-8">
+        {/* Recent Employee List */}
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            Recent Employee List
+          </h3>
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="py-2 px-3 font-medium text-gray-700">S/N</th>
+                <th className="py-2 px-3 font-medium text-gray-700">
+                  Staff Name
+                </th>
+                <th className="py-2 px-3 font-medium text-gray-700">
+                  Staff Role
+                </th>
+                <th className="py-2 px-3 font-medium text-gray-700">
+                  Designation
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees.slice(-5).map((employee, index) => (
+                <tr key={index} className="border-b hover:bg-gray-50">
+                  <td className="py-2 px-3">{index + 1}</td>
+                  <td className="py-2 px-3">
+                    {employee.firstName} {employee.lastName}
+                  </td>
+                  <td className="py-2 px-3">{employee.role}</td>
+                  <td className="py-2 px-3">{employee.currentJob}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         {/* Payment Vouchers */}
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -88,47 +115,12 @@ const DashboardSection = ({
             </tbody>
           </table>
         </div>
-
-        {/* Recent Employee List */}
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Recent Employee List
-          </h3>
-          <table className="w-full text-left text-sm border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="py-2 px-3 font-medium text-gray-700">S/N</th>
-                <th className="py-2 px-3 font-medium text-gray-700">
-                  Staff Name
-                </th>
-                <th className="py-2 px-3 font-medium text-gray-700">
-                  Staff Role
-                </th>
-                <th className="py-2 px-3 font-medium text-gray-700">
-                  Designation
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.slice(-5).map((employee, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
-                  <td className="py-2 px-3">{index + 1}</td>
-                  <td className="py-2 px-3">
-                    {employee.firstName} {employee.lastName}
-                  </td>
-                  <td className="py-2 px-3">{employee.role}</td>
-                  <td className="py-2 px-3">{employee.currentJob}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
 
       {/* Activity Feed and Meetings */}
       <div className="grid grid-cols-2 gap-8">
         {/* Activity Feed */}
-        <div className="bg-white p-6 rounded-lg shadow-lg">
+        {/* <div className="bg-white p-6 rounded-lg shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-gray-800">
               Activity Feed
@@ -141,7 +133,7 @@ const DashboardSection = ({
             {feed.map((item, index) => (
               <div key={index} className="flex items-center gap-4">
                 <img
-                  src={item.avatar}
+                  src={item.avatar || "/placeholder.svg"}
                   alt={item.name}
                   className="w-10 h-10 rounded-full"
                 />
@@ -163,7 +155,7 @@ const DashboardSection = ({
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Meetings */}
         <div className="bg-white p-6 rounded-lg shadow-lg">
