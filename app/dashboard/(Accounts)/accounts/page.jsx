@@ -1,4 +1,5 @@
-import AccountsDashboard from "@/app/ui/Accounts/AccountsDashboard"
+import AccountsDashboard from "@/app/ui/Accounts/accounts-dashboard"
+
 
 const Page = ({}) => {
   return <div>
