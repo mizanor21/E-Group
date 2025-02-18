@@ -1,30 +1,30 @@
 import { connectToDB } from "@/app/lib/connectToDB";
-import { Project } from "@/app/lib/Project/model";
+import { Expense } from "@/app/lib/Expances/model";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   await connectToDB();
-  const project = await Project.find();
-  const response = NextResponse.json(project);
+  const data = await Expense.find();
+  const response = NextResponse.json(data);
   response.headers.set("Access-Control-Allow-Origin", "*");
   return response;
 }
 
 export async function POST(req) {
   try {
-    const edgeData = await req.json();
+    const data = await req.json();
 
     // Connect to the database
     await connectToDB();
-    await Project.create(edgeData);
+    await Expense.create(data);
     return NextResponse.json(
-      { message: "Project data created" },
+      { message: "data created" },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating edge data:", error);
+    console.error("Error creating data:", error);
     return NextResponse.json(
-      { message: "Failed to create edge data" },
+      { message: "Failed to create data" },
       { status: 500 }
     );
   }
@@ -35,22 +35,22 @@ export async function DELETE(req) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     await connectToDB();
-    const deletedProject = await Project.findByIdAndDelete(id);
-    if (!deletedProject) {
+    const deleted = await Expense.findByIdAndDelete(id);
+    if (!deleted) {
       return NextResponse.json(
-        { message: "Project data not found" },
+        { message: "data not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { message: "Project data deleted" },
+      { message: "data deleted" },
       { status: 200 }
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { message: "Failed to delete Project data" },
+      { message: "Failed to delete data" },
       { status: 500 }
     );
   }

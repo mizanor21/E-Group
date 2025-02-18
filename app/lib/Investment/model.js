@@ -1,13 +1,39 @@
 import mongoose from "mongoose";
 
-const projectSchema = new mongoose.Schema(
+const investmentSchema = new mongoose.Schema(
   {
-    project: String,
-    location: String,
-    category: String,
+    date: {
+      type: Date,
+      required: true,
+    },
+    investorName: {
+      type: String,
+      required: true,
+    },
+    voucherNo: {
+      type: String,
+      required: true,
+    },
+    submissionDate: {
+      type: Date,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    mode: {
+      type: String,
+      enum: ["Cleared", "Pending", "Bounced"],
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-export const Project =
-  mongoose.models.Projects || mongoose.model("Projects", projectSchema);
+export const Investment =
+  mongoose.models.Investment || mongoose.model("Investment", investmentSchema);

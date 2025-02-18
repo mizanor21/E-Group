@@ -1,10 +1,10 @@
 import { connectToDB } from "@/app/lib/connectToDB";
-import { Project } from "@/app/lib/Project/model";
+import { Income } from "@/app/lib/Income/model";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   await connectToDB();
-  const project = await Project.find();
+  const project = await Income.find();
   const response = NextResponse.json(project);
   response.headers.set("Access-Control-Allow-Origin", "*");
   return response;
@@ -12,19 +12,19 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    const edgeData = await req.json();
+    const data = await req.json();
 
     // Connect to the database
     await connectToDB();
-    await Project.create(edgeData);
+    await Income.create(data);
     return NextResponse.json(
-      { message: "Project data created" },
+      { message: "Data created" },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating edge data:", error);
+    console.error("Error creating data:", error);
     return NextResponse.json(
-      { message: "Failed to create edge data" },
+      { message: "Failed to create data" },
       { status: 500 }
     );
   }
@@ -35,22 +35,22 @@ export async function DELETE(req) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     await connectToDB();
-    const deletedProject = await Project.findByIdAndDelete(id);
-    if (!deletedProject) {
+    const deleted = await Income.findByIdAndDelete(id);
+    if (!deleted) {
       return NextResponse.json(
-        { message: "Project data not found" },
+        { message: " data not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { message: "Project data deleted" },
+      { message: " data deleted" },
       { status: 200 }
     );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { message: "Failed to delete Project data" },
+      { message: "Failed to delete  data" },
       { status: 500 }
     );
   }

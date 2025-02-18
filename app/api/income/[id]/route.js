@@ -1,20 +1,33 @@
 import { connectToDB } from "@/app/lib/connectToDB";
-import { Project } from "@/app/lib/Project/model";
+import { Income } from "@/app/lib/Income/model";
 import { NextResponse } from "next/server";
+
+export async function GET(req, { params }) {
+  const { id } = params;
+  await connectToDB();
+  const data = await Income.findOne({ _id: id });
+  if (!data) {
+    return NextResponse.json(
+      { message: "data not found" },
+      { status: 404 }
+    );
+  }
+  return NextResponse.json(project, { status: 200 });
+}
 
 export async function PATCH(req, { params }) {
   const { id } = params;
-  const updateData = await req.json();
+  const data = await req.json();
 
   await connectToDB();
 
   try {
-    const updatedProject = await Project.findByIdAndUpdate(id, updateData, {
+    const updated = await Income.findByIdAndUpdate(id, data, {
       new: true, // Returns the updated document
       runValidators: true, // Ensures model validation
     });
 
-    if (!updatedProject) {
+    if (!updated) {
       return NextResponse.json(
         { message: "Project data not found" },
         { status: 404 }
@@ -22,27 +35,14 @@ export async function PATCH(req, { params }) {
     }
 
     return NextResponse.json(
-      { message: "Data Successfully Updated", data: updatedProject },
+      { message: "Data Successfully Updated", data: updated },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to update Updated Project data:", error);
+    console.error("Failed to update data:", error);
     return NextResponse.json(
-      { message: "Failed to update Updated Project data" },
+      { message: "Failed to update data" },
       { status: 500 }
     );
   }
-}
-
-export async function GET(req, { params }) {
-  const { id } = params;
-  await connectToDB();
-  const project = await Project.findOne({ _id: id });
-  if (!project) {
-    return NextResponse.json(
-      { message: "Project data not found" },
-      { status: 404 }
-    );
-  }
-  return NextResponse.json(project, { status: 200 });
 }
