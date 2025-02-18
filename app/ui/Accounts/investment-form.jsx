@@ -6,6 +6,7 @@ import { Modal } from "./modal"
 export function InvestmentForm({ onClose }) {
   const {
     register,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm({
@@ -15,12 +16,13 @@ export function InvestmentForm({ onClose }) {
       submissionDate: "",
       mode: "Cash",
       amount: 0,
-      investmentType: "",
       issueDate: "",
-      maturityDate: "",
-      status: "Active",
+      status: "Pending",
     },
   })
+
+  const mode = watch("mode");
+  const status = watch("status");
 
   const onSubmit = (data) => {
     console.log(data)
@@ -86,16 +88,26 @@ export function InvestmentForm({ onClose }) {
           </div>
         </div>
 
+        <div className="grid grid-cols-2 gap-4">
+          {/* Mode */}
         <div>
-          <label htmlFor="mode" className="block text-sm font-medium text-gray-700">
-            Mode
-          </label>
-          <select id="mode" {...register("mode")} className="input-style">
-            <option value="Cleared">Cleared</option>
-            <option value="Pending">Pending</option>
-            <option value="Bounced">Bounced</option>
-          </select>
-          {errors.mode && <p className="error-text">{errors.mode.message}</p>}
+            <label className="block text-gray-600 text-sm font-medium">Mode</label>
+            <select {...register("mode")} className={`input-style bg-${mode === "Cash" ? "red" : mode === "Check" ? "blue" : "green"}-500 text-white`}>
+              <option value="Cash">Cash</option>
+              <option value="Check">Check</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-gray-600 text-sm font-medium">Status</label>
+            <select {...register("status")} className={`input-style bg-${status === "Cleared" ? "green" : status === "Pending" ? "yellow" : "red"}-500 text-white`}>
+              <option value="Cleared">Cleared</option>
+              <option value="Pending">Pending</option>
+              <option value="Bounced">Bounced</option>
+            </select>
+          </div>
         </div>
 
         <div>
@@ -113,15 +125,8 @@ export function InvestmentForm({ onClose }) {
 
         <div className="flex justify-end space-x-2">
           <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary"
-          >
-            Cancel
-          </button>
-          <button
             type="submit"
-            className="btn-primary"
+            className="w-full bg-green-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-green-700 transition"
           >
             Submit
           </button>

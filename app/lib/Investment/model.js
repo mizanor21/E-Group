@@ -18,11 +18,12 @@ const investmentSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    state: {
+    mode: {
       type: String,
+      enum: ["Cash", "Check", "Online"],
       required: true,
     },
-    mode: {
+    status: {
       type: String,
       enum: ["Cleared", "Pending", "Bounced"],
       required: true,
