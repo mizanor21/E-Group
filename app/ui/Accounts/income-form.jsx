@@ -33,7 +33,7 @@ export function IncomeForm({ onClose }) {
 
   return (
     <Modal isOpen={true} onClose={onClose} title="Add Income">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4 ">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Date */}
           <div>
