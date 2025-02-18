@@ -12,7 +12,7 @@ export async function GET(req, { params }) {
       { status: 404 }
     );
   }
-  return NextResponse.json(project, { status: 200 });
+  return NextResponse.json(data, { status: 200 });
 }
 
 export async function PATCH(req, { params }) {
