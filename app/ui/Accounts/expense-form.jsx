@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { Modal } from "./modal"
-
+import { useForm } from "react-hook-form";
+import { Modal } from "./modal";
 
 export function ExpenseForm({ onClose }) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -15,162 +15,94 @@ export function ExpenseForm({ onClose }) {
       voucherNo: "",
       submissionDate: "",
       mode: "Cash",
-      amount: 0,
-      vendorName: "",
+      amount: "",
+      customerName: "",
       issueDate: "",
       dueDate: "",
       status: "Pending",
     },
-  })
+  });
+
+  const mode = watch("mode");
+  const status = watch("status");
 
   const onSubmit = (data) => {
-    console.log(data)
-    onClose()
-  }
+    console.log(data);
+    onClose();
+  };
 
   return (
     <Modal isOpen={true} onClose={onClose} title="Add Expense">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-            Date
-          </label>
-          <input
-            type="date"
-            id="date"
-            {...register("date")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          {errors.date && <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Input Fields */}
+          {[
+            { label: "Date", name: "date", type: "date" },
+            { label: "Customer Name", name: "customerName", type: "text", placeholder: "Enter Customer Name" },
+            { label: "Voucher No.", name: "voucherNo", type: "text", placeholder: "Enter Voucher/Cheque Number" },
+            { label: "Issue Date", name: "issueDate", type: "date" },
+            { label: "Submission Date", name: "submissionDate", type: "date" },
+            { label: "Due Date", name: "dueDate", type: "date" },
+          ].map(({ label, name, type, placeholder }) => (
+            <div key={name}>
+              <label className="block text-gray-600 text-sm font-medium">{label}</label>
+              <input
+                type={type}
+                {...register(name, { required: name !== "voucherNo" })}
+                placeholder={placeholder}
+                className="w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"
+              />
+              {errors[name] && <span className="text-red-500 text-xs">{label} is required</span>}
+            </div>
+          ))}
+
+          {/* Mode Selection */}
+          <div>
+            <label className="block text-gray-600 text-sm font-medium">Mode</label>
+            <select
+              {...register("mode")}
+              className="w-full p-2 border rounded-md shadow-sm bg-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Cash">Cash</option>
+              <option value="Check">Check</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+
+          {/* Status Selection */}
+          <div>
+            <label className="block text-gray-600 text-sm font-medium">Status</label>
+            <select
+              {...register("status")}
+              className="w-full p-2 border rounded-md shadow-sm bg-white focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Cleared">Cleared</option>
+              <option value="Pending">Pending</option>
+              <option value="Bounced">Bounced</option>
+            </select>
+          </div>
+
+          {/* Amount */}
+          <div className="col-span-2">
+            <label className="block text-gray-600 text-sm font-medium">Amount</label>
+            <input
+              type="number"
+              {...register("amount", { required: true })}
+              placeholder="Enter the value of the payment"
+              className="w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.amount && <span className="text-red-500 text-xs">Amount is required</span>}
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="voucherNo" className="block text-sm font-medium text-gray-700">
-            Voucher No
-          </label>
-          <input
-            type="text"
-            id="voucherNo"
-            {...register("voucherNo")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          {errors.voucherNo && <p className="mt-1 text-sm text-red-600">{errors.voucherNo.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="submissionDate" className="block text-sm font-medium text-gray-700">
-            Submission Date
-          </label>
-          <input
-            type="date"
-            id="submissionDate"
-            {...register("submissionDate")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          {errors.submissionDate && <p className="mt-1 text-sm text-red-600">{errors.submissionDate.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="mode" className="block text-sm font-medium text-gray-700">
-            Mode
-          </label>
-          <select
-            id="mode"
-            {...register("mode")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-            <option value="Cash">Cash</option>
-            <option value="Check">Check</option>
-            <option value="Online">Online</option>
-          </select>
-          {errors.mode && <p className="mt-1 text-sm text-red-600">{errors.mode.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-            Amount
-          </label>
-          <input
-            type="number"
-            id="amount"
-            {...register("amount", { valueAsNumber: true })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="vendorName" className="block text-sm font-medium text-gray-700">
-            Vendor Name
-          </label>
-          <input
-            type="text"
-            id="vendorName"
-            {...register("vendorName")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          {errors.vendorName && <p className="mt-1 text-sm text-red-600">{errors.vendorName.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700">
-            Issue Date
-          </label>
-          <input
-            type="date"
-            id="issueDate"
-            {...register("issueDate")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          {errors.issueDate && <p className="mt-1 text-sm text-red-600">{errors.issueDate.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
-            Due Date
-          </label>
-          <input
-            type="date"
-            id="dueDate"
-            {...register("dueDate")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-          {errors.dueDate && <p className="mt-1 text-sm text-red-600">{errors.dueDate.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-            Status
-          </label>
-          <select
-            id="status"
-            {...register("status")}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          >
-            <option value="Cleared">Cleared</option>
-            <option value="Pending">Pending</option>
-            <option value="Bounced">Bounced</option>
-          </select>
-          {errors.status && <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>}
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Submit
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-green-700 transition"
+        >
+          Save All Changes
+        </button>
       </form>
     </Modal>
-  )
+  );
 }
-
