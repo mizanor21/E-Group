@@ -6,6 +6,8 @@ import { MdDashboard, MdOutlinePeople, MdSettings } from "react-icons/md";
 import { BsCashCoin } from "react-icons/bs"; // Import icons
 import Image from "next/image";
 import logo from "@/public/assets/logo/file2.png";
+import { MdAccountBalance } from "react-icons/md";
+
 
 const Menubar = () => {
   const pathname = usePathname();
@@ -25,6 +27,11 @@ const Menubar = () => {
       title: "Payroll",
       path: "/dashboard/payroll",
       icon: <BsCashCoin />,
+    },
+    {
+      title: "Accounts",
+      path: "/dashboard/accounts",
+      icon: <MdAccountBalance />,
     },
     {
       title: "Settings",
