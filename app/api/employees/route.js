@@ -13,13 +13,14 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    const edgeData = await req.json();
+    const data = await req.json();
+    console.log(data)
 
     // Connect to the database
     await connectToDB();
-    await Employees.create(edgeData);
+    await Employees.create(data);
     return NextResponse.json(
-      { message: "Employees data created" },
+      { message: "Employees data created", data },
       { status: 201 }
     );
   } catch (error) {

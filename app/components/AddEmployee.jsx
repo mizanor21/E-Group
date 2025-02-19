@@ -17,6 +17,7 @@ const steps = ["Basic Info", "HR Details", "Documents", "Payment Info", "Summary
 
 export default function AddEmployee() {
   const [currentStep, setCurrentStep] = useState(0)
+  const [showConfirmation, setShowConfirmation] = useState(false)
   const methods = useForm({
     mode: "all",
   })
@@ -43,6 +44,11 @@ export default function AddEmployee() {
   }, [isSameAddress, setValue, getValues])
 
   const onSubmit = async (data) => {
+    setShowConfirmation(true)
+  }
+
+  const handleConfirmSubmit = async () => {
+    const data = getValues()
     // If addresses are same, use present address values
     if (data.isSameAddress) {
       data.permanentAddress1 = data.presentAddress1
@@ -52,17 +58,18 @@ export default function AddEmployee() {
       data.permanentPostOrZipCode = data.presentPostOrZipCode
     }
 
-    console.log(data)
-    // Here you would typically send the data to your backend API
     try {
-      const response = await axios.post("/api/employees", data);
+      const response = await axios.post("/api/employees", data)
+      console.log(response)
 
       if (response.status === 201) {
-        toast.success("Employees successfully added!");
-        // reset(); // Reset form
+        toast.success("Employee successfully added!")
+        setShowConfirmation(false)
+        methods.reset() // Reset form
+        setCurrentStep(0) // Go back to first step
       }
     } catch (error) {
-      toast.error(`${error.message}, Please valid info provide and try again.`);
+      toast.error(`${error.message}, Please provide valid info and try again.`)
     }
   }
 
@@ -96,9 +103,7 @@ export default function AddEmployee() {
 
   return (
     (<FormProvider {...methods}>
-      <form
-        onSubmit={methods.handleSubmit(onSubmit)}
-        className="max-w-7xl mx-auto p-6">
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">Add New Employee</h1>
           <ProgressBar steps={steps} currentStep={currentStep} />
@@ -142,6 +147,27 @@ export default function AddEmployee() {
           </div>
         </div>
       </form>
+      {showConfirmation && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Confirm Submission</h2>
+            <p>Are you sure you want to save this employee data?</p>
+            <div className="mt-4 flex justify-end space-x-4">
+              <button
+                onClick={() => setShowConfirmation(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSubmit}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </FormProvider>)
   );
 }

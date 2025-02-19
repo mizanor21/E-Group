@@ -72,32 +72,34 @@ const Summary = () => {
         title="Work Information"
         fields={[
           ["Employee Type", employeeType?.charAt(0).toUpperCase() + employeeType?.slice(1)],
+          ["Department", values.department],
+          ["Position", values.position],
+          ["Start Date", values.startDate],
+          ["Qualification", values.qualification],
+          ["Experience", values.experience],
+          ["Current Job", values.currentJob],
+          ["Actual Job", values.actualJob],
+          ["Project", values.project],
+          ["Role", values.role],
+        ]} />
+      <SummarySection
+        title="Payment Information"
+        fields={[
+          ["Employee Type", employeeType?.charAt(0).toUpperCase() + employeeType?.slice(1)],
           ["First Shift Start", values.firstShiftStart],
           ["First Shift End", values.firstShiftEnd],
           [
             employeeType === "hourly" ? "Hourly Rate" : employeeType === "daily" ? "Daily Rate" : "Basic Pay",
             formatCurrency(paymentValue),
           ],
+          ["Over Time Hours", values.overTimeHours],
+          ["Holiday OT", values.holidayOT],
+          ["Commission", values.commission ? `${values.commission}%` : "N/A"],
+          ["ACC Allowance", formatCurrency(values.accAllowance)],
+          ["Food Allowance", formatCurrency(values.foodAllowance)],
+          ["Telephone Allowance", formatCurrency(values.telephoneAllowance)],
+          ["Transport Allowance", formatCurrency(values.transportAllowance)],
         ]} />
-      {values.overTimeHours ||
-      values.holidayOT ||
-      values.commission ||
-      values.accAllowance ||
-      values.foodAllowance ||
-      values.telephoneAllowance ||
-      values.transportAllowance ? (
-        <SummarySection
-          title="Additional Payments"
-          fields={[
-            ["Over Time Hours", values.overTimeHours],
-            ["Holiday OT", values.holidayOT],
-            ["Commission", values.commission ? `${values.commission}%` : "N/A"],
-            ["ACC Allowance", formatCurrency(values.accAllowance)],
-            ["Food Allowance", formatCurrency(values.foodAllowance)],
-            ["Telephone Allowance", formatCurrency(values.telephoneAllowance)],
-            ["Transport Allowance", formatCurrency(values.transportAllowance)],
-          ]} />
-      ) : null}
       <SummarySection
         title="Vendor Billing Information"
         fields={[
@@ -115,15 +117,20 @@ const Summary = () => {
       <SummarySection
         title="HR Details"
         fields={[
-          ["Department", values.department],
-          ["Position", values.position],
-          ["Start Date", values.startDate],
-          ["Qualification", values.qualification],
-          ["Experience", values.experience],
-          ["Current Job", values.currentJob],
-          ["Actual Job", values.actualJob],
-          ["Project", values.project],
-          ["Role", values.role],
+          ["Passport Number", values.passportNumber],
+          ["Passport Issue Date", values.passportIssueDate],
+          ["Passport Expiry Date", values.passportExpiryDate],
+          ["RP/ID Number", values.rpIdNumber],
+          ["RP/ID Issue Date", values.rpIdIssueDate],
+          ["RP/ID Expiry Date", values.rpIdExpiryDate],
+          ["License Number", values.licenseNumber],
+          ["License Expiry Date", values.licenseExpiryDate],
+          ["Medical Card Number", values.medicalCardNumber],
+          ["Medical Card Expiry Date", values.medicalCardExpiryDate],
+          ["Insurance Number", values.insuranceNumber],
+          ["Insurance Expiry Date", values.insuranceExpiryDate],
+          ["Health Card Number", values.healthCardNumber],
+          ["Health Card Expiry Date", values.healthCardExpiryDate],
         ]} />
       <SummarySection
         title="Documents"
@@ -131,6 +138,17 @@ const Summary = () => {
           ["Resume", values.resume?.[0]?.name],
           ["ID Proof", values.idProof?.[0]?.name],
           ["Address Proof", values.addressProof?.[0]?.name],
+          ["Visa Proof", values.visaProof?.[0]?.name],
+        ]} />
+      <SummarySection
+        title="Additional Information"
+        fields={[
+          ["Ticket Duration", values.ticketDuration],
+          ["Annual Leave", values.annualLeave],
+          ["Last Ticket", values.lastTicket],
+          ["Off Day", values.offDay],
+          ["Settlement Date", values.settlementDate],
+          ["Remarks", values.remarks],
         ]} />
     </div>)
   );
