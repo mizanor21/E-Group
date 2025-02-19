@@ -10,6 +10,8 @@ import PaymentInfo from "./PaymentInfo"
 import Summary from "./Summary"
 import ProgressBar from "./ProgressBar"
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline"
+import axios from "axios"
+import toast from "react-hot-toast"
 
 const steps = ["Basic Info", "HR Details", "Documents", "Payment Info", "Summary"]
 
@@ -53,24 +55,14 @@ export default function AddEmployee() {
     console.log(data)
     // Here you would typically send the data to your backend API
     try {
-      const response = await fetch("/api/employees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
+      const response = await axios.post("/api/employees", data);
 
-      if (response.ok) {
-        console.log("Employee data submitted successfully")
-        // Reset form or redirect to a success page
-      } else {
-        console.error("Failed to submit employee data")
-        // Handle error
+      if (response.status === 201) {
+        toast.success("Employees successfully added!");
+        // reset(); // Reset form
       }
     } catch (error) {
-      console.error("Error submitting employee data:", error)
-      // Handle error
+      toast.error(`${error.message}, Please valid info provide and try again.`);
     }
   }
 

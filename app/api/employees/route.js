@@ -10,9 +10,12 @@ export async function GET() {
   return response;
 }
 
+
 export async function POST(req) {
   try {
     const edgeData = await req.json();
+
+    console.log(edgeData)
 
     // Connect to the database
     await connectToDB();
