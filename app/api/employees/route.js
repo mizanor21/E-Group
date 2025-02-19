@@ -15,8 +15,6 @@ export async function POST(req) {
   try {
     const edgeData = await req.json();
 
-    console.log(edgeData)
-
     // Connect to the database
     await connectToDB();
     await Employees.create(edgeData);
