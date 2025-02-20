@@ -2,6 +2,8 @@
 
 import { useForm } from "react-hook-form"
 import { Modal } from "./modal"
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export function InvestmentForm({ onClose }) {
   const {
@@ -13,6 +15,7 @@ export function InvestmentForm({ onClose }) {
     defaultValues: {
       date: "",
       voucherNo: "",
+      investorName: "",
       submissionDate: "",
       mode: "Cash",
       amount: 0,
@@ -24,9 +27,16 @@ export function InvestmentForm({ onClose }) {
   const mode = watch("mode");
   const status = watch("status");
 
-  const onSubmit = (data) => {
-    console.log(data)
-    onClose()
+  const onSubmit = async(data) => {
+    try {
+      const response = await axios.post("/api/investments", data);
+      toast.success("Investment added successfully!");
+      console.log(response.data);
+      onClose();
+    } catch (error) {
+      toast.error("There was an error submitting the form.");
+      console.error("There was an error submitting the form:", error);
+    }
   }
 
   return (

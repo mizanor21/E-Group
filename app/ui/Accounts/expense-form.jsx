@@ -2,6 +2,8 @@
 
 import { useForm } from "react-hook-form";
 import { Modal } from "./modal";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 export function ExpenseForm({ onClose }) {
   const {
@@ -26,9 +28,16 @@ export function ExpenseForm({ onClose }) {
   const mode = watch("mode");
   const status = watch("status");
 
-  const onSubmit = (data) => {
-    console.log(data);
-    onClose();
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post("/api/expenses", data);
+      toast.success("Expense added successfully!");
+      console.log(response.data);
+      onClose();
+    } catch (error) {
+      toast.error("There was an error submitting the form.");
+      console.error("There was an error submitting the form:", error);
+    }
   };
 
   return (

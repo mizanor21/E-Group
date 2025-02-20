@@ -2,6 +2,9 @@
 
 import { useForm } from "react-hook-form"
 import { Modal } from "./modal"
+import axios from "axios";
+import toast from "react-hot-toast";
+// import { toast } from "react-toastify";
 
 export function IncomeForm({ onClose }) {
   const {
@@ -26,9 +29,16 @@ export function IncomeForm({ onClose }) {
   const mode = watch("mode");
   const status = watch("status");
 
-  const onSubmit = (data) => {
-    console.log(data);
-    onClose();
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post("/api/income", data);
+      toast.success("Income added successfully!");
+      console.log(response.data);
+      onClose();
+    } catch (error) {
+      toast.error("There was an error submitting the form.");
+      console.error("There was an error submitting the form:", error);
+    }
   };
 
   return (
