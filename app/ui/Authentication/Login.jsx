@@ -1,72 +1,80 @@
 "use client";
 import Link from "next/link";
-import React from "react";
-import bg from "@/public/assets/technology_bg.jpg";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { FaUser, FaLock } from "react-icons/fa";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (email === "egroup2004@gmail.com" && password === "215969") {
+      router.push("/dashboard");
+    } else {
+      setError("Invalid email or password.");
+    }
+  };
+
   return (
-    <div
-      className="min-h-screen flex items-center justify-center relative"
-      style={{
-        backgroundImage: `url(${bg.src})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {/* Background Overlay */}
-      <div className="absolute inset-0 bg-black/30"></div>
-
-      {/* Glassy Form Container */}
-      <div className="relative z-10 bg-white/10 backdrop-blur-md rounded-lg shadow-xl px-8 py-16 w-full max-w-md">
-        {/* Header */}
-        <h2 className="text-center text-3xl font-bold text-white mb-6">
-          SIGN IN
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
+      <div className="relative z-10 bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl p-10 w-full max-w-md text-white">
+        <h2 className="text-center text-4xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
+          Welcome Back
         </h2>
-
-        {/* /* Form */}
-        <form>
-          <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-medium">
-              Email Address
-            </label>
+        <p className="text-center text-sm text-gray-300 mb-6">
+          Sign in to continue to your dashboard
+        </p>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4 relative">
+            <FaUser className="absolute left-3 top-4 text-gray-400" />
             <input
               type="email"
-              id="email"
-              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D9BC65] text-white transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
               placeholder="Registered Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="mb-8">
-            <label htmlFor="password" className="block text-sm font-medium">
-              Password
-            </label>
+          <div className="mb-6 relative">
+            <FaLock className="absolute left-3 top-4 text-gray-400" />
             <input
               type="password"
-              id="password"
-              className="mt-2 w-full px-4 py-3 bg-transparent backdrop-blur-lg border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D9BC65] text-white transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-transparent border border-gray-500 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
               placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <Link
-            href="/dashboard"
-            className="w-full inline-block text-center font-semibold py-3 rounded-lg hover:shadow-lg transition-all duration-300 focus:ring-2 focus:ring-offset-2 hover:bg-[#D9BC65] hover:text-black"
-            style={{
-              background:
-                "linear-gradient(90deg, #D9BC65 10%, #E0C264 30%, #B6953A 70%, #DFBA60 100%)",
-              color: "#000",
-            }}
+          {error && <div className="mb-4 text-red-400 text-center">{error}</div>}
+          <button
+            type="submit"
+            className="w-full py-3 rounded-lg font-semibold bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:scale-105 transition-transform"
           >
             Login
-          </Link>
+          </button>
         </form>
-
-        {/* /* Footer */}
-        <p className="text-sm text-gray-400 mt-6 text-center">
-          Don’t have an account?{" "}
-          <Link href="#" className="text-[#D9BC65] hover:underline">
-            Register
-          </Link>
-        </p>
+        
       </div>
     </div>
   );
