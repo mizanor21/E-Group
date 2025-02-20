@@ -1,9 +1,11 @@
-import AccountsDashboard from "@/app/ui/Accounts/accounts-dashboard"
+import Finance from "@/app/ui/Accounts/Finance/Finance"
+
 
 
 const Page = ({}) => {
   return <div>
-    <AccountsDashboard />
+    <Finance/>
+    {/* <AccountsDashboard /> */}
   </div>
 }
 

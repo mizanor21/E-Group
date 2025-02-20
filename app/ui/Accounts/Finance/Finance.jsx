@@ -5,7 +5,7 @@ import { IncomeForm } from "./income-form"
 import { ExpenseForm } from "./expense-form"
 import { InvestmentForm } from "./investment-form"
 
-const AccountsDashboard=() =>{
+const Finance=() =>{
   const [activeDialog, setActiveDialog] = useState(null)
 
   return (
@@ -41,4 +41,4 @@ const AccountsDashboard=() =>{
   )
 }
 
-export default AccountsDashboard
+export default Finance
