@@ -1,4 +1,4 @@
-import Employee from "@/app/ui/Employee/Employee";
+import Employee from "@/app/ui/Employees/Employee";
 import React from "react";
 
 const page = () => {

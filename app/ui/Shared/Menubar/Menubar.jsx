@@ -20,7 +20,7 @@ const Menubar = () => {
     },
     {
       title: "Employee",
-      path: "/dashboard/employee",
+      path: "/dashboard/employees",
       icon: <MdOutlinePeople />,
     },
     {

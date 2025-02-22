@@ -156,9 +156,9 @@ const EmployeeTable = ({ employees }) => {
                     <td className="py-2 px-4">{employee.role}</td>
                     <td className="py-2 px-4">{employee.department}</td>
                     <td className="py-2 px-4">
-                      <button className="text-blue-500 hover:underline">
+                      <Link href={`/dashboard/employees/${employee._id}`} className="text-blue-500 hover:underline">
                         View
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))
