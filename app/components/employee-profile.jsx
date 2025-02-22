@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { updateEmployee } from "../actions/employee"
+import { IoIosArrowBack } from "react-icons/io";
+import Link from "next/link"
+
 
 const formSchema = z.object({
   firstName: z.string().min(2),
@@ -94,11 +97,12 @@ export function EmployeeProfileForm({ employee, id }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10 space-y-8"
+        className=" p-6 bg-white shadow-lg rounded-lg mt-10 space-y-8"
       >
         {/* Form fields go here */}
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">Employee Details</h2>
+
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Link href={'/dashboard/employees'}><IoIosArrowBack/></Link> Employee Details</h2>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Updating..." : "Update Profile"}
           </Button>
