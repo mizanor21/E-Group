@@ -3,7 +3,7 @@
 export async function updateEmployee(id, data) {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/${id}`, {
-      method: "PUT",
+      method: "PATCH",
       body: JSON.stringify(Object.fromEntries(data)),
       headers: {
         "Content-Type": "application/json",

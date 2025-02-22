@@ -37,3 +37,16 @@ export const useSalaryData = () => {
   const { data, error } = useSWR(`${API_URL}/api/salary`, fetcher);
   return { data, error, isLoading: !data && !error };
 };
+
+export const useIncomeData = () => {
+  const { data, error } = useSWR(`${API_URL}/api/income`, fetcher);
+  return { data, error, isLoading: !data && !error };
+};
+export const useExpensesData = () => {
+  const { data, error } = useSWR(`${API_URL}/api/expenses`, fetcher);
+  return { data, error, isLoading: !data && !error };
+};
+export const useInvestmentData = () => {
+  const { data, error } = useSWR(`${API_URL}/api/investments`, fetcher);
+  return { data, error, isLoading: !data && !error };
+};
