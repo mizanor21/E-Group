@@ -20,7 +20,7 @@ export function InvestmentForm({ onClose }) {
       mode: "Cash",
       amount: 0,
       issueDate: "",
-      status: "Pending",
+      status: "Cleared",
     },
   })
 

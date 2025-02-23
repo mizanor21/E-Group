@@ -22,7 +22,7 @@ export function IncomeForm({ onClose }) {
       customerName: "",
       issueDate: "",
       dueDate: "",
-      status: "Pending",
+      status: "Cleared",
     },
   });
 

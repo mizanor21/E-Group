@@ -21,7 +21,7 @@ export function ExpenseForm({ onClose }) {
       customerName: "",
       issueDate: "",
       dueDate: "",
-      status: "Pending",
+      status: "Cleared",
     },
   });
 
