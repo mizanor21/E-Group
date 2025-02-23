@@ -8,6 +8,7 @@ import Finance from "@/app/ui/Accounts/Finance/Finance"
 import AnnualPayrollSummary from "@/app/ui/Payroll/AnnualPayrollSummary"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import TransactionGraph from "@/app/ui/Accounts/AccountsDash/Transaction/transaction-graph"
 
 const Page = () => {
   const { data: income } = useIncomeData()
@@ -98,6 +99,47 @@ const Page = () => {
   const netProfit = calculateNetProfit()
   const netProfitColor = netProfit >= 0 ? "bg-green-500" : "bg-red-500"
 
+  // Prepare data for the transaction graph
+  const prepareGraphData = () => {
+    const graphData = months.map((month, index) => {
+      const monthIncome =
+        income
+          ?.filter((item) => {
+            const itemDate = new Date(item.date)
+            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+          })
+          .reduce((sum, item) => sum + item.amount, 0) || 0
+
+      const monthExpenses =
+        expenses
+          ?.filter((item) => {
+            const itemDate = new Date(item.date)
+            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+          })
+          .reduce((sum, item) => sum + item.amount, 0) || 0
+
+      const monthSalary =
+        salaryData
+          ?.flatMap((employee) =>
+            employee.salaries.filter((salary) => {
+              const [year, salaryMonth] = salary.month.split("-")
+              return year === selectedYear && Number(salaryMonth) - 1 === index
+            }),
+          )
+          .reduce((sum, salary) => sum + salary.netSalary, 0) || 0
+
+      return {
+        name: month,
+        income: monthIncome,
+        expenses: monthExpenses + monthSalary,
+      }
+    })
+
+    return graphData
+  }
+
+  const graphData = prepareGraphData()
+
   return (
     <div>
       <Finance />
@@ -148,7 +190,7 @@ const Page = () => {
             </CardContent>
           </Card>
         </div>
-        <AnnualPayrollSummary />
+        <TransactionGraph data={graphData} />
       </div>
     </div>
   )
