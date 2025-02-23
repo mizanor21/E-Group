@@ -89,10 +89,10 @@ const Page = () => {
     const salaryTotal = filteredSalary?.reduce((sum, salary) => sum + salary.netSalary, 0) || 0
     return expensesTotal + salaryTotal
   }
+  const totalIncome = calculateTotalIncome()
+  const totalExpenses = calculateTotalExpenses()
 
   const calculateNetProfit = () => {
-    const totalIncome = calculateTotalIncome()
-    const totalExpenses = calculateTotalExpenses()
     return totalIncome - totalExpenses
   }
 
@@ -172,13 +172,13 @@ const Page = () => {
       <div className="grid grid-cols-2 gap-5">
         <div className="grid grid-cols-2 gap-5">
           <div className="">
-            <PreMonthIncome data={filteredIncome} />
+            <PreMonthIncome data={totalIncome} />
           </div>
           <div className="">
             <Investment data={filteredInvestment} />
           </div>
           <div className="">
-            <Expance data={filteredExpenses} salaryData={filteredSalary} />
+            <Expance data={totalExpenses} salaryData={filteredSalary} />
           </div>
           <Card className={`rounded-2xl p-4 ${netProfitColor} flex items-center justify-center text-center`}>
             <CardContent>
