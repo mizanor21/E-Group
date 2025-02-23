@@ -15,7 +15,7 @@ const Finance=() =>{
         <div className="space-x-2">
           <button
             onClick={() => setActiveDialog("income")}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
           >
             Add Income
           </button>
@@ -27,7 +27,7 @@ const Finance=() =>{
           </button>
           <button
             onClick={() => setActiveDialog("investment")}
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+            className="bg-[#b863e5] hover:bg-[#A601F9] text-white font-bold py-2 px-4 rounded"
           >
             Add Investment
           </button>

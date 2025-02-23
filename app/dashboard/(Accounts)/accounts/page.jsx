@@ -5,7 +5,6 @@ import Expance from "@/app/ui/Accounts/AccountsDash/Expance/Expance"
 import Investment from "@/app/ui/Accounts/AccountsDash/Investment/Investment"
 import PreMonthIncome from "@/app/ui/Accounts/AccountsDash/PreMonthIncome/PreMonthIncome"
 import Finance from "@/app/ui/Accounts/Finance/Finance"
-import AnnualPayrollSummary from "@/app/ui/Payroll/AnnualPayrollSummary"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import TransactionGraph from "@/app/ui/Accounts/AccountsDash/Transaction/transaction-graph"
@@ -110,6 +109,14 @@ const Page = () => {
           })
           .reduce((sum, item) => sum + item.amount, 0) || 0
 
+      const monthInvestment =
+      investment
+            ?.filter((item) => {
+              const itemDate = new Date(item.date)
+              return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+            })
+            .reduce((sum, item) => sum + item.amount, 0) || 0
+
       const monthExpenses =
         expenses
           ?.filter((item) => {
@@ -130,7 +137,7 @@ const Page = () => {
 
       return {
         name: month,
-        income: monthIncome,
+        income: monthIncome + monthInvestment,
         expenses: monthExpenses + monthSalary,
       }
     })
@@ -185,7 +192,9 @@ const Page = () => {
               <h3 className="text-lg font-semibold text-white">Net Profit</h3>
               <p className="font-bold text-white mt-2">
                 <span className="text-4xl">${Math.abs(netProfit).toFixed(2)}</span>
-                {netProfit < 0 && " (Loss)"}
+                <i className="text-sm">
+                {netProfit < 0 && " Loss"}
+                </i>
               </p>
             </CardContent>
           </Card>

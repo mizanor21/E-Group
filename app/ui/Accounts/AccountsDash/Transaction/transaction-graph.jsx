@@ -7,10 +7,10 @@ const TransactionGraph = ({ data }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Year-wise Transaction Graph</CardTitle>
+        <CardTitle>Transaction Graph</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={300}>
           <LineChart
             data={data}
             margin={{
@@ -25,8 +25,8 @@ const TransactionGraph = ({ data }) => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="income" stroke="#8884d8" activeDot={{ r: 8 }} />
-            <Line type="monotone" dataKey="expenses" stroke="#82ca9d" />
+            <Line type="monotone" dataKey="income" stroke="#37BD7F" activeDot={{ r: 8 }} />
+            <Line type="monotone" dataKey="expenses" stroke="#EF4444" />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
