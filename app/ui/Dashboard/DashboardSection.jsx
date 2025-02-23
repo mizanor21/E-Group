@@ -205,7 +205,7 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
       </div>
 
       {/* Meetings */}
-      <div className="bg-white p-6 rounded-lg shadow-lg">
+      {/* <div className="bg-white p-6 rounded-lg shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold text-gray-800">Meetings</h3>
           <button className="bg-gray-100 text-sm px-4 py-2 rounded-lg shadow-sm hover:bg-gray-200">Create New</button>
@@ -224,7 +224,7 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

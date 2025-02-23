@@ -17,19 +17,13 @@ const Nav = () => {
   return (
     <div className="navbar flex justify-between px-5">
       <div className="flex flex-col items-start">
-        <h3 className="text-xl font-bold">Welcome, Mr. Kahafil Ora </h3>
+        <h3 className="text-xl font-bold">Welcome, Mr. Shazzad Hossion </h3>
         <small className="text-sm">
           Today&apos;s {format(currentTime, "EEEE, MMMM d, yyyy")}
         </small>
       </div>
       <div className="flex">
         <div className="dropdown dropdown-end">
-          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-            <div className="indicator">
-              <IoMdNotifications className="text-2xl mt-1" />
-              <span className="badge badge-sm indicator-item">8</span>
-            </div>
-          </div>
           <div
             tabIndex={0}
             className="card card-compact dropdown-content bg-base-100 z-[1] mt-3 w-52 shadow"
