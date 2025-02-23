@@ -16,7 +16,6 @@ const investmentSchema = new mongoose.Schema(
     },
     submissionDate: {
       type: Date,
-      required: true,
     },
     mode: {
       type: String,

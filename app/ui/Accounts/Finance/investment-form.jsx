@@ -13,7 +13,7 @@ export function InvestmentForm({ onClose }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      date: "",
+      date: new Date().toISOString().split("T")[0],
       voucherNo: "",
       investorName: "",
       submissionDate: "",

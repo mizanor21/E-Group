@@ -12,7 +12,6 @@ const expenseSchema = new mongoose.Schema(
     },
     submissionDate: {
       type: Date,
-      required: true,
     },
     mode: {
       type: String,
@@ -29,11 +28,9 @@ const expenseSchema = new mongoose.Schema(
     },
     issueDate: {
       type: Date,
-      required: true,
     },
     dueDate: {
       type: Date,
-      required: true,
     },
     status: {
       type: String,

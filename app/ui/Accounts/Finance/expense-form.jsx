@@ -13,7 +13,7 @@ export function ExpenseForm({ onClose }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      date: "",
+      date: new Date().toISOString().split("T")[0],
       voucherNo: "",
       submissionDate: "",
       mode: "Cash",
@@ -57,7 +57,7 @@ export function ExpenseForm({ onClose }) {
               <label className="block text-gray-600 text-sm font-medium">{label}</label>
               <input
                 type={type}
-                {...register(name, { required: name !== "voucherNo" })}
+                {...register(name)}
                 placeholder={placeholder}
                 className="w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"
               />
@@ -109,7 +109,7 @@ export function ExpenseForm({ onClose }) {
           type="submit"
           className="w-full bg-green-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-green-700 transition"
         >
-          Save All Changes
+          Submit
         </button>
       </form>
     </Modal>

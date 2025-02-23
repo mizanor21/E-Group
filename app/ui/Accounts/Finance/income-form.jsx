@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { Modal } from "./modal"
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Router } from "next/router";
 // import { toast } from "react-toastify";
 
 export function IncomeForm({ onClose }) {
@@ -14,7 +15,7 @@ export function IncomeForm({ onClose }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      date: "",
+      date: new Date().toISOString().split("T")[0],
       voucherNo: "",
       submissionDate: "",
       mode: "Cash",
@@ -33,7 +34,7 @@ export function IncomeForm({ onClose }) {
     try {
       const response = await axios.post("/api/income", data);
       toast.success("Income added successfully!");
-      console.log(response.data);
+
       onClose();
     } catch (error) {
       toast.error("There was an error submitting the form.");
@@ -113,7 +114,7 @@ export function IncomeForm({ onClose }) {
 
         {/* Submit Button */}
         <button type="submit" className="w-full bg-green-600 text-white py-2 rounded-lg text-lg font-semibold hover:bg-green-700 transition">
-          Save All Changes
+          Submit
         </button>
       </form>
     </Modal>

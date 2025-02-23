@@ -209,9 +209,9 @@ const Page = () => {
       </div>
       <div className="grid grid-cols-1 gap-5 py-5">
 
-      <IncomeOverview data={income} />
-      <ExpensesOverview data={expenses} />
-      <InvestmentOverview data={investment} />
+      <IncomeOverview data={filteredIncome} />
+      <ExpensesOverview data={filteredExpenses} />
+      <InvestmentOverview data={filteredInvestment} />
       </div>
     </div>
   )
