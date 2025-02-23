@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useExpensesData, useIncomeData, useInvestmentData } from "@/app/data/DataFetch"
+import { useExpensesData, useIncomeData, useInvestmentData, useSalaryData } from "@/app/data/DataFetch"
 import Expance from "@/app/ui/Accounts/AccountsDash/Expance/Expance"
 import Investment from "@/app/ui/Accounts/AccountsDash/Investment/Investment"
 import PreMonthIncome from "@/app/ui/Accounts/AccountsDash/PreMonthIncome/PreMonthIncome"
@@ -13,6 +13,7 @@ const Page = () => {
   const { data: income } = useIncomeData()
   const { data: expenses } = useExpensesData()
   const { data: investment } = useInvestmentData()
+  const { data: salaryData } = useSalaryData()
 
   const [selectedYear, setSelectedYear] = useState("")
   const [selectedMonth, setSelectedMonth] = useState("")
@@ -22,6 +23,8 @@ const Page = () => {
       ...(income?.map((item) => new Date(item.date).getFullYear()) || []),
       ...(expenses?.map((item) => new Date(item.date).getFullYear()) || []),
       ...(investment?.map((item) => new Date(item.date).getFullYear()) || []),
+      ...(salaryData?.flatMap((employee) => employee.salaries.map((salary) => new Date(salary.month).getFullYear())) ||
+        []),
     ]),
   ).sort((a, b) => b - a)
 
@@ -60,9 +63,19 @@ const Page = () => {
     })
   }
 
+  const filterSalaryData = (data) => {
+    return data?.flatMap((employee) =>
+      employee.salaries.filter((salary) => {
+        const [year, month] = salary.month.split("-")
+        return year === selectedYear && Number(month) - 1 === months.indexOf(selectedMonth)
+      }),
+    )
+  }
+
   const filteredIncome = filterData(income)
   const filteredExpenses = filterData(expenses)
   const filteredInvestment = filterData(investment)
+  const filteredSalary = filterSalaryData(salaryData)
 
   const calculateTotalIncome = () => {
     const initialIncome = filteredIncome?.reduce((sum, item) => sum + item.amount, 0) || 0
@@ -70,9 +83,15 @@ const Page = () => {
     return initialIncome + investmentIncome
   }
 
+  const calculateTotalExpenses = () => {
+    const expensesTotal = filteredExpenses?.reduce((sum, item) => sum + item.amount, 0) || 0
+    const salaryTotal = filteredSalary?.reduce((sum, salary) => sum + salary.netSalary, 0) || 0
+    return expensesTotal + salaryTotal
+  }
+
   const calculateNetProfit = () => {
     const totalIncome = calculateTotalIncome()
-    const totalExpenses = filteredExpenses?.reduce((sum, item) => sum + item.amount, 0) || 0
+    const totalExpenses = calculateTotalExpenses()
     return totalIncome - totalExpenses
   }
 
@@ -117,21 +136,17 @@ const Page = () => {
             <Investment data={filteredInvestment} />
           </div>
           <div className="">
-            <Expance data={filteredExpenses} />
+            <Expance data={filteredExpenses} salaryData={filteredSalary} />
           </div>
           <Card className={`rounded-2xl p-4 ${netProfitColor} flex items-center justify-center text-center`}>
             <CardContent>
               <h3 className="text-lg font-semibold text-white">Net Profit</h3>
-              <p className=" font-bold text-white mt-2">
-                <span className="text-4xl">
-
-                ${Math.abs(netProfit).toFixed(2)}
-                </span>
+              <p className="font-bold text-white mt-2">
+                <span className="text-4xl">${Math.abs(netProfit).toFixed(2)}</span>
                 {netProfit < 0 && " (Loss)"}
               </p>
             </CardContent>
           </Card>
-          
         </div>
         <AnnualPayrollSummary />
       </div>
