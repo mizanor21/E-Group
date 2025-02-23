@@ -11,6 +11,9 @@ import TransactionGraph from "@/app/ui/Accounts/AccountsDash/Transaction/transac
 import IncomeOverview from "@/app/ui/Accounts/AccountsDash/PreMonthIncome/income-overview"
 import ExpensesOverview from "@/app/ui/Accounts/AccountsDash/Expance/expenses-overview"
 import InvestmentOverview from "@/app/ui/Accounts/AccountsDash/Investment/investment-overview"
+// import IncomeOverview from "@/app/ui/Accounts/AccountsDash/PreMonthIncome/income-overview"
+// import ExpensesOverview from "@/app/ui/Accounts/AccountsDash/Expance/expenses-overview"
+// import InvestmentOverview from "@/app/ui/Accounts/AccountsDash/Investment/investment-overview"
 
 const Page = () => {
   const { data: income } = useIncomeData()
