@@ -7,7 +7,7 @@ const TransactionGraph = ({ data }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Transaction Graph</CardTitle>
+        <CardTitle>Financial Statement</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
