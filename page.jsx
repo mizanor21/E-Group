@@ -5,12 +5,10 @@ import Expance from "@/app/ui/Accounts/AccountsDash/Expance/Expance"
 import Investment from "@/app/ui/Accounts/AccountsDash/Investment/Investment"
 import PreMonthIncome from "@/app/ui/Accounts/AccountsDash/PreMonthIncome/PreMonthIncome"
 import Finance from "@/app/ui/Accounts/Finance/Finance"
+import AnnualPayrollSummary from "@/app/ui/Payroll/AnnualPayrollSummary"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import TransactionGraph from "@/app/ui/Accounts/AccountsDash/Transaction/transaction-graph"
-import IncomeOverview from "@/app/ui/Accounts/AccountsDash/PreMonthIncome/income-overview"
-import ExpensesOverview from "@/app/ui/Accounts/AccountsDash/Expance/expenses-overview"
-import InvestmentOverview from "@/app/ui/Accounts/AccountsDash/Investment/investment-overview"
+import TransactionGraph from "@/app/ui/Accounts/AccountsDash/TransactionGraph/TransactionGraph"
 
 const Page = () => {
   const { data: income } = useIncomeData()
@@ -21,15 +19,15 @@ const Page = () => {
   const [selectedYear, setSelectedYear] = useState("")
   const [selectedMonth, setSelectedMonth] = useState("")
 
-  const years = Array.from(
-    new Set([
-      ...(income?.map((item) => new Date(item.date).getFullYear()) || []),
-      ...(expenses?.map((item) => new Date(item.date).getFullYear()) || []),
-      ...(investment?.map((item) => new Date(item.date).getFullYear()) || []),
-      ...(salaryData?.flatMap((employee) => employee.salaries.map((salary) => new Date(salary.month).getFullYear())) ||
-        []),
-    ]),
-  ).sort((a, b) => b - a)
+  const years = Array.from(new Set([
+    ...(income?.map((item) => new Date(item.date).getFullYear()) || []),
+    ...(expenses?.map((item) => new Date(item.date).getFullYear()) || []),
+    ...(investment?.map((item) => new Date(item.date).getFullYear()) || []),
+    ...(salaryData?.flatMap(
+      (employee) => employee.salaries.map((salary) => new Date(salary.month).getFullYear())
+    ) ||
+      []),
+  ])).sort((a, b) => b - a)
 
   const months = [
     "January",
@@ -59,20 +57,16 @@ const Page = () => {
   const filterData = (data) => {
     return data?.filter((item) => {
       const itemDate = new Date(item.date)
-      return (
-        itemDate.getFullYear() === Number.parseInt(selectedYear) &&
-        itemDate.getMonth() === months.indexOf(selectedMonth)
-      )
-    })
+      return (itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === months.indexOf(selectedMonth));
+    });
   }
 
   const filterSalaryData = (data) => {
     return data?.flatMap((employee) =>
       employee.salaries.filter((salary) => {
         const [year, month] = salary.month.split("-")
-        return year === selectedYear && Number(month) - 1 === months.indexOf(selectedMonth)
-      }),
-    )
+        return year === selectedYear && Number(month) - 1 === months.indexOf(selectedMonth);
+      }));
   }
 
   const filteredIncome = filterData(income)
@@ -91,10 +85,10 @@ const Page = () => {
     const salaryTotal = filteredSalary?.reduce((sum, salary) => sum + salary.netSalary, 0) || 0
     return expensesTotal + salaryTotal
   }
-  const totalIncome = calculateTotalIncome()
-  const totalExpenses = calculateTotalExpenses()
 
   const calculateNetProfit = () => {
+    const totalIncome = calculateTotalIncome()
+    const totalExpenses = calculateTotalExpenses()
     return totalIncome - totalExpenses
   }
 
@@ -108,23 +102,15 @@ const Page = () => {
         income
           ?.filter((item) => {
             const itemDate = new Date(item.date)
-            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index;
           })
           .reduce((sum, item) => sum + item.amount, 0) || 0
-
-      const monthInvestment =
-      investment
-            ?.filter((item) => {
-              const itemDate = new Date(item.date)
-              return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
-            })
-            .reduce((sum, item) => sum + item.amount, 0) || 0
 
       const monthExpenses =
         expenses
           ?.filter((item) => {
             const itemDate = new Date(item.date)
-            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index;
           })
           .reduce((sum, item) => sum + item.amount, 0) || 0
 
@@ -133,14 +119,13 @@ const Page = () => {
           ?.flatMap((employee) =>
             employee.salaries.filter((salary) => {
               const [year, salaryMonth] = salary.month.split("-")
-              return year === selectedYear && Number(salaryMonth) - 1 === index
-            }),
-          )
+              return year === selectedYear && Number(salaryMonth) - 1 === index;
+            }))
           .reduce((sum, salary) => sum + salary.netSalary, 0) || 0
 
       return {
         name: month,
-        income: monthIncome + monthInvestment,
+        income: monthIncome,
         expenses: monthExpenses + monthSalary,
       }
     })
@@ -151,7 +136,7 @@ const Page = () => {
   const graphData = prepareGraphData()
 
   return (
-    <div>
+    (<div>
       <Finance />
       <div className="mb-4 flex justify-end space-x-4">
         <Select onValueChange={setSelectedYear} value={selectedYear}>
@@ -182,36 +167,32 @@ const Page = () => {
       <div className="grid grid-cols-2 gap-5">
         <div className="grid grid-cols-2 gap-5">
           <div className="">
-            <PreMonthIncome data={totalIncome} />
+            <PreMonthIncome data={filteredIncome} />
           </div>
           <div className="">
             <Investment data={filteredInvestment} />
           </div>
           <div className="">
-            <Expance data={totalExpenses} salaryData={filteredSalary} />
+            <Expance data={filteredExpenses} salaryData={filteredSalary} />
           </div>
-          <Card className={`rounded-2xl p-4 ${netProfitColor} flex items-center justify-center text-center`}>
+          <Card
+            className={`rounded-2xl p-4 ${netProfitColor} flex items-center justify-center text-center`}>
             <CardContent>
               <h3 className="text-lg font-semibold text-white">Net Profit</h3>
               <p className="font-bold text-white mt-2">
                 <span className="text-4xl">${Math.abs(netProfit).toFixed(2)}</span>
-                <i className="text-sm">
-                {netProfit < 0 && " Loss"}
-                </i>
+                {netProfit < 0 && "(Loss)"}
               </p>
             </CardContent>
           </Card>
         </div>
+        <AnnualPayrollSummary />
+      </div>
+      <div className="mt-8">
         <TransactionGraph data={graphData} />
       </div>
-      <div className="grid grid-cols-1 gap-5 py-5">
-
-      <IncomeOverview data={income} />
-      <ExpensesOverview data={expenses} />
-      <InvestmentOverview data={investment} />
-      </div>
-    </div>
-  )
+    </div>)
+  );
 }
 
 export default Page
