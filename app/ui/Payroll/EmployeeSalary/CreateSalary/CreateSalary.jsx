@@ -29,12 +29,12 @@ const calculateSalaryByType = (employeeType, data, workingDays, numberOfLeave = 
   switch (employeeType.toLowerCase()) {
     case "hourly":
       // Calculate hourly salary based on actual working days and hours
-      baseSalary = hourlyRate * standardWorkingHours * actualWorkingDays
+      baseSalary = hourlyRate * workingDays
       break
 
     case "daily":
       // Calculate daily salary based on actual working days
-      baseSalary = dailyRate * actualWorkingDays
+      baseSalary = dailyRate * workingDays
       break
 
     case "monthly":
@@ -88,67 +88,68 @@ const CreateSalary = ({ id }) => {
   const btnStyle =
     "bg-sky-600 text-white px-10 py-3 rounded-md text-center hover:bg-white hover:border hover:border-sky-600 hover:text-sky-600 transition-all duration-500 mt-6"
 
-  const onSubmit = useCallback(
-    (formData) => {
-      const workingDays = Number.parseInt(formData.workingDays) || 0
-      const numberOfLeave = Number.parseInt(formData.numberOfLeave) || 0
-
-      // Calculate base salary based on employee type and actual working days
-      const { baseSalary, totalAllowances, totalCommission, grossSalary, actualWorkingDays } = calculateSalaryByType(
-        employeeData.employeeType,
-        employeeData,
-        workingDays,
-        numberOfLeave,
-      )
-
-      // Calculate overtime
-      const normalOverTime = Number.parseFloat(formData.normalOverTime) || 0
-      const holidayOverTime = Number.parseFloat(formData.holidayOverTime) || 0
-
-      // Calculate OT rates based on employee type
-      let normalOTRate, holidayOTRate
-
-      if (employeeData.employeeType.toLowerCase() === "hourly") {
-        normalOTRate = employeeData.hourlyRate * 1.25 // 1.25x for normal OT
-        holidayOTRate = employeeData.hourlyRate * 1.5 // 1.5x for holiday OT
-      } else {
-        // For daily and monthly employees, calculate OT rate based on their daily rate
-        const dailyRate = employeeData.dailyRate || employeeData.basicPay / actualWorkingDays
-        const hourlyRate = dailyRate / 8
-        normalOTRate = hourlyRate * 1.25
-        holidayOTRate = hourlyRate * 1.5
-      }
-
-      const normalOTEarning = normalOverTime * normalOTRate
-      const holidayOTEarning = holidayOverTime * holidayOTRate
-
-      // Calculate deductions
-      const leaveDeduction = 0 // We don't need separate leave deduction as it's handled in base salary
-      const otherDeductions = ["dedFines", "dedDoc", "dedOthers"].reduce(
-        (sum, key) => sum + (Number.parseFloat(formData[key]) || 0),
-        0,
-      )
-
-      const totalDeductions = otherDeductions // Only include other deductions
-
-      // Calculate other earnings
-      const otherEarnings =
-        (Number.parseFloat(formData.arrearPayments) || 0) - (Number.parseFloat(formData.advRecovery) || 0)
-
-      // Calculate net salary
-      const netSalary = grossSalary + normalOTEarning + holidayOTEarning + otherEarnings - totalDeductions
-
-      // Update form values
-      setValue("baseSalary", baseSalary.toFixed(2))
-      setValue("normalOverTimeEarning", normalOTEarning.toFixed(2))
-      setValue("holidayOverTimeEarning", holidayOTEarning.toFixed(2))
-      setValue("allowanceEarning", totalAllowances.toFixed(2))
-      setValue("deduction", totalDeductions.toFixed(2))
-      setValue("otherEarning", otherEarnings.toFixed(2))
-      setValue("netSalary", netSalary.toFixed(2))
-    },
-    [employeeData, setValue],
-  )
+    const onSubmit = useCallback(
+      (formData) => {
+        const workingDays = Number.parseInt(formData.workingDays) || 0
+        const numberOfLeave = Number.parseInt(formData.numberOfLeave) || 0
+    
+        // Calculate base salary based on employee type and actual working days
+        const { baseSalary, totalAllowances, totalCommission, grossSalary, actualWorkingDays } = calculateSalaryByType(
+          employeeData.employeeType,
+          employeeData,
+          workingDays,
+          numberOfLeave,
+        )
+    
+        // Calculate overtime
+        const normalOverTime = Number.parseFloat(formData.normalOverTime) || 0
+        const holidayOverTime = Number.parseFloat(formData.holidayOverTime) || 0
+    
+        // Calculate OT rates based on employee type
+        let normalOTRate, holidayOTRate
+    
+        if (employeeData.employeeType.toLowerCase() === "hourly") {
+          normalOTRate = employeeData.hourlyRate * 1.25 // 1.25x for normal OT
+          holidayOTRate = employeeData.hourlyRate * 1.5 // 1.5x for holiday OT
+        } else {
+          // For daily and monthly employees, calculate OT rate based on their daily rate
+          const dailyRate = employeeData.dailyRate || employeeData.basicPay / workingDays
+          const hourlyRate = dailyRate / 10
+          normalOTRate = hourlyRate * 1.25
+          holidayOTRate = hourlyRate * 1.5
+        }
+    
+        const normalOTEarning = normalOverTime * normalOTRate
+        const holidayOTEarning = holidayOverTime * holidayOTRate
+    
+        // Calculate deductions
+        const dailyRate = employeeData.dailyRate || employeeData.basicPay / workingDays
+        const leaveDeduction = dailyRate * numberOfLeave // We don't need separate leave deduction as it's handled in base salary
+        const otherDeductions = ["dedFines", "dedDoc", "dedOthers"].reduce(
+          (sum, key) => sum + (Number.parseFloat(formData[key]) || 0),
+          0,
+        )
+    
+        const totalDeductions = leaveDeduction + otherDeductions // Only include other deductions
+    
+        // Calculate other earnings
+        const otherEarnings =
+          (Number.parseFloat(formData.arrearPayments) || 0) - (Number.parseFloat(formData.advRecovery) || 0)
+    
+        // Calculate net salary
+        const netSalary = grossSalary + normalOTEarning + holidayOTEarning + otherEarnings - totalDeductions
+    
+        // Update form values
+        setValue("baseSalary", baseSalary.toFixed(2))
+        setValue("normalOverTimeEarning", normalOTEarning.toFixed(2))
+        setValue("holidayOverTimeEarning", holidayOTEarning.toFixed(2))
+        setValue("allowanceEarning", totalAllowances.toFixed(2))
+        setValue("deduction", totalDeductions.toFixed(2))
+        setValue("otherEarning", otherEarnings.toFixed(2))
+        setValue("netSalary", netSalary.toFixed(2))
+      },
+      [employeeData, setValue],
+    )
 
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
@@ -402,7 +403,6 @@ const CreateSalary = ({ id }) => {
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 mt-4">
               <input {...register("advRecovery")} type="text" placeholder="Advance Recovery" className={inputStyle} />
               <input {...register("arrearPayments")} type="text" placeholder="Arrear Payments" className={inputStyle} />
-              <input {...register("currentBalance")} type="text" placeholder="Current Balance" className={inputStyle} />
             </form>
             <h4 className="font-bold text-center text-2xl mt-4">Other Earning</h4>
             <input
