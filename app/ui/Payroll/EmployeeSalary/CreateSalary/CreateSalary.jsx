@@ -373,12 +373,14 @@ const CreateSalary = ({ id }) => {
           <h3 className="text-lg font-semibold">Deductions</h3>
           <div className="border rounded-xl border-rose-500 p-5 shadow-sm">
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 mt-4">
-              <input
-                {...register("numberOfLeave")}
-                type="number"
-                placeholder="Number of Leave Days"
-                className={inputStyle}
-              />
+            {employeeData.employeeType.toLowerCase() !== "hourly" && employeeData.employeeType.toLowerCase() !== "daily" && (
+      <input
+        {...register("numberOfLeave")}
+        type="number"
+        placeholder="Number of Leave Days"
+        className={inputStyle}
+      />
+    )}
               <input {...register("dedFines")} type="text" placeholder="Ded-Fines" className={inputStyle} />
               <input {...register("dedDoc")} type="text" placeholder="Ded-Doc" className={inputStyle} />
               <input {...register("dedOthers")} type="text" placeholder="Ded-Others" className={inputStyle} />
