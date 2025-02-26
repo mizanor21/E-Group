@@ -264,7 +264,13 @@ const CreateSalary = ({ id }) => {
 
       {/* Working Days Section */}
       <div className="mb-6">
-        <h4 className="text-lg font-semibold">Working Days</h4>
+        <h4 className="text-lg font-semibold">
+          {
+            employeeData?.employeeType?.toLowerCase() === "monthly" || employeeData?.employeeType?.toLowerCase() === "daily"
+              ? "Total Days (Month)"
+              : "Total Hours"
+          }
+         </h4>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-start gap-4 border rounded-xl p-5">
           <input
             {...register("workingDays", {
