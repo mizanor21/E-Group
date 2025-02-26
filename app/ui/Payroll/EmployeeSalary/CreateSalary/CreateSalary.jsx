@@ -26,7 +26,7 @@ const calculateSalaryByType = (employeeType, data, workingDays, numberOfLeave = 
   // Calculate actual working days after deducting leaves
   const actualWorkingDays = Math.max(0, workingDays - numberOfLeave)
 
-  switch (employeeType.toLowerCase()) {
+  switch (employeeType?.toLowerCase()) {
     case "hourly":
       // Calculate hourly salary based on actual working days and hours
       baseSalary = hourlyRate * workingDays
@@ -108,7 +108,7 @@ const CreateSalary = ({ id }) => {
         // Calculate OT rates based on employee type
         let normalOTRate, holidayOTRate
     
-        if (employeeData.employeeType.toLowerCase() === "hourly") {
+        if (employeeData.employeeType?.toLowerCase() === "hourly") {
           normalOTRate = employeeData.hourlyRate * 1.25 // 1.25x for normal OT
           holidayOTRate = employeeData.hourlyRate * 1.5 // 1.5x for holiday OT
         } else {
@@ -373,7 +373,7 @@ const CreateSalary = ({ id }) => {
           <h3 className="text-lg font-semibold">Deductions</h3>
           <div className="border rounded-xl border-rose-500 p-5 shadow-sm">
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 mt-4">
-            {employeeData.employeeType.toLowerCase() !== "hourly" && employeeData.employeeType.toLowerCase() !== "daily" && (
+            {employeeData?.employeeType?.toLowerCase() !== "hourly" && employeeData?.employeeType?.toLowerCase() !== "daily" && (
       <input
         {...register("numberOfLeave")}
         type="number"
