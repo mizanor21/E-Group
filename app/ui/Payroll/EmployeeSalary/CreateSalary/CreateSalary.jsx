@@ -21,7 +21,6 @@ const calculateSalaryByType = (employeeType, data, workingDays, numberOfLeave = 
   } = data
 
   let baseSalary = 0
-  const standardWorkingDays = 30 // Standard monthly working days
   const standardWorkingHours = 8 // Standard daily working hours
 
   // Calculate actual working days after deducting leaves
@@ -30,17 +29,17 @@ const calculateSalaryByType = (employeeType, data, workingDays, numberOfLeave = 
   switch (employeeType.toLowerCase()) {
     case "hourly":
       // Calculate hourly salary based on actual working days and hours
-      baseSalary = hourlyRate * actualWorkingDays * standardWorkingHours
+      baseSalary = hourlyRate * standardWorkingHours * actualWorkingDays
       break
 
     case "daily":
       // Calculate daily salary based on actual working days
-      baseSalary = (dailyRate || basicPay / standardWorkingDays) * actualWorkingDays
+      baseSalary = dailyRate * actualWorkingDays
       break
 
     case "monthly":
       // Calculate monthly salary prorated for actual working days
-      baseSalary = (basicPay / standardWorkingDays) * actualWorkingDays
+      baseSalary = basicPay
       break
 
     default:
@@ -114,7 +113,7 @@ const CreateSalary = ({ id }) => {
         holidayOTRate = employeeData.hourlyRate * 1.5 // 1.5x for holiday OT
       } else {
         // For daily and monthly employees, calculate OT rate based on their daily rate
-        const dailyRate = employeeData.dailyRate || employeeData.basicPay / 30
+        const dailyRate = employeeData.dailyRate || employeeData.basicPay / actualWorkingDays
         const hourlyRate = dailyRate / 8
         normalOTRate = hourlyRate * 1.25
         holidayOTRate = hourlyRate * 1.5
