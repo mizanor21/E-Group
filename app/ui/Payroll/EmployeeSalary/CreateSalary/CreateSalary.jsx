@@ -262,7 +262,7 @@ const CreateSalary = ({ id }) => {
         <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className={inputStyle} />
       </div>
 
-      {/* Working Days Section */}
+      {/* /* Working Days Section */ }
       <div className="mb-6">
         <h4 className="text-lg font-semibold">
           {
@@ -270,19 +270,17 @@ const CreateSalary = ({ id }) => {
               ? "Total Days (Month)"
               : "Total Hours"
           }
-         </h4>
+        </h4>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-start gap-4 border rounded-xl p-5">
           <input
             {...register("workingDays", {
               required: "This field is required",
               min: { value: 1, message: "Value must be at least 1" },
-              max: { value: 31, message: "Value cannot exceed 31" },
+              max: employeeData?.employeeType?.toLowerCase() === "hourly" ? undefined : { value: 31, message: "Value cannot exceed 31" },
             })}
             type="number"
             className={inputStyle}
-            placeholder="Enter days"
-            min="1"
-            max="31"
+            placeholder="Enter values"
           />
           {errors.workingDays && <p className="text-red-500 text-sm">{errors.workingDays.message}</p>}
           <div>
@@ -299,7 +297,9 @@ const CreateSalary = ({ id }) => {
       </div>
 
       {/* Over Time Section */}
-      <div>
+      {
+        employeeData?.employeeType?.toLowerCase() === "monthly" || employeeData?.employeeType?.toLowerCase() === "daily" ? (
+          <div>
         <h4 className="text-lg font-semibold">Over Time</h4>
         <div className="flex justify-between border rounded-xl border-gray-400 p-5">
           <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -333,7 +333,8 @@ const CreateSalary = ({ id }) => {
             </div>
           </form>
         </div>
-      </div>
+      </div>  
+        ): null}
 
       {/* Allowances Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">

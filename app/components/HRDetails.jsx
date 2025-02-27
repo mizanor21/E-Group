@@ -2,38 +2,38 @@
 import { useFormContext } from "react-hook-form"
 import { CalendarIcon, IdentificationIcon, DocumentTextIcon, CreditCardIcon } from "@heroicons/react/24/outline"
 
-const InputField = ({
-  id,
-  label,
-  type,
-  icon: Icon,
-  placeholder,
-  validation,
-  error
-}) => (
-  <div className="space-y-1">
-    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
+  <div className="w-full">
+    {/* Label */}
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {label}
     </label>
-    <div className="relative rounded-md shadow-sm">
+
+    {/* Input Wrapper */}
+    <div className="relative">
+      {/* Icon */}
       {Icon && (
-        <div
-          className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-gray-400" />
+        <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
       )}
+      
+      {/* Input Field */}
       <input
         id={id}
         type={type}
-        className={`${Icon ? "pl-10" : "pl-3"} block w-full sm:text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-          error ? "border-red-300" : ""
-        }`}
-        placeholder={placeholder}
-        {...validation} />
+        {...validation}
+        className={`w-full px-4 py-2 pl-10 border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"}`}
+        placeholder={`Enter ${label.toLowerCase()}...`}
+      />
     </div>
-    {error && <p className="text-sm text-red-600">{error.message}</p>}
+
+    {/* Error Message */}
+    {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
-)
+);
 
 const FileUpload = ({ id, label, validation, error }) => (
   <div className="space-y-1">
@@ -71,10 +71,10 @@ const HRDetails = () => {
       {/* Passport Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Passport Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="passportNumber"
-            label="Passport Number"
+            label="Passport Number *"
             type="text"
             icon={IdentificationIcon}
             placeholder="Enter your valid passport number"
@@ -92,11 +92,11 @@ const HRDetails = () => {
             label="Passport Issue Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("passportIssueDate", { required: "Issue date is required" })}
+            validation={register("passportIssueDate")}
             error={errors.passportIssueDate} />
           <InputField
             id="passportExpiryDate"
-            label="Passport Expiry Date"
+            label="Passport Expiry *"
             type="date"
             icon={CalendarIcon}
             validation={register("passportExpiryDate", { required: "Expiry date is required" })}
@@ -107,21 +107,21 @@ const HRDetails = () => {
             type="text"
             icon={IdentificationIcon}
             placeholder="Enter your RP/ID number"
-            validation={register("rpIdNumber", { required: "RP/ID number is required" })}
+            validation={register("rpIdNumber")}
             error={errors.rpIdNumber} />
           <InputField
             id="rpIdIssueDate"
             label="RP/ID Issue Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("rpIdIssueDate", { required: "Issue date is required" })}
+            validation={register("rpIdIssueDate")}
             error={errors.rpIdIssueDate} />
           <InputField
             id="rpIdExpiryDate"
             label="RP/ID Expiry Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("rpIdExpiryDate", { required: "Expiry date is required" })}
+            validation={register("rpIdExpiryDate")}
             error={errors.rpIdExpiryDate} />
           <InputField
             id="sponsor"
@@ -143,21 +143,21 @@ const HRDetails = () => {
       {/* License Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">License Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="licenseNumber"
             label="License Number"
             type="text"
             icon={IdentificationIcon}
             placeholder="Enter valid license number"
-            validation={register("licenseNumber", { required: "License number is required" })}
+            validation={register("licenseNumber")}
             error={errors.licenseNumber} />
           <InputField
             id="licenseExpiryDate"
             label="License Expiry Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("licenseExpiryDate", { required: "Expiry date is required" })}
+            validation={register("licenseExpiryDate")}
             error={errors.licenseExpiryDate} />
           <InputField
             id="medicalCardNumber"
@@ -217,7 +217,7 @@ const HRDetails = () => {
       {/* Other Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Other Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FileUpload
             id="documents"
             label="Documents"

@@ -6,7 +6,7 @@ const employeeSchema = new mongoose.Schema({
   lastName: { type: String },
   email: { type: String, required: true, unique: true },
   phoneNumber: { type: String },
-  dob: { type: Date, required: true },
+  dob: { type: Date},
   employeeID: { type: String, required: true, unique: true },
   gender: { type: String },
   nationality: { type: String },
@@ -17,8 +17,8 @@ const employeeSchema = new mongoose.Schema({
   presentAddress1: { type: String, required: true },
   presentAddress2: { type: String },
   presentCity: { type: String, required: true },
-  presentDivision: { type: String, required: true },
-  presentPostOrZipCode: { type: String, required: true },
+  presentDivision: { type: String },
+  presentPostOrZipCode: { type: String },
   permanentAddress1: { type: String },
   permanentAddress2: { type: String },
   permanentCity: { type: String },
@@ -27,13 +27,13 @@ const employeeSchema = new mongoose.Schema({
   isSameAddress: { type: Boolean, default: false },
 
   // Job Information
-  department: { type: String, required: true },
+  department: { type: String },
   actualJob: { type: String },
-  currentJob: { type: String, required: true },
+  currentJob: { type: String},
   project: { type: String },
   employeeType: { type: String, required: true, enum: ["hourly", "daily", "monthly", "others"] },
   experience: { type: String },
-  qualification: { type: String, required: true },
+  qualification: { type: String },
   role: { type: String },
 
   // Payment & Compensation

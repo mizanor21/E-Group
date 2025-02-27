@@ -11,55 +11,39 @@ import {
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
 
-const InputField = ({
-  id,
-  label,
-  type,
-  icon: Icon,
-  placeholder,
-  validation,
-  error,
-  required
-}) => (
-  <div className="space-y-1">
-    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-      {label} {required && <span className="text-red-500">*</span>}
+const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
+  <div className="w-full">
+    {/* Label */}
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+      {label}
     </label>
-    <div className="relative rounded-md shadow-sm">
+
+    {/* Input Wrapper */}
+    <div className="relative">
+      {/* Icon */}
       {Icon && (
-        <div
-          className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-gray-400" />
+        <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
       )}
+      
+      {/* Input Field */}
       <input
         id={id}
         type={type}
-        className={`${Icon ? "pl-10" : "pl-3"} block w-full sm:text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-          error ? "border-red-300" : ""
-        }`}
-        placeholder={placeholder}
-        {...validation} />
+        {...validation}
+        className={`w-full px-4 py-2 pl-10 border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"}`}
+        placeholder={`Enter ${label.toLowerCase()}...`}
+      />
     </div>
-    {error && <p className="text-sm text-red-600">{error.message}</p>}
-  </div>
-)
 
-const TimeInput = ({ id, label, validation, error, required }) => (
-  <div className="space-y-1">
-    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <input
-      id={id}
-      type="time"
-      className={`block w-full sm:text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-        error ? "border-red-300" : ""
-      }`}
-      {...validation} />
-    {error && <p className="text-sm text-red-600">{error.message}</p>}
+    {/* Error Message */}
+    {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
-)
+);
+
 
 const PaymentInfo = () => {
   const {
@@ -106,7 +90,7 @@ const PaymentInfo = () => {
           {employeeType === "hourly" && (
             <InputField
               id="hourlyRate"
-              label="Hourly Rate"
+              label="Hourly Rate *"
               type="number"
               icon={CurrencyDollarIcon}
               placeholder="Enter hourly rate"
@@ -118,7 +102,7 @@ const PaymentInfo = () => {
           {employeeType === "daily" && (
             <InputField
               id="dailyRate"
-              label="Daily Rate"
+              label="Daily Rate *"
               type="number"
               icon={CurrencyDollarIcon}
               placeholder="Enter daily rate"
@@ -130,7 +114,7 @@ const PaymentInfo = () => {
           {employeeType === "monthly" && (
             <InputField
               id="basicPay"
-              label="Basic Pay"
+              label="Basic Pay *"
               type="number"
               icon={CurrencyDollarIcon}
               placeholder="Enter basic pay"
@@ -151,7 +135,7 @@ const PaymentInfo = () => {
             </label>
 
             {showExtra && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <InputField
                   id="overTimeHours"
                   label="Over Time Hours (Normal @1.25)"
@@ -218,14 +202,14 @@ const PaymentInfo = () => {
         <h3 className="text-lg font-semibold mb-6">
           Vendor Billing Information <span className="text-red-500">*</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="vendorName"
             label="Vendor Name"
             type="text"
             icon={BuildingOfficeIcon}
             placeholder="Enter vendor name"
-            validation={register("vendorName", { required: "Vendor name is required" })}
+            validation={register("vendorName")}
             error={errors.vendorName}
             required />
           <InputField
@@ -234,7 +218,7 @@ const PaymentInfo = () => {
             type="number"
             icon={ClockIcon}
             placeholder="Enter hours"
-            validation={register("vendorWorkingHours", { required: "Working hours is required" })}
+            validation={register("vendorWorkingHours")}
             error={errors.vendorWorkingHours}
             required />
           <InputField
@@ -243,7 +227,7 @@ const PaymentInfo = () => {
             type="number"
             icon={CurrencyDollarIcon}
             placeholder="Enter rate"
-            validation={register("vendorRate", { required: "Rate is required" })}
+            validation={register("vendorRate")}
             error={errors.vendorRate}
             required />
         </div>
@@ -253,14 +237,14 @@ const PaymentInfo = () => {
         <h3 className="text-lg font-semibold mb-6">
           Customer Billing Information <span className="text-red-500">*</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="customerName"
             label="Customer Name"
             type="text"
             icon={UserIcon}
             placeholder="Enter customer name"
-            validation={register("customerName", { required: "Customer name is required" })}
+            validation={register("customerName")}
             error={errors.customerName}
             required />
           <InputField
@@ -269,7 +253,7 @@ const PaymentInfo = () => {
             type="number"
             icon={ClockIcon}
             placeholder="Enter hours"
-            validation={register("customerWorkingHours", { required: "Working hours is required" })}
+            validation={register("customerWorkingHours")}
             error={errors.customerWorkingHours}
             required />
           <InputField
@@ -278,7 +262,7 @@ const PaymentInfo = () => {
             type="number"
             icon={CurrencyDollarIcon}
             placeholder="Enter rate"
-            validation={register("customerRate", { required: "Rate is required" })}
+            validation={register("customerRate")}
             error={errors.customerRate}
             required />
         </div>

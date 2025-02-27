@@ -2,38 +2,38 @@
 import { useFormContext } from "react-hook-form"
 import { CalendarIcon, UserIcon, PhoneIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
 
-const InputField = ({
-  id,
-  label,
-  type,
-  icon: Icon,
-  placeholder,
-  validation,
-  error
-}) => (
-  <div className="space-y-1">
-    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
+  <div className="w-full">
+    {/* Label */}
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {label}
     </label>
-    <div className="relative rounded-md shadow-sm">
+
+    {/* Input Wrapper */}
+    <div className="relative">
+      {/* Icon */}
       {Icon && (
-        <div
-          className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-gray-400" />
+        <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
       )}
+      
+      {/* Input Field */}
       <input
         id={id}
         type={type}
-        className={`${Icon ? "pl-10" : "pl-3"} block w-full sm:text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-          error ? "border-red-300" : ""
-        }`}
-        placeholder={placeholder}
-        {...validation} />
+        {...validation}
+        className={`w-full px-4 py-2 pl-10 border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"}`}
+        placeholder={`Enter ${label.toLowerCase()}...`}
+      />
     </div>
-    {error && <p className="text-sm text-red-600">{error.message}</p>}
+
+    {/* Error Message */}
+    {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
-)
+);
 
 const FileUpload = ({ id, label, validation, error }) => (
   <div className="space-y-1">
@@ -71,14 +71,14 @@ const Documents = () => {
       {/* Hired From */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Hired From</h3>
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="hiredFrom"
             label="Hired From"
             type="text"
             icon={UserIcon}
             placeholder="Enter full name you hired from"
-            validation={register("hiredFrom", { required: "Hired from is required" })}
+            validation={register("hiredFrom")}
             error={errors.hiredFrom} />
           <InputField
             id="contactFullName"
@@ -120,14 +120,14 @@ const Documents = () => {
       {/* Hired By */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Hired By</h3>
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <InputField
             id="hiredBy"
             label="Hired By"
             type="text"
             icon={UserIcon}
             placeholder="Enter full name you hired by"
-            validation={register("hiredBy", { required: "Hired by is required" })}
+            validation={register("hiredBy")}
             error={errors.hiredBy} />
           <InputField
             id="hiredByContactName"
@@ -159,11 +159,7 @@ const Documents = () => {
             icon={CalendarIcon}
             validation={register("hiredByExpiryDate")}
             error={errors.hiredByExpiryDate} />
-          <FileUpload
-            id="hiredByDocuments"
-            label="Documents"
-            validation={register("hiredByDocuments")}
-            error={errors.hiredByDocuments} />
+          
           <InputField
             id="nocExpiryDate"
             label="NOC Expiry Date"
@@ -171,17 +167,19 @@ const Documents = () => {
             icon={CalendarIcon}
             validation={register("nocExpiryDate")}
             error={errors.nocExpiryDate} />
+
+          <FileUpload
+            id="hiredByDocuments"
+            label="Documents"
+            validation={register("hiredByDocuments")}
+            error={errors.hiredByDocuments} />
         </div>
       </div>
       {/* VISA Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">VISA Information</h3>
-        <div className="grid grid-cols-1 gap-6">
-          <FileUpload
-            id="visaProof"
-            label="VISA Proof"
-            validation={register("visaProof")}
-            error={errors.visaProof} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
           <div className="space-y-1">
             <label htmlFor="visaType" className="block text-sm font-medium text-gray-700">
               VISA Type
@@ -233,6 +231,11 @@ const Documents = () => {
             icon={CalendarIcon}
             validation={register("deadline")}
             error={errors.deadline} />
+          <FileUpload
+            id="visaProof"
+            label="VISA Proof"
+            validation={register("visaProof")}
+            error={errors.visaProof} />
         </div>
       </div>
     </div>)
