@@ -2,13 +2,12 @@
 import React, { useState } from "react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import projectsModal from "./PModal";
 import axios from "axios";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import ProjectModal from "./PModal";
 
-const GroupTable = ({ projectsData = [] }) => {
+const ProjectTable = ({ projectsData = [] }) => {
   const [projects, setProjects] = useState(projectsData); // Company data
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default rows per page
@@ -305,4 +304,4 @@ const GroupTable = ({ projectsData = [] }) => {
   );
 };
 
-export default GroupTable;
+export default ProjectTable;
