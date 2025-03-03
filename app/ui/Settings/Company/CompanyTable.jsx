@@ -94,10 +94,7 @@ const CompanyTable = ({ initialCompanies = [] }) => {
       );
     } else {
       // Add new company
-      setCompanies((prevCompanies) => [
-        ...prevCompanies,
-        { ...newData, id: Date.now().toString() }, // Assign unique ID
-      ]);
+      setCompanies((prevCompanies) => [...prevCompanies, newData]);
     }
     setIsModalOpen(false); // Close modal
   };

@@ -12,7 +12,6 @@ const CompanyModal = ({ data, onClose, onSave }) => {
     reset,
   } = useForm({
     defaultValues: data || {
-      id: "",
       company: "",
       location: "",
       category: "",
@@ -20,29 +19,32 @@ const CompanyModal = ({ data, onClose, onSave }) => {
   });
 
   // Handle Form Submission
-  // const onSubmit = (formData) => {
-  //   console.log(formData);
-  //   onSave(formData); // Pass the data to parent
-  //   reset(); // Reset form
-  //   onClose(); // Close modal
-  // };
-
   const onSubmit = async (formData) => {
     try {
-      // Send formData to the server
-      const response = await axios.post("/api/company", formData);
-      console.log(formData);
+      let response;
+
+      if (data) {
+        // If data exists, it's an edit operation (PATCH)
+        response = await axios.patch(`/api/company/${data._id}`, formData);
+        toast.success("Company successfully updated!");
+      } else {
+        // If no data, it's an add operation (POST)
+        response = await axios.post("/api/company", formData);
+        toast.success("Company successfully added!");
+      }
 
       // Handle success
-      if (response.status === 201) {
-        toast.success("Company successfully added!");
-        onSave(formData); // Update parent component's state if needed
+      if (response.status === 200 || response.status === 201) {
+        onSave(response.data); // Pass the updated/added data to the parent component
         reset(); // Reset form
         onClose(); // Close modal
       }
     } catch (error) {
       // Handle error
-      toast.error("Failed to add company. Please try again.");
+      toast.error(
+        `Failed to ${data ? "update" : "add"} company. Please try again.`
+      );
+      console.error(error);
     }
   };
 
@@ -65,7 +67,7 @@ const CompanyModal = ({ data, onClose, onSave }) => {
                 errors.company ? "border-red-500" : ""
               }`}
             />
-            {errors.companyName && (
+            {errors.company && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.company.message}
               </p>
