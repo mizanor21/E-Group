@@ -86,18 +86,18 @@ const GroupTable = ({ projectsData = [] }) => {
 
   // Handle Save Company (Add or Edit)
   const handleSaveProject = (newData) => {
-    if (newData.id) {
-      // Edit existing company
+    if (newData._id) {
+      // Edit existing project
       setProjects((prevProjects) =>
         prevProjects.map((project) =>
-          project.id === newData.id ? newData : project
+          project._id === newData._id ? newData : project
         )
       );
     } else {
-      // Add new company
+      // Add new project
       setProjects((prevProjects) => [
         ...prevProjects,
-        { ...newData, id: Date.now().toString() }, // Assign unique ID
+        { ...newData, _id: Date.now().toString() }, // Assign unique ID
       ]);
     }
     setIsModalOpen(false); // Close modal
@@ -113,7 +113,7 @@ const GroupTable = ({ projectsData = [] }) => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
 
-    const tableColumn = ["ID", "projects Name", "Location", "Category"];
+    const tableColumn = ["ID", "Projects Name", "Location", "Category"];
     const tableRows = projects.map((project) => [
       project.id,
       project.project,
