@@ -1,4 +1,4 @@
-import { EmployeeProfileForm } from "@/app/components/employee-profile"
+import { EmployeeProfileForm } from "@/app/ui/Employees/AddEmployee/components/employee-profile"
 
 export default async function EmployeeProfile({ params }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/${params.id}`, {

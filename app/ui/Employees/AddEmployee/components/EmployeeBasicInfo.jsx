@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useFormContext } from "react-hook-form"
+import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -12,25 +12,20 @@ import {
   HomeIcon,
   AcademicCapIcon,
   BriefcaseIcon,
-} from "@heroicons/react/24/outline"
+} from "@heroicons/react/24/outline";
+import { useProjectData } from "@/app/data/DataFetch";
 
 const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
   <div className="w-full">
-    {/* Label */}
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {label}
     </label>
-
-    {/* Input Wrapper */}
     <div className="relative">
-      {/* Icon */}
       {Icon && (
         <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
       )}
-      
-      {/* Input Field */}
       <input
         id={id}
         type={type}
@@ -41,21 +36,15 @@ const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
         placeholder={`Enter ${label.toLowerCase()}...`}
       />
     </div>
-
-    {/* Error Message */}
     {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
 );
 
-
 const SelectField = ({ id, label, options, validation, error }) => (
   <div className="w-full">
-    {/* Label */}
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {label}
     </label>
-
-    {/* Select Field Wrapper */}
     <div className="relative">
       <select
         id={id}
@@ -64,17 +53,12 @@ const SelectField = ({ id, label, options, validation, error }) => (
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
           ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"}`}
       >
-        <option value="" disabled selected>
-          Select {label.toLowerCase()}...
-        </option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
       </select>
-
-      {/* Dropdown Icon */}
       <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
         <svg
           className="w-5 h-5 text-gray-400"
@@ -90,26 +74,36 @@ const SelectField = ({ id, label, options, validation, error }) => (
         </svg>
       </div>
     </div>
-
-    {/* Error Message */}
     {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
 );
 
-
 const EmployeeBasicInfo = () => {
+  const { data } = useProjectData([]); // Fetch project data
   const {
     register,
     formState: { errors },
     watch,
-  } = useFormContext()
-  const [isSameAddress, setIsSameAddress] = useState(false)
+  } = useFormContext();
+  const [isSameAddress, setIsSameAddress] = useState(false);
 
-  const watchPresentAddress1 = watch("presentAddress1")
-  const watchPresentAddress2 = watch("presentAddress2")
-  const watchPresentCity = watch("presentCity")
-  const watchPresentDivision = watch("presentDivision")
-  const watchPresentPostOrZipCode = watch("presentPostOrZipCode")
+  const watchPresentAddress1 = watch("presentAddress1");
+  const watchPresentAddress2 = watch("presentAddress2");
+  const watchPresentCity = watch("presentCity");
+  const watchPresentDivision = watch("presentDivision");
+  const watchPresentPostOrZipCode = watch("presentPostOrZipCode");
+
+  // Extract unique project names from the data
+  const uniqueProjects = [...new Set(data.map((item) => item.project))];
+
+  // Create options for the SelectField
+  const projectOptions = [
+    { value: "", label: "Select Project" }, // Default option
+    ...uniqueProjects.map((project) => ({
+      value: project,
+      label: project,
+    })),
+  ];
 
   return (
     (<div className="bg-white p-6 rounded-lg shadow-md space-y-8">
@@ -122,14 +116,16 @@ const EmployeeBasicInfo = () => {
             type="text"
             icon={UserIcon}
             validation={register("firstName", { required: "First name is required" })}
-            error={errors.firstName} />
+            error={errors.firstName}
+          />
           <InputField
             id="lastName"
             label="Last Name"
             type="text"
             icon={UserIcon}
             validation={register("lastName")}
-            error={errors.lastName} />
+            error={errors.lastName}
+          />
           <InputField
             id="email"
             label="Email *"
@@ -142,36 +138,39 @@ const EmployeeBasicInfo = () => {
                 message: "Invalid email address",
               },
             })}
-            error={errors.email} />
+            error={errors.email}
+          />
           <InputField
             id="phoneNumber"
             label="Phone Number *"
             type="tel"
             icon={PhoneIcon}
             validation={register("phoneNumber", { required: "Phone number is required" })}
-            error={errors.phoneNumber} />
+            error={errors.phoneNumber}
+          />
           <InputField
             id="dob"
             label="Date of Birth"
             type="date"
             icon={CalendarIcon}
             validation={register("dob")}
-            error={errors.dob} />
-
-          <InputField
+            error={errors.dob}
+          />
+          <SelectField
             id="project"
             label="Project *"
-            type="text"
-            icon={BriefcaseIcon}
-            validation={register("project", { required: "Role is required" })}
-            error={errors.project} />
+            options={projectOptions}
+            validation={register("project", { required: "Project is required" })}
+            error={errors.project}
+          />
           <InputField
             id="employeeID"
             label="Employee ID *"
             type="text"
             icon={IdentificationIcon}
             validation={register("employeeID", { required: "Employee ID is required" })}
-            error={errors.employeeID} />
+            error={errors.employeeID}
+          />
           <SelectField
             id="gender"
             label="Gender *"
@@ -182,14 +181,16 @@ const EmployeeBasicInfo = () => {
               { value: "other", label: "Other" },
             ]}
             validation={register("gender", { required: "Gender is required" })}
-            error={errors.gender} />
+            error={errors.gender}
+          />
           <InputField
             id="nationality"
             label="Nationality *"
             type="text"
             icon={GlobeAltIcon}
             validation={register("nationality", { required: "Nationality is required" })}
-            error={errors.nationality} />
+            error={errors.nationality}
+          />
           <SelectField
             id="bloodGroup"
             label="Blood Group *"
@@ -205,14 +206,16 @@ const EmployeeBasicInfo = () => {
               { value: "O-", label: "O-" },
             ]}
             validation={register("bloodGroup", { required: "Blood group is required" })}
-            error={errors.bloodGroup} />
+            error={errors.bloodGroup}
+          />
           <InputField
             id="religion"
             label="Religion"
             type="text"
             icon={UserIcon}
             validation={register("religion")}
-            error={errors.religion} />
+            error={errors.religion}
+          />
         </div>
       </div>
       <div>
