@@ -1,9 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import toast from "react-hot-toast";
 
 const GroupModal = ({ data, onClose, onSave }) => {
-  // Initialize React Hook Form
   const {
     register,
     handleSubmit,
@@ -16,20 +16,30 @@ const GroupModal = ({ data, onClose, onSave }) => {
   // Handle Form Submission
   const onSubmit = async (formData) => {
     try {
-      // Send formData to the server
-      const response = await axios.post("/api/group", formData);
-      console.log(formData);
+      let response;
+
+      if (data) {
+        // If data exists, it's an edit operation (PATCH)
+        response = await axios.patch(`/api/group/${data._id}`, formData); // Use data._id
+        toast.success("Group successfully updated!");
+      } else {
+        // If no data, it's an add operation (POST)
+        response = await axios.post("/api/group", formData);
+        toast.success("Group successfully added!");
+      }
 
       // Handle success
-      if (response.status === 201) {
-        toast.success("Group successfully added!");
-        onSave(formData); // Update parent component's state if needed
+      if (response.status === 200 || response.status === 201) {
+        onSave(response.data); // Pass the updated/added data to the parent component
         reset(); // Reset form
         onClose(); // Close modal
       }
     } catch (error) {
       // Handle error
-      toast.error("Failed to add group. Please try again.");
+      toast.error(
+        `Failed to ${data ? "update" : "add"} group. Please try again.`
+      );
+      console.error(error);
     }
   };
 

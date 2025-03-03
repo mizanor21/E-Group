@@ -51,17 +51,16 @@ const GroupTable = ({ groupsData = [] }) => {
 
   // Handle Save group (Add or Edit)
   const handleSaveGroup = (newData) => {
-    if (newData.id) {
+    if (newData._id) {
       // Edit existing group
       setGroups((prevGroups) =>
-        prevGroups.map((group) => (group.id === newData.id ? newData : group))
+        prevGroups.map((group) =>
+          group._id === newData._id ? newData : group
+        )
       );
     } else {
       // Add new group
-      setGroups((prevGroups) => [
-        ...prevGroups,
-        { ...newData, id: Date.now().toString() }, // Assign unique ID
-      ]);
+      setGroups((prevGroups) => [...prevGroups, newData]);
     }
     setIsModalOpen(false); // Close modal
   };
@@ -76,22 +75,28 @@ const GroupTable = ({ groupsData = [] }) => {
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
 
+    // Define table columns
     const tableColumn = ["ID", "Group Name", "Location", "Category"];
+    // Define table rows
     const tableRows = groups.map((group) => [
-      group.id,
-      group.group,
-      group.location,
-      group.category,
+      group._id || "N/A", // Use _id or a placeholder if not available
+      group.group || "N/A",
+      group.location || "N/A",
+      group.category || "N/A",
     ]);
 
+    // Add title to the PDF
     doc.text("Group List", 14, 15);
+
+    // Generate the table using jspdf-autotable
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
       startY: 20,
     });
 
-    doc.save("group_List.pdf");
+    // Save the PDF
+    doc.save("group_list.pdf");
   };
 
   // Handle user deletion with toast notification
@@ -110,8 +115,8 @@ const GroupTable = ({ groupsData = [] }) => {
         try {
           // Make API call to delete
           await axios.delete(`/api/group?id=${id}`);
-          setGroups((prevGroup) =>
-            prevGroup.filter((group) => group._id !== id)
+          setGroups((prevGroups) =>
+            prevGroups.filter((group) => group._id !== id)
           ); // Update the state
 
           // Show success alert
@@ -211,7 +216,7 @@ const GroupTable = ({ groupsData = [] }) => {
           <tbody>
             {displayedGroups.length > 0 ? (
               displayedGroups.map((group, index) => (
-                <tr key={group.id} className="border-t hover:bg-gray-100">
+                <tr key={group._id} className="border-t hover:bg-gray-100">
                   <td className="py-2 px-4">{startRow + index + 1}</td>
                   <td className="py-2 px-4">{group.group}</td>
                   <td className="py-2 px-4">{group.location}</td>
