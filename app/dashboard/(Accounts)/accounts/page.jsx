@@ -83,6 +83,10 @@ const Page = () => {
   const filteredInvestment = filterData(investment)
   const filteredSalary = filterSalaryData(salaryData)
 
+  const calculateInitialIncome = () => {
+    return filteredIncome?.reduce((sum, item) => sum + item.amount, 0) || 0
+  }
+
   const calculateTotalIncome = () => {
     const initialIncome = filteredIncome?.reduce((sum, item) => sum + item.amount, 0) || 0
     const investmentIncome = filteredInvestment?.reduce((sum, item) => sum + item.amount, 0) || 0
@@ -94,6 +98,8 @@ const Page = () => {
     const salaryTotal = filteredSalary?.reduce((sum, salary) => sum + salary.netSalary, 0) || 0
     return expensesTotal + salaryTotal
   }
+
+  const initialIncome = calculateInitialIncome()
   const totalIncome = calculateTotalIncome()
   const totalExpenses = calculateTotalExpenses()
 
@@ -185,7 +191,7 @@ const Page = () => {
       <div className="grid grid-cols-2 gap-5">
         <div className="grid grid-cols-2 gap-5">
           <div className="">
-            <PreMonthIncome data={totalIncome} />
+            <PreMonthIncome data={initialIncome} />
           </div>
           <div className="">
             <Investment data={filteredInvestment} />

@@ -9,7 +9,7 @@ const PreMonthIncome = ({ data }) => {
         <CardTitle>Income</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="text-2xl font-semibold">${data.toFixed(2)}</div>
+        <div className="text-2xl font-semibold">${data?.toFixed(2)}</div>
         <div className="text-sm"><i>Included Investment</i></div>
       </CardContent>
     </Card>
