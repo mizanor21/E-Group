@@ -94,7 +94,7 @@ const EmployeeBasicInfo = () => {
   const watchPresentPostOrZipCode = watch("presentPostOrZipCode");
 
   // Extract unique project names from the data
-  const uniqueProjects = [...new Set(data.map((item) => item.project))];
+  const uniqueProjects = [...new Set(data?.map((item) => item.project))];
 
   // Create options for the SelectField
   const projectOptions = [
