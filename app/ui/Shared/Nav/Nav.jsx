@@ -3,18 +3,42 @@ import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { IoMdNotifications } from "react-icons/io";
 import Image from "next/image";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebase.config";
+import { useRouter } from "next/navigation";
 import demoProfile from "@/public/icons/profile.gif";
 import user from "@/public/icons/user.png";
 import settings from "@/public/icons/settings.png";
 import logout from "@/public/icons/logout.png";
 import Link from "next/link";
+import toast from "react-hot-toast";
+
 const Nav = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Firebase SignOut Handler
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      // Clear any local storage or session data if needed
+      localStorage.removeItem('user'); // Optional: clear user data
+      toast.success("Successfully signed out!");
+      
+      // Redirect to login page
+      router.push('/');
+    } catch (error) {
+      console.error("Sign out error", error);
+      // Optionally show an error toast or message
+      alert("Failed to sign out. Please try again.");
+    }
+  };
+
   return (
     <div className="navbar flex justify-between px-5">
       <div className="flex flex-col items-start">
@@ -71,7 +95,10 @@ const Nav = () => {
               </div>
             </li>
             <li className="flex justify-between">
-              <div className="">
+              <div 
+                onClick={handleSignOut} 
+                className="cursor-pointer"
+              >
                 <Image width={20} height={20} alt="logout logo" src={logout} />
                 <a>Logout</a>
               </div>
