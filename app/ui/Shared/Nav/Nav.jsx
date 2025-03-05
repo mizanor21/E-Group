@@ -7,6 +7,7 @@ import demoProfile from "@/public/icons/profile.gif";
 import user from "@/public/icons/user.png";
 import settings from "@/public/icons/settings.png";
 import logout from "@/public/icons/logout.png";
+import Link from "next/link";
 const Nav = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -55,7 +56,7 @@ const Nav = () => {
             <li className="flex justify-between">
               <div className="">
                 <Image width={20} height={20} alt="User logo" src={user} />
-                <a className="justify-between">Profile</a>
+                <Link href={'/dashboard/signup'} className="justify-between">Create New User</Link>
               </div>
             </li>
             <li className="flex justify-between">
