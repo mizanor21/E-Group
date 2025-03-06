@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { useCreateUserWithEmailAndPassword, useUpdateProfile } from 'react-firebase-hooks/auth';
 import { auth } from '@/firebase.config'; // Ensure this path is correct
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -35,6 +35,9 @@ export default function ConservatorySignUpPage() {
     loading,
     firebaseError
   ] = useCreateUserWithEmailAndPassword(auth);
+
+  // Firebase Hook for Profile Update
+  const [updateProfile, updating, updateError] = useUpdateProfile(auth);
 
   // Generate dynamic verification code
   const generateVerificationCode = () => {
@@ -77,11 +80,17 @@ export default function ConservatorySignUpPage() {
     try {
       // Create user with email and password
       const res = await createUserWithEmailAndPassword(data.email, data.password);
-      console.log(data);
       
       if (res) {
-        // Optional: You might want to update the user profile with full name
-        // await updateProfile(auth.currentUser, { displayName: data.fullName });
+        // Update the user profile with full name
+        const success = await updateProfile({ displayName: data.fullName });
+        
+        if (success) {
+          console.log("Profile updated with display name:", data.fullName);
+        } else {
+          console.error("Failed to update profile:", updateError);
+          // Continue anyway since basic account was created
+        }
         
         // Redirect to dashboard or profile setup
         router.push('/dashboard');
@@ -123,9 +132,9 @@ export default function ConservatorySignUpPage() {
           </div>
 
           {/* Error Message */}
-          {(error || firebaseError) && (
+          {(error || firebaseError || updateError) && (
             <div className="mb-4 p-3 bg-red-50 border border-red-300 text-red-600 rounded">
-              {error || firebaseError?.message}
+              {error || firebaseError?.message || updateError?.message}
             </div>
           )}
 
@@ -195,10 +204,10 @@ export default function ConservatorySignUpPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit" 
-              disabled={loading}
+              disabled={loading || updating}
               className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full hover:opacity-90 transition-all duration-300 disabled:opacity-50"
             >
-              {loading ? 'Creating Account...' : 'Sign Up'}
+              {(loading || updating) ? 'Creating Account...' : 'Sign Up'}
             </motion.button>
 
             {/* Login Link */}
