@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 // Validation Schema
 const signupSchema = z.object({
@@ -43,10 +44,10 @@ export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [permissions, setPermissions] = useState({
-    employee: { create: false, view: false, edit: false, delete: false },
-    payroll: { create: false, view: false, edit: false, delete: false },
-    accounts: { create: false, view: false, edit: false, delete: false },
-    settings: { create: false, view: false, edit: false, delete: false },
+    employee: { create: true, view: true, edit: true, delete: true },
+    payroll: { create: true, view: true, edit: true, delete: true },
+    accounts: { create: true, view: true, edit: true, delete: true },
+    settings: { create: true, view: true, edit: true, delete: true },
   });
 
   // Firebase Hook for User Creation
@@ -108,6 +109,7 @@ export default function SignUpPage() {
           console.error("Failed to update profile:", updateError);
           // Continue anyway since basic account was created
         }
+        toast.success("Account created successfully!");
         
         // Redirect to dashboard or profile setup
         router.push('/dashboard');
