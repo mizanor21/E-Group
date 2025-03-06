@@ -6,45 +6,37 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Download, ChevronRight, Filter, Search } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Download, ChevronRight, Filter, Search, BarChart2, TrendingUp, Calendar, AlertCircle, RefreshCw, DollarSign } from "lucide-react"
 import { IoCloudDownloadOutline } from "react-icons/io5"
 import { jsPDF } from "jspdf"
 import autoTable from "jspdf-autotable"
 
 const EnhancedInvestmentOverview = ({ data, selectedYear }) => {
-  // State for filters
+  // State for filters and analytics
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [modeFilter, setModeFilter] = useState("all")
   const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" })
-  
+  const [timeframe, setTimeframe] = useState("monthly") // monthly, quarterly, yearly
+  const [showDetailedView, setShowDetailedView] = useState(false)
+
   // Extract unique modes and statuses for filter options
-  const uniqueModes = useMemo(() => {
-    const modes = [...new Set(data?.map(item => item.mode) || [])]
-    return modes
-  }, [data])
-  
-  const uniqueStatuses = useMemo(() => {
-    const statuses = [...new Set(data?.map(item => item.status) || [])]
-    return statuses
-  }, [data])
-  
+  const uniqueModes = useMemo(() => [...new Set(data?.map(item => item.mode) || [])], [data])
+  const uniqueStatuses = useMemo(() => [...new Set(data?.map(item => item.status) || [])], [data])
+
   // Apply filters and sorting to data
   const filteredData = useMemo(() => {
     if (!data) return []
     
     return data
       .filter(item => {
-        // Search term filter (case insensitive)
         const searchMatch = 
           searchTerm === "" || 
           item.investorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           item.voucherNo.toLowerCase().includes(searchTerm.toLowerCase())
         
-        // Status filter
         const statusMatch = statusFilter === "all" || item.status === statusFilter
-        
-        // Mode filter
         const modeMatch = modeFilter === "all" || item.mode === modeFilter
         
         return searchMatch && statusMatch && modeMatch
@@ -59,63 +51,143 @@ const EnhancedInvestmentOverview = ({ data, selectedYear }) => {
             ? new Date(a.date) - new Date(b.date)
             : new Date(b.date) - new Date(a.date)
         }
-        // Default sort by date descending
         return new Date(b.date) - new Date(a.date)
       })
   }, [data, searchTerm, statusFilter, modeFilter, sortConfig])
-  
+
   // Calculate totals for summary
   const summaryData = useMemo(() => {
     if (!filteredData.length) return { total: 0, count: 0 }
     
     const total = filteredData.reduce((sum, item) => sum + item.amount, 0)
-    return {
-      total,
-      count: filteredData.length
-    }
+    return { total, count: filteredData.length }
   }, [filteredData])
-  
-  // Request sort change
-  const requestSort = (key) => {
-    let direction = 'asc'
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc'
-    }
-    setSortConfig({ key, direction })
-  }
-  
+
+  // Time-based grouping
+  const timeBasedData = useMemo(() => {
+    const groupedData = {}
+    
+    filteredData.forEach(item => {
+      const date = new Date(item.date)
+      let key
+      
+      if (timeframe === "monthly") {
+        key = `${date.getMonth() + 1}/${date.getFullYear()}`
+      } else if (timeframe === "quarterly") {
+        const quarter = Math.floor(date.getMonth() / 3) + 1
+        key = `Q${quarter}/${date.getFullYear()}`
+      } else {
+        key = date.getFullYear().toString()
+      }
+      
+      if (!groupedData[key]) {
+        groupedData[key] = { total: 0, count: 0 }
+      }
+      
+      groupedData[key].total += item.amount
+      groupedData[key].count += 1
+    })
+    
+    return Object.entries(groupedData)
+      .sort((a, b) => {
+        if (timeframe === "monthly") {
+          const [monthA, yearA] = a[0].split('/').map(Number)
+          const [monthB, yearB] = b[0].split('/').map(Number)
+          return yearB - yearA || monthB - monthA
+        } else if (timeframe === "quarterly") {
+          const qA = a[0].match(/Q(\d)\/(\d{4})/)
+          const qB = b[0].match(/Q(\d)\/(\d{4})/)
+          if (qA && qB) {
+            return Number(qB[2]) - Number(qA[2]) || Number(qB[1]) - Number(qA[1])
+          }
+          return 0
+        } else {
+          return Number(b[0]) - Number(a[0])
+        }
+      })
+      .slice(0, 12)
+  }, [filteredData, timeframe])
+
   // Status badge component
   const getStatusBadge = (status) => {
     const statusStyles = {
       Pending: "bg-yellow-100 text-yellow-800",
       Cleared: "bg-green-100 text-green-800",
       Overdue: "bg-red-100 text-red-800",
-    }
-    return <Badge className={statusStyles[status] || "bg-gray-100 text-gray-800"}>{status}</Badge>
-  }
+    };
+    return <Badge className={statusStyles[status] || "bg-gray-100 text-gray-800"}>{status}</Badge>;
+  };
 
   // Download filtered report as PDF
   const downloadFilteredPDF = () => {
-    const doc = new jsPDF()
-
+    const doc = new jsPDF();
+  
     // Add headers
-    doc.setFontSize(16)
-    doc.text(`Investment Overview - ${selectedYear}`, 14, 15)
-
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Investment Overview - ${selectedYear}`, 14, 15);
+  
+    // Add timestamp
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
+  
     // Add filter information
-    doc.setFontSize(10)
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22)
-    
     if (statusFilter !== "all" || modeFilter !== "all" || searchTerm) {
-      doc.text("Applied Filters:", 14, 28)
-      let filterText = []
-      if (statusFilter !== "all") filterText.push(`Status: ${statusFilter}`)
-      if (modeFilter !== "all") filterText.push(`Mode: ${modeFilter}`)
-      if (searchTerm) filterText.push(`Search: "${searchTerm}"`)
-      doc.text(filterText.join(", "), 14, 34)
+      doc.setFontSize(10);
+      doc.text("Applied Filters:", 14, 28);
+      let filterText = [];
+      if (statusFilter !== "all") filterText.push(`Status: ${statusFilter}`);
+      if (modeFilter !== "all") filterText.push(`Mode: ${modeFilter}`);
+      if (searchTerm) filterText.push(`Search: "${searchTerm}"`);
+      doc.text(filterText.join(", "), 14, 34);
     }
-
-    // Format table data
+  
+    // Add analytics section
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Investment Analytics", 14, 40);
+  
+    // Summary metrics
+    const summaryMetrics = [
+      ["Total Investments", `$${summaryData.total.toFixed(2)}`],
+      ["Total Investors", `${summaryData.count}`],
+    ];
+  
+    autoTable(doc, {
+      head: [["Metric", "Value"]],
+      body: summaryMetrics,
+      startY: 45,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [51, 51, 51] },
+    });
+  
+    // Time-based analysis
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Time-Based Analysis", 14, doc.lastAutoTable.finalY + 15);
+  
+    const timeBasedTableData = timeBasedData.map(([period, data]) => [
+      period,
+      `$${data.total.toFixed(2)}`,
+      `${data.count}`,
+    ]);
+  
+    autoTable(doc, {
+      head: [["Period", "Total Amount", "Count"]],
+      body: timeBasedTableData,
+      startY: doc.lastAutoTable.finalY + 20,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [51, 51, 51] },
+    });
+  
+    // Add transactions table
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Transaction Details", 14, doc.lastAutoTable.finalY + 15);
+  
     const tableData = filteredData.map((item) => [
       new Date(item.date).toLocaleDateString(),
       item.investorName,
@@ -124,30 +196,52 @@ const EnhancedInvestmentOverview = ({ data, selectedYear }) => {
       item.mode,
       item.status,
       `$${item.amount.toFixed(2)}`,
-    ])
-
-    // Create table
+    ]);
+  
     autoTable(doc, {
       head: [["Date", "Investor Name", "Voucher No.", "Submission Date", "Mode", "Status", "Amount"]],
       body: tableData,
-      startY: statusFilter !== "all" || modeFilter !== "all" || searchTerm ? 40 : 30,
+      startY: doc.lastAutoTable.finalY + 20,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [51, 51, 51] },
       alternateRowStyles: { fillColor: [245, 245, 245] },
-    })
-
-    // Add summary information
-    doc.setFontSize(12)
-    const yPos = doc.internal.pageSize.height - 20
-    doc.text(`Total Investments: ${summaryData.count} items`, 14, yPos - 10)
-    doc.text(`Total Amount: $${summaryData.total.toFixed(2)}`, 14, yPos)
-
+    });
+  
+    // Add recommendations section
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Management Recommendations:", 14, doc.lastAutoTable.finalY + 15);
+  
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+  
+    let recommendations = [];
+    if (summaryData.total === 0) {
+      recommendations.push("• No investments found for the selected filters.");
+    } else {
+      if (statusFilter === "Overdue") {
+        recommendations.push("• High overdue investments detected. Follow up with investors immediately.");
+      }
+      if (statusFilter === "Pending") {
+        recommendations.push("• Review pending investments and ensure timely clearance.");
+      }
+      if (timeBasedData.length > 0) {
+        const latestPeriod = timeBasedData[0][0];
+        const latestData = timeBasedData[0][1];
+        recommendations.push(`• Latest period (${latestPeriod}) had ${latestData.count} investments totaling $${latestData.total.toFixed(2)}.`);
+      }
+    }
+  
+    recommendations.forEach((rec, i) => {
+      doc.text(rec, 14, doc.lastAutoTable.finalY + 20 + (i * 5));
+    });
+  
     // Save with appropriate filename
-    let filename = `investment-overview-${selectedYear}`
-    if (statusFilter !== "all") filename += `-${statusFilter}`
-    if (modeFilter !== "all") filename += `-${modeFilter}`
-    doc.save(`${filename}.pdf`)
-  }
+    let filename = `investment-overview-${selectedYear}`;
+    if (statusFilter !== "all") filename += `-${statusFilter}`;
+    if (modeFilter !== "all") filename += `-${modeFilter}`;
+    doc.save(`${filename}.pdf`);
+  };
 
   // Download individual memo PDF
   const downloadMemoPDF = (item) => {
@@ -282,9 +376,97 @@ const EnhancedInvestmentOverview = ({ data, selectedYear }) => {
             <Download className="w-4 h-4 mr-2" />
             Download Report
           </Button>
+          <Button variant="outline" onClick={() => setShowDetailedView(!showDetailedView)}>
+            <BarChart2 className="w-4 h-4 mr-2" />
+            {showDetailedView ? "Hide Analytics" : "Show Analytics"}
+          </Button>
         </div>
       </div>
-      
+
+      {/* Analytics Dashboard */}
+      {showDetailedView && (
+        <div className="space-y-6 mb-5">
+          {/* Key metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500">Total Investments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <DollarSign className="w-4 h-4 mr-2 text-blue-500" />
+                  <span className="text-2xl font-bold">${summaryData.total.toFixed(2)}</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-500">Total Investors</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <TrendingUp className="w-4 h-4 mr-2 text-green-500" />
+                  <span className="text-2xl font-bold">{summaryData.count}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Time-based analysis */}
+          <Card>
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle>Investment Analysis</CardTitle>
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant={timeframe === "monthly" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setTimeframe("monthly")}
+                >
+                  Monthly
+                </Button>
+                <Button 
+                  variant={timeframe === "quarterly" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setTimeframe("quarterly")}
+                >
+                  Quarterly
+                </Button>
+                <Button 
+                  variant={timeframe === "yearly" ? "default" : "outline"} 
+                  size="sm"
+                  onClick={() => setTimeframe("yearly")}
+                >
+                  Yearly
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Period</th>
+                      <th className="text-right py-2">Total</th>
+                      <th className="text-right py-2">Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {timeBasedData.map(([period, data]) => (
+                      <tr key={period} className="border-b hover:bg-gray-50">
+                        <td className="py-2 font-medium">{period}</td>
+                        <td className="text-right py-2">${data.total.toFixed(2)}</td>
+                        <td className="text-right py-2">{data.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Filter Controls */}
       <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
         <div className="flex flex-col md:flex-row gap-4">
