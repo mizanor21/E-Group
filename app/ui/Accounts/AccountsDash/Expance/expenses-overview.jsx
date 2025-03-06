@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Download, Edit2, ChevronRight } from "lucide-react"
 import { jsPDF } from "jspdf"
-import "jspdf-autotable"
+import autoTable from "jspdf-autotable"
 
 
 const ExpensesOverview = ({ data, selectedYear }) => {
@@ -37,7 +37,7 @@ const ExpensesOverview = ({ data, selectedYear }) => {
       `$${item.amount.toFixed(2)}`,
     ])
 
-    doc.autoTable({
+    autoTable(doc,{
       head: [["Date", "Category", "Voucher No.", "Issue Date", "Payment Method", "Status", "Amount"]],
       body: tableData,
       startY: 30,

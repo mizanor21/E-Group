@@ -174,7 +174,7 @@ const InvestmentOverview = ({ data, selectedYear }) => {
     doc.text(`Generated: ${new Date().toLocaleString()}`, centerX, 
              doc.internal.pageSize.getHeight() - 10, { align: 'center' })
     
-    doc.save(`Transaction-${item.voucherNo}.pdf`)
+    doc.save(`IV-Memo-${item.voucherNo}.pdf`)
   }
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
