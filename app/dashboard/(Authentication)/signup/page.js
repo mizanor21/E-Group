@@ -1,5 +1,5 @@
-'use client'
-import React, { useState, useEffect } from 'react';
+'use client';
+import React, { useState } from 'react';
 import { useCreateUserWithEmailAndPassword, useUpdateProfile } from 'react-firebase-hooks/auth';
 import { auth } from '@/firebase.config'; // Ensure this path is correct
 import { useRouter } from 'next/navigation';
@@ -23,11 +23,32 @@ const signupSchema = z.object({
   path: ["confirmPassword"]
 });
 
-export default function ConservatorySignUpPage() {
+// Permission Checkbox Component
+const PermissionCheckbox = ({ module, action, label, checked, onChange }) => (
+  <div className="flex items-center mb-2">
+    <input
+      type="checkbox"
+      id={`${module}-${action}`}
+      checked={checked}
+      onChange={onChange}
+      className="w-4 h-4 mr-2 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+    />
+    <label htmlFor={`${module}-${action}`} className="text-sm font-medium text-gray-700">
+      {label || action.charAt(0).toUpperCase() + action.slice(1)}
+    </label>
+  </div>
+);
+
+export default function SignUpPage() {
   const router = useRouter();
-  const [dynamicCode, setDynamicCode] = useState('8AD4F');
   const [error, setError] = useState('');
-  
+  const [permissions, setPermissions] = useState({
+    employee: { create: false, view: false, edit: false, delete: false },
+    payroll: { create: false, view: false, edit: false, delete: false },
+    accounts: { create: false, view: false, edit: false, delete: false },
+    settings: { create: false, view: false, edit: false, delete: false },
+  });
+
   // Firebase Hook for User Creation
   const [
     createUserWithEmailAndPassword,
@@ -38,24 +59,6 @@ export default function ConservatorySignUpPage() {
 
   // Firebase Hook for Profile Update
   const [updateProfile, updating, updateError] = useUpdateProfile(auth);
-
-  // Generate dynamic verification code
-  const generateVerificationCode = () => {
-    return Math.random().toString(36).substring(2, 7).toUpperCase();
-  };
-
-  // Regenerate code periodically
-  useEffect(() => {
-    const newCode = generateVerificationCode();
-    setDynamicCode(newCode);
-
-    const codeInterval = setInterval(() => {
-      const refreshedCode = generateVerificationCode();
-      setDynamicCode(refreshedCode);
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(codeInterval);
-  }, []);
 
   // Form management with React Hook Form
   const { 
@@ -72,6 +75,17 @@ export default function ConservatorySignUpPage() {
     }
   });
 
+  // Handle Permission Changes
+  const handlePermissionChange = (module, action) => {
+    setPermissions((prev) => ({
+      ...prev,
+      [module]: {
+        ...prev[module],
+        [action]: !prev[module][action],
+      },
+    }));
+  };
+
   // Signup Submit Handler
   const onSubmit = async (data) => {
     // Reset previous errors
@@ -82,11 +96,14 @@ export default function ConservatorySignUpPage() {
       const res = await createUserWithEmailAndPassword(data.email, data.password);
       
       if (res) {
-        // Update the user profile with full name
-        const success = await updateProfile({ displayName: data.fullName });
+        // Update the user profile with full name and permissions
+        const success = await updateProfile({ 
+          displayName: data.fullName,
+          permissions: JSON.stringify(permissions), // Store permissions as a string
+        });
         
         if (success) {
-          console.log("Profile updated with display name:", data.fullName);
+          console.log("Profile updated with display name and permissions:", data.fullName, permissions);
         } else {
           console.error("Failed to update profile:", updateError);
           // Continue anyway since basic account was created
@@ -215,7 +232,7 @@ export default function ConservatorySignUpPage() {
               <p className="text-sm text-gray-600">
                 Already have an account? {' '}
                 <Link 
-                  href="/" 
+                  href="/login" 
                   className="text-cyan-600 hover:underline"
                 >
                   Login
@@ -225,23 +242,126 @@ export default function ConservatorySignUpPage() {
           </form>
         </div>
 
-        {/* Isometric Illustration Section */}
+        {/* Permission Section */}
         <div className="hidden md:block relative bg-gradient-to-br from-cyan-50 to-blue-100 p-8">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 600 400" 
-            className="absolute inset-0 w-full h-full"
-          >
-            {/* Isometric Buildings */}
-            <g transform="translate(50, 50)">
-              {/* Large Blue Cubes */}
-              <g fill="#3B82F6" fillOpacity="0.2">
-                <path d="M0 250 L200 150 L400 250 L200 350 Z" />
-                <path d="M200 150 L400 50 L600 150 L400 250 Z" />
-                <path d="M0 250 L200 350 L400 250 L200 150 Z" />
-              </g>
-            </g>
-          </svg>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Module Permissions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Employee Module */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-bold text-gray-700 mb-3 uppercase text-sm">Employee</h3>
+              <PermissionCheckbox 
+                module="employee" 
+                action="create" 
+                checked={permissions.employee.create} 
+                onChange={() => handlePermissionChange('employee', 'create')} 
+              />
+              <PermissionCheckbox 
+                module="employee" 
+                action="view" 
+                checked={permissions.employee.view} 
+                onChange={() => handlePermissionChange('employee', 'view')} 
+              />
+              <PermissionCheckbox 
+                module="employee" 
+                action="edit" 
+                checked={permissions.employee.edit} 
+                onChange={() => handlePermissionChange('employee', 'edit')} 
+              />
+              <PermissionCheckbox 
+                module="employee" 
+                action="delete" 
+                checked={permissions.employee.delete} 
+                onChange={() => handlePermissionChange('employee', 'delete')} 
+              />
+            </div>
+
+            {/* Payroll Module */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-bold text-gray-700 mb-3 uppercase text-sm">Payroll</h3>
+              <PermissionCheckbox 
+                module="payroll" 
+                action="create" 
+                checked={permissions.payroll.create} 
+                onChange={() => handlePermissionChange('payroll', 'create')} 
+              />
+              <PermissionCheckbox 
+                module="payroll" 
+                action="view" 
+                checked={permissions.payroll.view} 
+                onChange={() => handlePermissionChange('payroll', 'view')} 
+              />
+              <PermissionCheckbox 
+                module="payroll" 
+                action="edit" 
+                checked={permissions.payroll.edit} 
+                onChange={() => handlePermissionChange('payroll', 'edit')} 
+              />
+              <PermissionCheckbox 
+                module="payroll" 
+                action="delete" 
+                checked={permissions.payroll.delete} 
+                onChange={() => handlePermissionChange('payroll', 'delete')} 
+              />
+            </div>
+
+            {/* Accounts Module */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-bold text-gray-700 mb-3 uppercase text-sm">Accounts</h3>
+              <PermissionCheckbox 
+                module="accounts" 
+                action="create" 
+                checked={permissions.accounts.create} 
+                onChange={() => handlePermissionChange('accounts', 'create')} 
+              />
+              <PermissionCheckbox 
+                module="accounts" 
+                action="view" 
+                checked={permissions.accounts.view} 
+                onChange={() => handlePermissionChange('accounts', 'view')} 
+              />
+              <PermissionCheckbox 
+                module="accounts" 
+                action="edit" 
+                checked={permissions.accounts.edit} 
+                onChange={() => handlePermissionChange('accounts', 'edit')} 
+              />
+              <PermissionCheckbox 
+                module="accounts" 
+                action="delete" 
+                checked={permissions.accounts.delete} 
+                onChange={() => handlePermissionChange('accounts', 'delete')} 
+              />
+            </div>
+
+            {/* Settings Module */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h3 className="font-bold text-gray-700 mb-3 uppercase text-sm">Settings</h3>
+              <PermissionCheckbox 
+                module="settings" 
+                action="create" 
+                checked={permissions.settings.create} 
+                onChange={() => handlePermissionChange('settings', 'create')} 
+              />
+              <PermissionCheckbox 
+                module="settings" 
+                action="view" 
+                checked={permissions.settings.view} 
+                onChange={() => handlePermissionChange('settings', 'view')} 
+              />
+              <PermissionCheckbox 
+                module="settings" 
+                action="edit" 
+                checked={permissions.settings.edit} 
+                onChange={() => handlePermissionChange('settings', 'edit')} 
+              />
+              <PermissionCheckbox 
+                module="settings" 
+                action="delete" 
+                checked={permissions.settings.delete} 
+                onChange={() => handlePermissionChange('settings', 'delete')} 
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
