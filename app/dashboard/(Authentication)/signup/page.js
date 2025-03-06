@@ -232,7 +232,7 @@ export default function SignUpPage() {
               <p className="text-sm text-gray-600">
                 Already have an account? {' '}
                 <Link 
-                  href="/login" 
+                  href="/" 
                   className="text-cyan-600 hover:underline"
                 >
                   Login
