@@ -73,10 +73,11 @@ export default function ConservatorySignUpPage() {
   const onSubmit = async (data) => {
     // Reset previous errors
     setError('');
-
+    
     try {
       // Create user with email and password
       const res = await createUserWithEmailAndPassword(data.email, data.password);
+      console.log(data);
       
       if (res) {
         // Optional: You might want to update the user profile with full name

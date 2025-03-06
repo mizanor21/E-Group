@@ -12,9 +12,12 @@ import settings from "@/public/icons/settings.png";
 import logout from "@/public/icons/logout.png";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const Nav = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [user1, loading, error] = useAuthState(auth);
+  
   const router = useRouter();
 
   useEffect(() => {
@@ -42,7 +45,7 @@ const Nav = () => {
   return (
     <div className="navbar flex justify-between px-5">
       <div className="flex flex-col items-start">
-        <h3 className="text-xl font-bold">Welcome, Mr. Shazzad Hossion </h3>
+        <h3 className="text-xl font-bold">Welcome, {user1?.displayName} </h3>
         <small className="text-sm">
           Today&apos;s {format(currentTime, "EEEE, MMMM d, yyyy")}
         </small>
