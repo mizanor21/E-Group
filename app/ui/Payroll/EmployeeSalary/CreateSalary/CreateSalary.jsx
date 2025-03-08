@@ -114,13 +114,13 @@ const CreateSalary = ({ id }) => {
           holidayOTRate = employeeData.hourlyRate * 1.5 // 1.5x for holiday OT
         } else if (employeeData.employeeType?.toLowerCase() === "daily") {
           // For daily employees, calculate from daily rate
-          const hourlyRate = employeeData.dailyRate / 8 // Assuming 8-hour workday
+          const hourlyRate = employeeData.dailyRate / 10 // Assuming 8-hour workday
           normalOTRate = hourlyRate * 1.25
           holidayOTRate = hourlyRate * 1.5
         } else {
           // For monthly employees
           const dailyRate = employeeData.basicPay / workingDays
-          const hourlyRate = dailyRate / 8 // Assuming 8-hour workday
+          const hourlyRate = dailyRate / 10 // Assuming 8-hour workday
           normalOTRate = hourlyRate * 1.25
           holidayOTRate = hourlyRate * 1.5
         }
