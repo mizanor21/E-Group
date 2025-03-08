@@ -28,18 +28,19 @@ const calculateSalaryByType = (employeeType, data, workingDays, numberOfLeave = 
 
   switch (employeeType?.toLowerCase()) {
     case "hourly":
-      // Calculate hourly salary based on actual working days and hours
+      // For hourly employees, workingDays is actually the number of working hours
       baseSalary = hourlyRate * workingDays
       break
 
     case "daily":
-      // Calculate daily salary based on actual working days
-      baseSalary = dailyRate * workingDays
+      // For daily employees, deduct the days they were on leave
+      baseSalary = dailyRate * actualWorkingDays
       break
 
     case "monthly":
-      // Calculate monthly salary prorated for actual working days
-      baseSalary = basicPay
+      // For monthly employees, calculate the per-day rate and deduct for leaves
+      const monthlyDailyRate = basicPay / workingDays
+      baseSalary = basicPay - (monthlyDailyRate * numberOfLeave)
       break
 
     default:
@@ -111,10 +112,15 @@ const CreateSalary = ({ id }) => {
         if (employeeData.employeeType?.toLowerCase() === "hourly") {
           normalOTRate = employeeData.hourlyRate * 1.25 // 1.25x for normal OT
           holidayOTRate = employeeData.hourlyRate * 1.5 // 1.5x for holiday OT
+        } else if (employeeData.employeeType?.toLowerCase() === "daily") {
+          // For daily employees, calculate from daily rate
+          const hourlyRate = employeeData.dailyRate / 8 // Assuming 8-hour workday
+          normalOTRate = hourlyRate * 1.25
+          holidayOTRate = hourlyRate * 1.5
         } else {
-          // For daily and monthly employees, calculate OT rate based on their daily rate
-          const dailyRate = employeeData.dailyRate || employeeData.basicPay / workingDays
-          const hourlyRate = dailyRate / 10
+          // For monthly employees
+          const dailyRate = employeeData.basicPay / workingDays
+          const hourlyRate = dailyRate / 8 // Assuming 8-hour workday
           normalOTRate = hourlyRate * 1.25
           holidayOTRate = hourlyRate * 1.5
         }
@@ -122,15 +128,22 @@ const CreateSalary = ({ id }) => {
         const normalOTEarning = normalOverTime * normalOTRate
         const holidayOTEarning = holidayOverTime * holidayOTRate
     
-        // Calculate deductions
-        const dailyRate = employeeData.dailyRate || employeeData.basicPay / workingDays
-        const leaveDeduction = dailyRate * numberOfLeave // We don't need separate leave deduction as it's handled in base salary
+        // Calculate deductions - Handle based on employee type
+        let leaveDeduction = 0
+        if (employeeData.employeeType?.toLowerCase() === "monthly") {
+          const dailyRate = employeeData.basicPay / workingDays
+          leaveDeduction = dailyRate * numberOfLeave
+        } else if (employeeData.employeeType?.toLowerCase() === "daily") {
+          leaveDeduction = employeeData.dailyRate * numberOfLeave
+        }
+        // For hourly employees, we don't calculate leave deductions as they only get paid for hours worked
+        
         const otherDeductions = ["dedFines", "dedDoc", "dedOthers"].reduce(
           (sum, key) => sum + (Number.parseFloat(formData[key]) || 0),
           0,
         )
     
-        const totalDeductions = leaveDeduction + otherDeductions // Only include other deductions
+        const totalDeductions = otherDeductions // Leave deduction is already factored into base salary
     
         // Calculate other earnings
         const otherEarnings =
@@ -227,6 +240,24 @@ const CreateSalary = ({ id }) => {
 
   const closeModal = () => setModalData({ isOpen: false, salaryData: null })
 
+  // Helper to get the proper label for working days input based on employee type
+  const getWorkingDaysLabel = () => {
+    if (employeeData?.employeeType?.toLowerCase() === "hourly") {
+      return "Total Hours"
+    } else {
+      return "Total Days (Month)"
+    }
+  }
+
+  // Helper to get max value for working days input
+  const getWorkingDaysMax = () => {
+    if (employeeData?.employeeType?.toLowerCase() === "hourly") {
+      return undefined // No upper limit for hours
+    } else {
+      return 31 // Max days in a month
+    }
+  }
+
   return (
     <div className="bg-white p-10 space-y-10">
       <h2 className="text-xl md:text-2xl lg:text-4xl text-center font-semibold bg-gradient-to-r from-[#4572ba] to-sky-600  bg-clip-text text-transparent ">
@@ -262,29 +293,23 @@ const CreateSalary = ({ id }) => {
         <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className={inputStyle} />
       </div>
 
-      {/* /* Working Days Section */ }
+      {/* Working Days Section */}
       <div className="mb-6">
-        <h4 className="text-lg font-semibold">
-          {
-            employeeData?.employeeType?.toLowerCase() === "monthly" || employeeData?.employeeType?.toLowerCase() === "daily"
-              ? "Total Days (Month)"
-              : "Total Hours"
-          }
-        </h4>
+        <h4 className="text-lg font-semibold">{getWorkingDaysLabel()}</h4>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-start gap-4 border rounded-xl p-5">
           <input
             {...register("workingDays", {
               required: "This field is required",
               min: { value: 1, message: "Value must be at least 1" },
-              max: employeeData?.employeeType?.toLowerCase() === "hourly" ? undefined : { value: 31, message: "Value cannot exceed 31" },
+              max: getWorkingDaysMax() ? { value: getWorkingDaysMax(), message: `Value cannot exceed ${getWorkingDaysMax()}` } : undefined,
             })}
             type="number"
             className={inputStyle}
-            placeholder="Enter values"
+            placeholder={employeeData?.employeeType?.toLowerCase() === "hourly" ? "Enter hours" : "Enter days"}
           />
           {errors.workingDays && <p className="text-red-500 text-sm">{errors.workingDays.message}</p>}
           <div>
-            <label className="block mb-2">Base Salary (for worked days)</label>
+            <label className="block mb-2">Base Salary</label>
             <input
               {...register("baseSalary")}
               type="text"
@@ -296,10 +321,8 @@ const CreateSalary = ({ id }) => {
         </form>
       </div>
 
-      {/* Over Time Section */}
-      {
-        employeeData?.employeeType?.toLowerCase() === "monthly" || employeeData?.employeeType?.toLowerCase() === "daily" ? (
-          <div>
+      {/* Over Time Section - Only for monthly and daily employees */}
+      <div>
         <h4 className="text-lg font-semibold">Over Time</h4>
         <div className="flex justify-between border rounded-xl border-gray-400 p-5">
           <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -333,8 +356,7 @@ const CreateSalary = ({ id }) => {
             </div>
           </form>
         </div>
-      </div>  
-        ): null}
+      </div>
 
       {/* Allowances Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
@@ -380,14 +402,24 @@ const CreateSalary = ({ id }) => {
           <h3 className="text-lg font-semibold">Deductions</h3>
           <div className="border rounded-xl border-rose-500 p-5 shadow-sm">
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 mt-4">
-            {employeeData?.employeeType?.toLowerCase() !== "hourly" && employeeData?.employeeType?.toLowerCase() !== "daily" && (
-      <input
-        {...register("numberOfLeave")}
-        type="number"
-        placeholder="Number of Leave Days"
-        className={inputStyle}
-      />
-    )}
+              {/* Only show leave input for monthly employees */}
+              {employeeData?.employeeType?.toLowerCase() === "monthly" && (
+                <input
+                  {...register("numberOfLeave")}
+                  type="number"
+                  placeholder="Number of Leave Days"
+                  className={inputStyle}
+                />
+              )}
+              {/* Only show leave input for daily employees */}
+              {employeeData?.employeeType?.toLowerCase() === "daily" && (
+                <input
+                  {...register("numberOfLeave")}
+                  type="number"
+                  placeholder="Number of Leave Days"
+                  className={inputStyle}
+                />
+              )}
               <input {...register("dedFines")} type="text" placeholder="Ded-Fines" className={inputStyle} />
               <input {...register("dedDoc")} type="text" placeholder="Ded-Doc" className={inputStyle} />
               <input {...register("dedOthers")} type="text" placeholder="Ded-Others" className={inputStyle} />
@@ -449,4 +481,3 @@ const CreateSalary = ({ id }) => {
 }
 
 export default CreateSalary
-
