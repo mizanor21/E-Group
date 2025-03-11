@@ -8,17 +8,19 @@ const EmployeeTable = ({ employees }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("");
   const [filterEmployeeType, setFilterEmployeeType] = useState("");
+  const [filterProject, setFilterProject] = useState("");
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
-    if (!employees?.length) return { roles: [], employeeTypes: [] };
+    if (!employees?.length) return { roles: [], employeeTypes: [], projects: [] };
     
     const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean);
     const employeeTypes = [...new Set(employees.map(emp => emp.employeeType))].filter(Boolean);
+    const projects = [...new Set(employees.map(emp => emp.project))].filter(Boolean);
     
-    return { roles, employeeTypes };
+    return { roles, employeeTypes, projects };
   }, [employees]);
 
   // Handle active filters display
@@ -27,13 +29,14 @@ const EmployeeTable = ({ employees }) => {
     if (searchQuery) filters.push({ type: 'search', label: `Search: ${searchQuery}` });
     if (filterRole) filters.push({ type: 'role', label: `Role: ${filterRole}` });
     if (filterEmployeeType) filters.push({ type: 'type', label: `Type: ${filterEmployeeType}` });
+    if (filterProject) filters.push({ type: 'project', label: `Project: ${filterProject}` });
     
     setActiveFilters(filters);
     setIsFilterActive(filters.length > 0);
     
     // Reset to first page when filters change
     setCurrentPage(1);
-  }, [searchQuery, filterRole, filterEmployeeType]);
+  }, [searchQuery, filterRole, filterEmployeeType, filterProject]);
 
   // Filtered employees based on all criteria
   const filteredEmployees = useMemo(() => {
@@ -41,12 +44,13 @@ const EmployeeTable = ({ employees }) => {
       (employee) =>
         (filterRole === "" || employee.role === filterRole) &&
         (filterEmployeeType === "" || employee.employeeType === filterEmployeeType) &&
+        (filterProject === "" || employee.project === filterProject) &&
         Object.values(employee)
           .join(" ")
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
     ) || [];
-  }, [employees, filterRole, filterEmployeeType, searchQuery]);
+  }, [employees, filterRole, filterEmployeeType, filterProject, searchQuery]);
   
   // Smart pagination
   const totalItems = filteredEmployees.length;
@@ -102,6 +106,7 @@ const EmployeeTable = ({ employees }) => {
     setSearchQuery("");
     setFilterRole("");
     setFilterEmployeeType("");
+    setFilterProject("");
     setCurrentPage(1);
   };
 
@@ -117,6 +122,9 @@ const EmployeeTable = ({ employees }) => {
       case 'type':
         setFilterEmployeeType("");
         break;
+      case 'project':
+        setFilterProject("");
+        break;
       default:
         break;
     }
@@ -125,19 +133,12 @@ const EmployeeTable = ({ employees }) => {
   // Get employee type badge color
   const getEmployeeTypeBadgeClass = (type) => {
     switch(type) {
-      case 'Full-time': 
+      case 'hourly': 
         return 'bg-green-100 text-green-800';
-      case 'Part-time':
-
+      case 'daily':
         return 'bg-yellow-100 text-yellow-800';
-      case 'Contract': 
+      case 'monthly': 
         return 'bg-purple-100 text-purple-800';
-      case 'Intern': 
-        return 'bg-blue-100 text-blue-800';
-      case 'Temporary': 
-        return 'bg-orange-100 text-orange-800';
-      case 'Remote': 
-        return 'bg-indigo-100 text-indigo-800';
       default: 
         return 'bg-gray-100 text-gray-800';
     }
@@ -249,6 +250,28 @@ const EmployeeTable = ({ employees }) => {
             </select>
           </div>
 
+          {/* Filter Project */}
+          <div>
+            <label
+              htmlFor="filterProject"
+              className="text-sm font-medium text-gray-600 mb-1 block"
+            >
+              Project
+            </label>
+            <select
+              id="filterProject"
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+              className="border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-300 w-full transition-all appearance-none bg-white"
+              style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a0aec0%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+            >
+              <option value="">All Projects</option>
+              {filterOptions.projects.map(project => (
+                <option key={project} value={project}>{project}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Total Employees Stats Box */}
           <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
             <div>
@@ -340,6 +363,7 @@ const EmployeeTable = ({ employees }) => {
                 <th className="py-3 px-4">Type</th>
                 <th className="py-3 px-4">Role</th>
                 <th className="py-3 px-4">Department</th>
+                <th className="py-3 px-4">Project</th>
                 <th className="py-3 px-4 text-center">Action</th>
               </tr>
             </thead>
@@ -364,6 +388,7 @@ const EmployeeTable = ({ employees }) => {
                     </td>
                     <td className="py-3 px-4">{employee.role}</td>
                     <td className="py-3 px-4">{employee.department}</td>
+                    <td className="py-3 px-4">{employee.project}</td>
                     <td className="py-3 px-4 text-center">
                       <Link 
                         href={`/dashboard/employees/${employee._id}`} 
@@ -381,7 +406,7 @@ const EmployeeTable = ({ employees }) => {
               ) : (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={10}
                     className="text-center py-8 text-gray-500"
                   >
                     <div className="flex flex-col items-center justify-center">
