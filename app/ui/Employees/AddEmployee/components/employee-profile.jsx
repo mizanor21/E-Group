@@ -1,54 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import * as z from "zod"
-
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowBack } from "react-icons/io"
 import Link from "next/link"
+import { toast } from "react-hot-toast"
 
-
-const formSchema = z.object({
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
-  email: z.string().email(),
-  phoneNumber: z.string(),
-  gender: z.string(),
-  nationality: z.string(),
-  department: z.string(),
-  currentJob: z.string(),
-  project: z.string(),
-  experience: z.string(),
-  employeeType: z.string(),
-  presentAddress1: z.string(),
-  presentCity: z.string(),
-  presentDivision: z.string(),
-  presentPostOrZipCode: z.string(),
-  isSameAddress: z.boolean(),
-  permanentAddress1: z.string().optional(),
-  permanentCity: z.string().optional(),
-  permanentDivision: z.string().optional(),
-  foodAllowance: z.string(),
-  transportAllowance: z.string(),
-  telephoneAllowance: z.string(),
-  dailyRate: z.string(),
-  commission: z.string(),
-  accommodation: z.string(),
-})
 
 export function EmployeeProfileForm({ employee, id }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: employee.firstName,
       lastName: employee.lastName,
@@ -78,30 +48,56 @@ export function EmployeeProfileForm({ employee, id }) {
     },
   })
 
+  const isSameAddress = form.watch("isSameAddress")
+
+  // Automatically fill permanent address if "Same as Present Address" is checked
+  useEffect(() => {
+    if (isSameAddress) {
+      form.setValue("permanentAddress1", form.getValues("presentAddress1"))
+      form.setValue("permanentCity", form.getValues("presentCity"))
+      form.setValue("permanentDivision", form.getValues("presentDivision"))
+    }
+  }, [isSameAddress, form])
+
   const onSubmit = async (data) => {
     try {
       setIsLoading(true)
-    //   await updateEmployee(id, data)
+
+      // Send a PATCH request to update the employee profile
+      const response = await fetch(`/api/employees/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update employee")
+      }
+
+      // Show success message
+      toast.success("Employee profile updated successfully")
       router.refresh()
     } catch (error) {
+      // Show error message
+      toast.error("Failed to update employee profile")
       console.error("Failed to update employee:", error)
     } finally {
       setIsLoading(false)
     }
   }
-  
-
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className=" p-6 bg-white shadow-lg rounded-lg mt-10 space-y-8"
-      >
-        {/* Form fields go here */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 bg-white shadow-lg rounded-lg mt-10 space-y-8">
         <div className="flex justify-between items-center">
-
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Link href={'/dashboard/employees'}><IoIosArrowBack/></Link> Employee Details</h2>
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <Link href="/dashboard/employees">
+              <IoIosArrowBack />
+            </Link>
+            Employee Details
+          </h2>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Updating..." : "Update Profile"}
           </Button>
@@ -111,7 +107,6 @@ export function EmployeeProfileForm({ employee, id }) {
           {/* Personal Info */}
           <div className="bg-gray-100 p-4 rounded-lg space-y-4">
             <h3 className="font-semibold text-gray-700">Personal Info</h3>
-
             <FormField
               control={form.control}
               name="firstName"
@@ -125,7 +120,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="lastName"
@@ -139,7 +133,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="email"
@@ -153,7 +146,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="phoneNumber"
@@ -167,7 +159,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="gender"
@@ -195,7 +186,6 @@ export function EmployeeProfileForm({ employee, id }) {
           {/* Job Info */}
           <div className="bg-gray-100 p-4 rounded-lg space-y-4">
             <h3 className="font-semibold text-gray-700">Job Details</h3>
-
             <FormField
               control={form.control}
               name="department"
@@ -209,7 +199,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="currentJob"
@@ -223,7 +212,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="project"
@@ -237,7 +225,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="experience"
@@ -257,7 +244,6 @@ export function EmployeeProfileForm({ employee, id }) {
         {/* Address Section */}
         <div className="bg-gray-100 p-4 rounded-lg space-y-4">
           <h3 className="font-semibold text-gray-700">Address</h3>
-
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -272,7 +258,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
@@ -287,7 +272,6 @@ export function EmployeeProfileForm({ employee, id }) {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="presentDivision"
@@ -301,7 +285,6 @@ export function EmployeeProfileForm({ employee, id }) {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="presentPostOrZipCode"
@@ -332,13 +315,58 @@ export function EmployeeProfileForm({ employee, id }) {
               </FormItem>
             )}
           />
+
+          {!isSameAddress && (
+            <>
+              <FormField
+                control={form.control}
+                name="permanentAddress1"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Permanent Address</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="permanentCity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="permanentDivision"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Division</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Allowances Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-gray-100 p-4 rounded-lg space-y-4">
             <h3 className="font-semibold text-gray-700">Allowances</h3>
-
             <FormField
               control={form.control}
               name="foodAllowance"
@@ -352,7 +380,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="transportAllowance"
@@ -366,7 +393,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="telephoneAllowance"
@@ -384,7 +410,6 @@ export function EmployeeProfileForm({ employee, id }) {
 
           <div className="bg-gray-100 p-4 rounded-lg space-y-4">
             <h3 className="font-semibold text-gray-700">Financials</h3>
-
             <FormField
               control={form.control}
               name="dailyRate"
@@ -398,7 +423,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="commission"
@@ -412,7 +436,6 @@ export function EmployeeProfileForm({ employee, id }) {
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="accommodation"
