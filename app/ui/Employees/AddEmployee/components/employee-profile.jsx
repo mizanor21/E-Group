@@ -574,10 +574,10 @@ const EmployeeProfileUpdate = ({ employeeData, employeeId }) => {
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select type</option>
-                    <option value="fulltime">Full-time</option>
-                    <option value="parttime">Part-time</option>
                     <option value="hourly">Hourly</option>
-                    <option value="contract">Contract</option>
+                    <option value="daily">Daily</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="others">Others</option>
                   </select>
                 )}
               />
