@@ -2,7 +2,7 @@ import EmployeeProfileUpdate from "@/app/ui/Employees/AddEmployee/components/emp
 
 export default async function EmployeeProfile({ params }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/${params.id}`, {
-    next: { revalidate: 10 },
+    next: { revalidate: 5 },
   })
 
   if (!res.ok) {
