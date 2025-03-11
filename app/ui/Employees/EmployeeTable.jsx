@@ -356,13 +356,12 @@ const EmployeeTable = ({ employees }) => {
             <thead>
               <tr className="bg-gray-50 text-gray-700 text-sm uppercase tracking-wider border-b">
                 <th className="py-3 px-4">S/N</th>
-                <th className="py-3 px-4">Name</th>
                 <th className="py-3 px-4">Employee ID</th>
+                <th className="py-3 px-4">Name</th>
                 <th className="py-3 px-4">Gender</th>
                 <th className="py-3 px-4">Phone Number</th>
                 <th className="py-3 px-4">Type</th>
                 <th className="py-3 px-4">Role</th>
-                <th className="py-3 px-4">Department</th>
                 <th className="py-3 px-4">Project</th>
                 <th className="py-3 px-4 text-center">Action</th>
               </tr>
@@ -375,10 +374,10 @@ const EmployeeTable = ({ employees }) => {
                     className="border-b hover:bg-gray-50 transition-colors"
                   >
                     <td className="py-3 px-4 text-gray-500">{startRow + index + 1}</td>
+                    <td className="py-3 px-4 font-mono text-sm">{employee.employeeID}</td>
                     <td className="py-3 px-4 font-medium">
                       {employee.firstName} {employee.lastName}
                     </td>
-                    <td className="py-3 px-4 font-mono text-sm">{employee.employeeID}</td>
                     <td className="py-3 px-4">{employee.gender}</td>
                     <td className="py-3 px-4">{employee.phoneNumber}</td>
                     <td className="py-3 px-4">
@@ -387,7 +386,6 @@ const EmployeeTable = ({ employees }) => {
                       </span>
                     </td>
                     <td className="py-3 px-4">{employee.role}</td>
-                    <td className="py-3 px-4">{employee.department}</td>
                     <td className="py-3 px-4">{employee.project}</td>
                     <td className="py-3 px-4 text-center">
                       <Link 
