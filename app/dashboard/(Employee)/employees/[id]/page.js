@@ -1,4 +1,4 @@
-import { EmployeeProfileForm } from "@/app/ui/Employees/AddEmployee/components/employee-profile"
+import EmployeeProfileUpdate from "@/app/ui/Employees/AddEmployee/components/employee-profile"
 
 export default async function EmployeeProfile({ params }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees/${params.id}`, {
@@ -11,6 +11,6 @@ export default async function EmployeeProfile({ params }) {
 
   const employee = await res.json()
 
-  return <EmployeeProfileForm employee={employee} id={params.id} />
+  return <EmployeeProfileUpdate employeeData={employee} employeeId={params.id} />
 }
 
