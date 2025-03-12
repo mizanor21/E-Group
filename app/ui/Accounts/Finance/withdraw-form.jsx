@@ -29,13 +29,11 @@ export function WithdrawForm({ onClose }) {
 
   const onSubmit = async(data) => {
     try {
-      const response = await axios.post("/api/investments", data);
-      toast.success("Investment added successfully!");
-      console.log(response.data);
+      const response = await axios.post("/api/withdraw", data);
+      toast.success("Withdraw added successfully!");
       onClose();
     } catch (error) {
       toast.error("There was an error submitting the form.");
-      console.error("There was an error submitting the form:", error);
     }
   }
 
@@ -58,7 +56,7 @@ export function WithdrawForm({ onClose }) {
 
           <div>
             <label htmlFor="investorName" className="block text-sm font-medium text-gray-700">
-              Investor Name
+              Withdrawer
             </label>
             <input
               type="text"
