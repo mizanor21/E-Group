@@ -36,4 +36,4 @@ const withdrawSchema = new mongoose.Schema(
 );
 
 export const Withdraw =
-  mongoose.models.Withdraw || mongoose.model("withdraw", withdrawSchema);
+  mongoose.models.Withdraw || mongoose.model("Withdraw", withdrawSchema);

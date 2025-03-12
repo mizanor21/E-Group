@@ -17,7 +17,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [modeFilter, setModeFilter] = useState("all")
-  const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" })
+  const [sortConfig, setSortConfig] = useState({ key: "date", direction: "desc" });
   const [timeframe, setTimeframe] = useState("monthly") // monthly, quarterly, yearly
   const [showDetailedView, setShowDetailedView] = useState(false)
 
@@ -54,6 +54,15 @@ const WithdrawOverview = ({ data, selectedYear }) => {
         return new Date(b.date) - new Date(a.date)
       })
   }, [data, searchTerm, statusFilter, modeFilter, sortConfig])
+
+  // Request sort handler
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
 
   // Calculate totals for summary
   const summaryData = useMemo(() => {
@@ -125,7 +134,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
     // Add headers
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text(`Investment Overview - ${selectedYear}`, 14, 15);
+    doc.text(`Withdraw Overview - ${selectedYear}`, 14, 15);
   
     // Add timestamp
     doc.setFontSize(10);
@@ -146,11 +155,11 @@ const WithdrawOverview = ({ data, selectedYear }) => {
     // Add analytics section
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Investment Analytics", 14, 40);
+    doc.text("Withdraw Analytics", 14, 40);
   
     // Summary metrics
     const summaryMetrics = [
-      ["Total Investments", `$${summaryData.total.toFixed(2)}`],
+      ["Total Withdraws", `$${summaryData.total.toFixed(2)}`],
       ["Total Investors", `${summaryData.count}`],
     ];
   
@@ -199,7 +208,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
     ]);
   
     autoTable(doc, {
-      head: [["Date", "Investor Name", "Voucher No.", "Submission Date", "Mode", "Status", "Amount"]],
+      head: [["Date", "Withdrawer", "Voucher No.", "Submission Date", "Mode", "Status", "Amount"]],
       body: tableData,
       startY: doc.lastAutoTable.finalY + 20,
       styles: { fontSize: 8 },
@@ -217,18 +226,18 @@ const WithdrawOverview = ({ data, selectedYear }) => {
   
     let recommendations = [];
     if (summaryData.total === 0) {
-      recommendations.push("• No investments found for the selected filters.");
+      recommendations.push("• No Withdraws found for the selected filters.");
     } else {
       if (statusFilter === "Overdue") {
-        recommendations.push("• High overdue investments detected. Follow up with investors immediately.");
+        recommendations.push("• High overdue Withdraws detected. Follow up with investors immediately.");
       }
       if (statusFilter === "Pending") {
-        recommendations.push("• Review pending investments and ensure timely clearance.");
+        recommendations.push("• Review pending Withdraws and ensure timely clearance.");
       }
       if (timeBasedData.length > 0) {
         const latestPeriod = timeBasedData[0][0];
         const latestData = timeBasedData[0][1];
-        recommendations.push(`• Latest period (${latestPeriod}) had ${latestData.count} investments totaling $${latestData.total.toFixed(2)}.`);
+        recommendations.push(`• Latest period (${latestPeriod}) had ${latestData.count} Withdraws totaling $${latestData.total.toFixed(2)}.`);
       }
     }
   
@@ -237,7 +246,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
     });
   
     // Save with appropriate filename
-    let filename = `investment-overview-${selectedYear}`;
+    let filename = `Withdraw-overview-${selectedYear}`;
     if (statusFilter !== "all") filename += `-${statusFilter}`;
     if (modeFilter !== "all") filename += `-${modeFilter}`;
     doc.save(`${filename}.pdf`);
@@ -286,7 +295,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
     
     // Main transaction info
     const transactionData = [
-      ["Investor", item.investorName],
+      ["Withdrawer", item.investorName],
       ["Voucher No", item.voucherNo],
       ["Transaction Date", transactionDate],
       ["Submission Date", submissionDate],
@@ -364,7 +373,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
     doc.text(`Generated: ${new Date().toLocaleString()}`, centerX, 
              doc.internal.pageSize.getHeight() - 10, { align: 'center' })
     
-    doc.save(`IV-Memo-${item.voucherNo}.pdf`)
+    doc.save(`Withdraw-${item.voucherNo}.pdf`)
   }
 
   return (
@@ -390,7 +399,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">Total Investments</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-500">Total Withdraws</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center">
@@ -416,7 +425,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
           {/* Time-based analysis */}
           <Card>
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle>Investment Analysis</CardTitle>
+              <CardTitle>Withdraw Analysis</CardTitle>
               <div className="flex items-center space-x-2">
                 <Button 
                   variant={timeframe === "monthly" ? "default" : "outline"} 
@@ -511,7 +520,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
         {/* Summary info */}
         {filteredData.length > 0 && (
           <div className="mt-4 text-sm text-gray-600">
-            Showing {filteredData.length} investments 
+            Showing {filteredData.length} Withdraws 
             {(statusFilter !== "all" || modeFilter !== "all" || searchTerm) && " with applied filters"} | 
             Total: ${summaryData.total.toFixed(2)}
           </div>
@@ -527,8 +536,8 @@ const WithdrawOverview = ({ data, selectedYear }) => {
                 className="cursor-pointer"
                 onClick={() => requestSort('date')}
               >
-                Date {sortConfig.key === 'date' && (
-                  <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                Date {sortConfig?.key === 'date' && (
+                  <span>{sortConfig?.direction === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
               <TableHead>Investor Name</TableHead>
@@ -551,7 +560,7 @@ const WithdrawOverview = ({ data, selectedYear }) => {
             {filteredData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                  No matching investments found
+                  No matching Withdraws found
                 </TableCell>
               </TableRow>
             ) : (

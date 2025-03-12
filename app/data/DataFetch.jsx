@@ -50,3 +50,7 @@ export const useInvestmentData = () => {
   const { data, error } = useSWR(`${API_URL}/api/investments`, fetcher);
   return { data, error, isLoading: !data && !error };
 };
+export const useWithdrawData = () => {
+  const { data, error } = useSWR(`${API_URL}/api/withdraw`, fetcher);
+  return { data, error, isLoading: !data && !error };
+};

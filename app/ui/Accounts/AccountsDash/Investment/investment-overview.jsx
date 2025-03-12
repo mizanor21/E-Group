@@ -55,6 +55,15 @@ const EnhancedInvestmentOverview = ({ data, selectedYear }) => {
       })
   }, [data, searchTerm, statusFilter, modeFilter, sortConfig])
 
+  // Request sort handler
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
   // Calculate totals for summary
   const summaryData = useMemo(() => {
     if (!filteredData.length) return { total: 0, count: 0 }

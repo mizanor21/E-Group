@@ -5,6 +5,7 @@ import {
   useIncomeData,
   useInvestmentData,
   useSalaryData,
+  useWithdrawData,
 } from "@/app/data/DataFetch";
 import Expance from "@/app/ui/Accounts/AccountsDash/Expance/Expance";
 import Investment from "@/app/ui/Accounts/AccountsDash/Investment/Investment";
@@ -24,14 +25,12 @@ import ExpensesOverview from "@/app/ui/Accounts/AccountsDash/Expance/expenses-ov
 import InvestmentOverview from "@/app/ui/Accounts/AccountsDash/Investment/investment-overview";
 import Withdraw from "@/app/ui/Accounts/AccountsDash/Withdrow/withdraw";
 import WithdrawOverview from "@/app/ui/Accounts/AccountsDash/Withdrow/withdraw-overview";
-// import IncomeOverview from "@/app/ui/Accounts/AccountsDash/PreMonthIncome/income-overview"
-// import ExpensesOverview from "@/app/ui/Accounts/AccountsDash/Expance/expenses-overview"
-// import InvestmentOverview from "@/app/ui/Accounts/AccountsDash/Investment/investment-overview"
 
 const Page = () => {
   const { data: income } = useIncomeData();
   const { data: expenses } = useExpensesData();
   const { data: investment } = useInvestmentData();
+  const { data: withdraw } = useWithdrawData();
   const { data: salaryData } = useSalaryData();
 
   const [selectedYear, setSelectedYear] = useState("");
@@ -104,6 +103,7 @@ const Page = () => {
   const filteredIncome = filterData(income);
   const filteredExpenses = filterData(expenses);
   const filteredInvestment = filterData(investment);
+  const filteredWithdraw = filterData(withdraw);
   const filteredSalary = filterSalaryData(salaryData);
 
   const calculateInitialIncome = () => {
@@ -228,7 +228,7 @@ const Page = () => {
         <div className="grid grid-cols-2 gap-3 2xl:gap-5">
           <PreMonthIncome data={initialIncome} />
           <Investment data={filteredInvestment} />
-          <Withdraw data={filteredInvestment} />
+          <Withdraw data={filteredWithdraw} />
           <Expance data={totalExpenses} salaryData={filteredSalary} />
           <Card
             className={`rounded-2xl p-4 ${netProfitColor} flex items-center justify-center text-center`}
@@ -253,7 +253,7 @@ const Page = () => {
         <IncomeOverview data={filteredIncome} />
         <ExpensesOverview data={filteredExpenses} />
         <InvestmentOverview data={filteredInvestment} />
-        <WithdrawOverview data={filteredInvestment} />
+        <WithdrawOverview data={filteredWithdraw} />
       </div>
     </div>
   );
