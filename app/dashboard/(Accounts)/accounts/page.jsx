@@ -118,6 +118,10 @@ const Page = () => {
     return initialIncome + investmentIncome;
   };
 
+  const calculateWithdraw = () => {
+    return filteredWithdraw?.reduce((sum, item) => sum + item.amount, 0) || 0;
+  };
+
   const calculateTotalExpenses = () => {
     const expensesTotal =
       filteredExpenses?.reduce((sum, item) => sum + item.amount, 0) || 0;
@@ -128,10 +132,11 @@ const Page = () => {
 
   const initialIncome = calculateInitialIncome();
   const totalIncome = calculateTotalIncome();
+  const totalWithdraw = calculateWithdraw();
   const totalExpenses = calculateTotalExpenses();
 
   const calculateNetProfit = () => {
-    return totalIncome - totalExpenses;
+    return totalIncome - totalExpenses - totalWithdraw;
   };
 
   const netProfit = calculateNetProfit();
