@@ -4,12 +4,13 @@ import { useState } from "react"
 import { IncomeForm } from "./income-form"
 import { ExpenseForm } from "./expense-form"
 import { InvestmentForm } from "./investment-form"
+import { WithdrawForm } from "./withdraw-form"
 
 const Finance=() =>{
   const [activeDialog, setActiveDialog] = useState(null)
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold">Accounts Dashboard</h2>
         <div className="space-x-2">
@@ -31,12 +32,19 @@ const Finance=() =>{
           >
             Add Investment
           </button>
+          <button
+            onClick={() => setActiveDialog("withdraw")}
+            className="bg-[#b863e5] hover:bg-[#A601F9] text-white font-bold py-2 px-4 rounded"
+          >
+            Add Withdraw
+          </button>
         </div>
       </div>
 
       {activeDialog === "income" && <IncomeForm onClose={() => setActiveDialog(null)} />}
       {activeDialog === "expense" && <ExpenseForm onClose={() => setActiveDialog(null)} />}
       {activeDialog === "investment" && <InvestmentForm onClose={() => setActiveDialog(null)} />}
+      {activeDialog === "withdraw" && <WithdrawForm onClose={() => setActiveDialog(null)} />}
     </div>
   )
 }

@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-const Investment = ({ data }) => {
+const Withdraw = ({ data }) => {
   const totalInvestment = data?.reduce((sum, item) => sum + item.amount, 0) || 0
 
   return (
     <Card className="w-full bg-[#A601FF] text-white rounded-2xl flex justify-center items-center text-center">
       <div className="">
       <CardHeader>
-        <CardTitle>Investment</CardTitle>
+        <CardTitle>Withdraw</CardTitle>
       </CardHeader>
       <CardContent className="">
         <div className="text-2xl font-semibold">${totalInvestment.toFixed(2)}</div>
@@ -18,5 +18,5 @@ const Investment = ({ data }) => {
   )
 }
 
-export default Investment
+export default Withdraw
 
