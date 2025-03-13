@@ -1,52 +1,18 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    confirmPassword: {
-      type: String,
-    },
+    uid: { type: String, required: true, unique: true }, // Firebase UID
+    fullName: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     permissions: {
-      employee: {
-        create: { type: Boolean, default: false },
-        view: { type: Boolean, default: false },
-        edit: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      },
-      payroll: {
-        create: { type: Boolean, default: false },
-        view: { type: Boolean, default: false },
-        edit: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      },
-      accounts: {
-        create: { type: Boolean, default: false },
-        view: { type: Boolean, default: false },
-        edit: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      },
-      settings: {
-        create: { type: Boolean, default: false },
-        view: { type: Boolean, default: false },
-        edit: { type: Boolean, default: false },
-        delete: { type: Boolean, default: false },
-      },
+      employee: { create: Boolean, view: Boolean, edit: Boolean, delete: Boolean },
+      payroll: { create: Boolean, view: Boolean, edit: Boolean, delete: Boolean },
+      accounts: { create: Boolean, view: Boolean, edit: Boolean, delete: Boolean },
+      settings: { create: Boolean, view: Boolean, edit: Boolean, delete: Boolean },
     },
   },
   { timestamps: true }
 );
 
-export const User =
-  mongoose.models.User || mongoose.model("User", userSchema);
+export const User = mongoose.models.User || mongoose.model('User', userSchema);

@@ -9,10 +9,10 @@ const Layout = ({ children }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col bg-[#f2f7ff] text-black">
-        <div className="shadow-sm">
-          <Nav />
-        </div>
+        <div className="px-5 pt-5">
 
+        <Nav />
+        </div>
         <div className="flex-1 overflow-y-auto  ">
           <div className="p-6 min-h-screen">{children}
           <Toaster />

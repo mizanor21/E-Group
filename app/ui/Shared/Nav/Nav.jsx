@@ -1,7 +1,6 @@
 "use client";
 import { format } from "date-fns";
 import React, { useEffect, useState } from "react";
-import { IoMdNotifications } from "react-icons/io";
 import Image from "next/image";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase.config";
@@ -16,8 +15,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 const Nav = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [user1, loading, error] = useAuthState(auth);
-  
+  const [loginUser, loading, error] = useAuthState(auth);
   const router = useRouter();
 
   useEffect(() => {
@@ -25,86 +23,131 @@ const Nav = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Firebase SignOut Handler
+  useEffect(() => {
+    if (loading) return; // Don't proceed if auth state is still loading
+    
+    if (!loginUser) {
+      // Redirect to login page if no user is logged in
+      router.push('/');
+      return;
+    }
+    
+  }, [loginUser, loading, router]);
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      // Clear any local storage or session data if needed
-      localStorage.removeItem('user'); // Optional: clear user data
+      localStorage.removeItem('user');
       toast.success("Successfully signed out!");
-      
-      // Redirect to login page
       router.push('/');
     } catch (error) {
       console.error("Sign out error", error);
-      // Optionally show an error toast or message
-      alert("Failed to sign out. Please try again.");
+      toast.error("Failed to sign out. Please try again.");
     }
   };
 
+  // Show skeleton UI while loading
+  if (loading) {
+    return (
+      <div className="navbar flex justify-between px-5 animate-pulse">
+        <div className="flex flex-col items-start">
+          <div className="h-6 bg-gray-200 rounded w-48 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-32"></div>
+        </div>
+        <div className="flex">
+          <div className="w-14 h-14 bg-gray-200 rounded-full"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="navbar flex justify-between px-5">
+        <div className="flex flex-col items-start">
+          <h3 className="text-xl font-bold text-red-500">Authentication Error</h3>
+          <small className="text-sm">Please try refreshing the page</small>
+        </div>
+        <button 
+          onClick={() => router.push('/')}
+          className="btn btn-error btn-sm"
+        >
+          Return to Login
+        </button>
+      </div>
+    );
+  }
+
+  const displayName = loginUser?.displayName;
+
   return (
-    <div className="navbar flex justify-between px-5">
+    <div className="navbar flex justify-between p-4 shadow-sm bg-white rounded-lg">
       <div className="flex flex-col items-start">
-        <h3 className="text-xl font-bold">Welcome, {user1?.displayName} </h3>
-        <small className="text-sm">
+        <h3 className="text-xl font-bold">
+          Welcome, {displayName}
+        </h3>
+        <small className="text-sm text-gray-600">
           Today&apos;s {format(currentTime, "EEEE, MMMM d, yyyy")}
         </small>
       </div>
-      <div className="flex">
-        <div className="dropdown dropdown-end">
-          <div
-            tabIndex={0}
-            className="card card-compact dropdown-content bg-base-100 z-[1] mt-3 w-52 shadow"
-          >
-            <div className="card-body">
-              <span className="text-lg font-bold">8 Notifications</span>
-              <div className="card-actions">
-                <button className="btn bg-gradient-to-r from-[#2d63a9] to-[#2d63a9]/50 text-white btn-block">
-                  View Notifications
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center gap-4">
+        
+        {/* User Profile Dropdown */}
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}
             role="button"
-            className="btn btn-ghost btn-circle avatar"
+            className="btn btn-ghost btn-circle avatar ring ring-primary ring-offset-2"
           >
-            <div className="w-14 rounded-full">
-              <Image alt="User demo profile" src={demoProfile} />
+            <div className="w-10 rounded-full">
+              <Image alt={`${displayName}'s profile`} src={demoProfile} />
             </div>
           </div>
           <ul
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
           >
-            <li className="flex justify-between">
-              <div className="">
-                <Image width={20} height={20} alt="User logo" src={user} />
-                <Link href={'/dashboard/signup'} className="justify-between">Create New User</Link>
-              </div>
+            <li>
+              <Link href="/dashboard/profile" className="py-2 font-medium">
+                <div className="flex items-center gap-2">
+                  <Image width={20} height={20} alt="User logo" src={user} />
+                  <span>Profile</span>
+                </div>
+              </Link>
             </li>
-            <li className="flex justify-between">
-              <div className="">
-                <Image
-                  width={20}
-                  height={20}
-                  alt="settings logo"
-                  src={settings}
-                />
-                <a>Settings</a>
-              </div>
+            <li>
+              <Link href='/dashboard/signup' className="py-2">
+                <div className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <line x1="19" x2="19" y1="8" y2="14" />
+                    <line x1="16" x2="22" y1="11" y2="11" />
+                  </svg>
+                  <span>Create New User</span>
+                </div>
+              </Link>
             </li>
-            <li className="flex justify-between">
-              <div 
+            <li>
+              <Link href="/dashboard/settings" className="py-2">
+                <div className="flex items-center gap-2">
+                  <Image width={20} height={20} alt="settings logo" src={settings} />
+                  <span>Settings</span>
+                </div>
+              </Link>
+            </li>
+            <div className="divider my-1"></div>
+            <li>
+              <button 
                 onClick={handleSignOut} 
-                className="cursor-pointer"
+                className="py-2 text-red-500 hover:text-red-700"
               >
-                <Image width={20} height={20} alt="logout logo" src={logout} />
-                <a>Logout</a>
-              </div>
+                <div className="flex items-center gap-2">
+                  <Image width={20} height={20} alt="logout logo" src={logout} />
+                  <span>Logout</span>
+                </div>
+              </button>
             </li>
           </ul>
         </div>
