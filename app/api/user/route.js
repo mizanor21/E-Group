@@ -15,7 +15,11 @@ export async function GET(request) {
       users = await User.find();
     }
 
-    return NextResponse.json({ success: true, users }, { status: 200 });
+    if (email) {
+      return NextResponse.json(users[0]);
+    } else {
+      return NextResponse.json(users);
+    }
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json({ success: false, message: "Failed to fetch users" }, { status: 500 });
