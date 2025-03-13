@@ -102,8 +102,8 @@ export default function SignUpPage() {
         permissions: permissions, // Include permissions from state
       };
   
-      // Send a POST request to the /api/signup endpoint
-      const response = await fetch('/api/signup', {
+      // Send a POST request to the /api/user endpoint
+      const response = await fetch('/api/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

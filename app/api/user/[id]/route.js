@@ -1,11 +1,11 @@
 import { connectToDB } from "@/app/lib/connectToDB";
-import { Signup } from "@/app/lib/Signup/model";
+import { User } from "@/app/lib/User/model";
 import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
   const { id } = params;
   await connectToDB();
-  const data = await Signup.findOne({ _id: id });
+  const data = await User.findOne({ _id: id });
   if (!data) {
     return NextResponse.json(
       { message: "data not found" },
@@ -22,7 +22,7 @@ export async function PATCH(req, { params }) {
   await connectToDB();
 
   try {
-    const updated = await Signup.findByIdAndUpdate(id, data, {
+    const updated = await User.findByIdAndUpdate(id, data, {
       new: true, // Returns the updated document
       runValidators: true, // Ensures model validation
     });
