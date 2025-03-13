@@ -87,48 +87,45 @@ export default function SignUpPage() {
     }));
   };
 
-  // Signup Submit Handler
   const onSubmit = async (data) => {
     // Reset previous errors
     setError('');
-    
+  
     try {
-      // Create user with email and password
-      const res = await createUserWithEmailAndPassword(data.email, data.password);
-      
-      if (res) {
-        // Update the user profile with full name and permissions
-        const success = await updateProfile({ 
-          displayName: data.fullName,
-          permissions: JSON.stringify(permissions), // Store permissions as a string
-        });
-        
-        if (success) {
-          console.log("Profile updated with display name and permissions:", data.fullName, permissions);
-        } else {
-          console.error("Failed to update profile:", updateError);
-          // Continue anyway since basic account was created
-        }
+  
+      // Prepare the data to match the schema
+      const userData = {
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        permissions: permissions, // Include permissions from state
+      };
+  
+      // Send a POST request to the /api/signup endpoint
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      // Handle the response
+      const result = await response.json();
+  
+      if (response.ok) {
+        // If the API call is successful, show a success message and redirect
         toast.success("Account created successfully!");
-        
-        // Redirect to dashboard or profile setup
         router.push('/dashboard');
+      } else {
+        // If there's an error, display the error message
+        setError(result.message || 'Sign up failed. Please try again.');
       }
     } catch (err) {
-      // Handle specific Firebase authentication errors
-      switch (err.code) {
-        case 'auth/email-already-in-use':
-          setError('Email is already registered');
-          break;
-        case 'auth/invalid-email':
-          setError('Invalid email address');
-          break;
-        case 'auth/operation-not-allowed':
-          setError('Sign up is currently disabled');
-          break;
-        default:
-          setError('Sign up failed. Please try again.');
-      }
+      // Handle any unexpected errors
+      setError('An unexpected error occurred. Please try again.');
+      console.error("Signup error:", err);
     }
   };
 
