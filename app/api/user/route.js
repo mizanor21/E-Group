@@ -2,33 +2,23 @@ import { connectToDB } from "@/app/lib/connectToDB";
 import { User } from "@/app/lib/User/model";
 import { NextResponse } from "next/server";
 
-// export async function GET() {
-//   await connectToDB();
-//   const data = await Signup.find();
-//   const response = NextResponse.json(data);
-//   response.headers.set("Access-Control-Allow-Origin", "*");
-//   return response;
-// }
-
-
 export async function GET(request) {
   try {
     await connectToDB();
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
 
-    let query = {};
+    let users;
     if (email) {
-      query.email = email;
+      users = await User.find({ email }); 
+    } else {
+      users = await User.find();
     }
 
-    const company = await User.find(query); 
-
-    const response = NextResponse.json(company);
-    response.headers.set("Access-Control-Allow-Origin", "*");
-    return response;
+    return NextResponse.json({ success: true, users }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    console.error("Error fetching users:", error);
+    return NextResponse.json({ success: false, message: "Failed to fetch users" }, { status: 500 });
   }
 }
 
