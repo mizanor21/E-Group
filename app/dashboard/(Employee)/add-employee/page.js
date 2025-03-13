@@ -1,13 +1,17 @@
-// import AddEmployee from "@/app/ui/Employee/AddEmployee/AddEmployee";
+'use client'
+import { useLoginUserData } from "@/app/data/DataFetch";
+import ErrorPage from "@/app/ui/component/Error";
 import AddEmployee from "@/app/ui/Employees/AddEmployee/components/AddEmployee";
 import React from "react";
 
-const page = () => {
+const Page = () => {
+  const {data} = useLoginUserData([])
+  
   return (
     <div>
-      <AddEmployee />
+      {data?.permissions?.employee?.create ? <AddEmployee /> : <ErrorPage />}
     </div>
   );
 };
 
-export default page;
+export default Page;

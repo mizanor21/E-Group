@@ -1,4 +1,6 @@
 "use client";
+import { auth } from "@/firebase.config";
+import { useAuthState } from "react-firebase-hooks/auth";
 import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -52,5 +54,12 @@ export const useInvestmentData = () => {
 };
 export const useWithdrawData = () => {
   const { data, error } = useSWR(`${API_URL}/api/withdraw`, fetcher);
+  return { data, error, isLoading: !data && !error };
+};
+export const useLoginUserData = () => {
+  const [loginUser] = useAuthState(auth);
+  const shouldFetch = loginUser?.email ? `${API_URL}/api/user?email=${loginUser?.email}` : null;
+  const { data, error } = useSWR(shouldFetch, fetcher);
+
   return { data, error, isLoading: !data && !error };
 };
