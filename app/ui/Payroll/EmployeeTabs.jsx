@@ -2,8 +2,6 @@
 import React, { useState } from "react";
 import EmployeeSalary from "./EmployeeSalary/EmployeeSalary";
 import EmployeePayslips from "./EmployeePayslips/EmployeePayslips";
-import EmployeePayroll from "./EmployeePayroll/EmployeePayroll";
-// import TaxDefinitions from "./TaxDefinitions/TaxDefinitions";
 
 const EmployeeTabs = () => {
   const [activeTab, setActiveTab] = useState("employeeSalary"); // Manage active tab
@@ -32,33 +30,12 @@ const EmployeeTabs = () => {
         >
           Employee Payslips
         </button>
-        <button
-          onClick={() => setActiveTab("employeePayroll")}
-          className={`${
-            activeTab === "employeePayroll"
-              ? "border-b-4 border-blue-500 text-blue-500"
-              : "hover:text-blue-500"
-          } pb-2 font-medium`}
-        >
-          Employee Payroll
-        </button>
-        {/* <button
-          onClick={() => setActiveTab("taxDefinitions")}
-          className={`${
-            activeTab === "taxDefinitions"
-              ? "border-b-4 border-blue-500 text-blue-500"
-              : "hover:text-blue-500"
-          } pb-2 font-medium`}
-        >
-          Tax Definitions
-        </button> */}
+        
       </div>
 
       {/* Render Components Based on Active Tab */}
       {activeTab === "employeeSalary" && <EmployeeSalary />}
       {activeTab === "employeePayslips" && <EmployeePayslips />}
-      {activeTab === "employeePayroll" && <EmployeePayroll />}
-      {/* {activeTab === "taxDefinitions" && <TaxDefinitions />} */}
     </div>
   );
 };
