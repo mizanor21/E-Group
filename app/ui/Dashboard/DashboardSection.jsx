@@ -171,7 +171,7 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
           </table>
         </div>
         {/* Payment Vouchers */}
-        <div className="bg-white p-6 rounded-lg shadow-lg">
+        {/* <div className="bg-white p-6 rounded-lg shadow-lg">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Payment Vouchers</h3>
           <table className="w-full text-left text-sm border-collapse">
             <thead>
@@ -201,7 +201,7 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
               ))}
             </tbody>
           </table>
-        </div>
+        </div> */}
       </div>
 
       {/* Meetings */}
