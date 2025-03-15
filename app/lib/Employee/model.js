@@ -61,6 +61,11 @@ const employeeSchema = new mongoose.Schema({
   vendorRate: { type: Number },
 
   // Documents & Proofs
+  passportProof: { type: String },
+  rpIdProof: { type: String },
+  visaProof: { type: String },
+  hiredFromDocuments: { type: String },
+  hiredByDocuments: { type: String },
   
 
   // Identification

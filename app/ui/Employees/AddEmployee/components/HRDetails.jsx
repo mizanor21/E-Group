@@ -35,31 +35,6 @@ const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
   </div>
 );
 
-const FileUpload = ({ id, label, validation, error }) => (
-  <div className="space-y-1">
-    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-      {label}
-    </label>
-    <div
-      className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-      <div className="space-y-1 text-center">
-        <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-        <div className="flex text-sm text-gray-600">
-          <label
-            htmlFor={id}
-            className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-            <span>Upload a file</span>
-            <input id={id} type="file" className="sr-only" {...validation} />
-          </label>
-          <p className="pl-1">or drag and drop</p>
-        </div>
-        <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
-      </div>
-    </div>
-    {error && <p className="text-sm text-red-600">{error.message}</p>}
-  </div>
-)
-
 const HRDetails = () => {
   const {
     register,
@@ -218,16 +193,6 @@ const HRDetails = () => {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Other Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <FileUpload
-            id="documents"
-            label="Documents"
-            validation={register("documents")}
-            error={errors.documents} />
-          <FileUpload
-            id="fileFolder"
-            label="File Folder"
-            validation={register("fileFolder")}
-            error={errors.fileFolder} />
           <InputField
             id="ticketDuration"
             label="Ticket Duration"

@@ -136,7 +136,7 @@ const PaymentInfo = () => {
 
             {showExtra && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <InputField
+                {/* <InputField
                   id="overTimeHours"
                   label="Over Time Hours (Normal @1.25)"
                   type="number"
@@ -159,7 +159,7 @@ const PaymentInfo = () => {
                   icon={CurrencyDollarIcon}
                   placeholder="0"
                   validation={register("commission")}
-                  error={errors.commission} />
+                  error={errors.commission} /> */}
                 <InputField
                   id="accAllowance"
                   label="ACC Allowance"
@@ -200,7 +200,7 @@ const PaymentInfo = () => {
       {/* Vendor Billing Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">
-          Vendor Billing Information <span className="text-red-500">*</span>
+          Vendor Billing Information
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
@@ -235,7 +235,7 @@ const PaymentInfo = () => {
       {/* Customer Billing Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">
-          Customer Billing Information <span className="text-red-500">*</span>
+          Customer Billing Information
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
