@@ -1,10 +1,15 @@
 "use client";
 import { useLoginUserData } from "@/app/data/DataFetch";
+import axios from "axios";
 import Link from "next/link";
 import React, { useState, useEffect, useMemo } from "react";
+import toast from "react-hot-toast";
+import { MdDelete, MdEdit } from "react-icons/md";
+import Swal from "sweetalert2";
 
 const EmployeeTable = ({ employees }) => {
   const {data}  = useLoginUserData([]);
+  const [employeeData, setEmployeeData] = useState(employees || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,14 +21,14 @@ const EmployeeTable = ({ employees }) => {
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
-    if (!employees?.length) return { roles: [], employeeTypes: [], projects: [] };
+    if (!employeeData?.length) return { roles: [], employeeTypes: [], projects: [] };
     
-    const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean);
-    const employeeTypes = [...new Set(employees.map(emp => emp.employeeType))].filter(Boolean);
-    const projects = [...new Set(employees.map(emp => emp.project))].filter(Boolean);
+    const roles = [...new Set(employeeData.map(emp => emp.role))].filter(Boolean);
+    const employeeTypes = [...new Set(employeeData.map(emp => emp.employeeType))].filter(Boolean);
+    const projects = [...new Set(employeeData.map(emp => emp.project))].filter(Boolean);
     
     return { roles, employeeTypes, projects };
-  }, [employees]);
+  }, [employeeData]);
 
   // Handle active filters display
   useEffect(() => {
@@ -42,7 +47,7 @@ const EmployeeTable = ({ employees }) => {
 
   // Filtered employees based on all criteria
   const filteredEmployees = useMemo(() => {
-    return employees?.filter(
+    return employeeData?.filter(
       (employee) =>
         (filterRole === "" || employee.role === filterRole) &&
         (filterEmployeeType === "" || employee.employeeType === filterEmployeeType) &&
@@ -52,7 +57,7 @@ const EmployeeTable = ({ employees }) => {
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
     ) || [];
-  }, [employees, filterRole, filterEmployeeType, filterProject, searchQuery]);
+  }, [employeeData, filterRole, filterEmployeeType, filterProject, searchQuery]);
   
   // Smart pagination
   const totalItems = filteredEmployees.length;
@@ -146,6 +151,40 @@ const EmployeeTable = ({ employees }) => {
     }
   };
 
+  // Handle user deletion with toast notification
+    const handleDelete = (id) => {
+      // Show confirmation dialog
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            // Make API call to delete
+            await axios.delete(`/api/employees?id=${id}`);
+            setEmployeeData((prevEmployee) =>
+              prevEmployee.filter((employee) => employee._id !== id)
+            ); // Update the state
+  
+            // Show success alert
+            Swal.fire({
+              title: "Deleted!",
+              text: "The employee has been deleted.",
+              icon: "success",
+            });
+          } catch (error) {
+            // Handle error
+            toast.error("Failed to delete employee. Please try again.");
+          }
+        }
+      });
+    };
+
   return (
     <div className="rounded-lg space-y-5">
       {/* Header Section */}
@@ -212,6 +251,28 @@ const EmployeeTable = ({ employees }) => {
             </div>
           </div>
 
+          {/* Filter Project */}
+          <div>
+            <label
+              htmlFor="filterProject"
+              className="text-sm font-medium text-gray-600 mb-1 block"
+            >
+              Project
+            </label>
+            <select
+              id="filterProject"
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+              className="border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-300 w-full transition-all appearance-none bg-white"
+              style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a0aec0%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
+            >
+              <option value="">All Projects</option>
+              {filterOptions.projects.map(project => (
+                <option key={project} value={project}>{project}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Filter Role */}
           <div>
             <label
@@ -256,27 +317,7 @@ const EmployeeTable = ({ employees }) => {
             </select>
           </div>
 
-          {/* Filter Project */}
-          <div>
-            <label
-              htmlFor="filterProject"
-              className="text-sm font-medium text-gray-600 mb-1 block"
-            >
-              Project
-            </label>
-            <select
-              id="filterProject"
-              value={filterProject}
-              onChange={(e) => setFilterProject(e.target.value)}
-              className="border px-4 py-2 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-300 w-full transition-all appearance-none bg-white"
-              style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a0aec0%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem center', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem' }}
-            >
-              <option value="">All Projects</option>
-              {filterOptions.projects.map(project => (
-                <option key={project} value={project}>{project}</option>
-              ))}
-            </select>
-          </div>
+          
 
           {/* Total Employees Stats Box */}
           <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
@@ -364,11 +405,11 @@ const EmployeeTable = ({ employees }) => {
                 <th className="py-3 px-4">S/N</th>
                 <th className="py-3 px-4">Employee ID</th>
                 <th className="py-3 px-4">Name</th>
+                <th className="py-3 px-4">Project</th>
                 <th className="py-3 px-4">Gender</th>
                 <th className="py-3 px-4">Phone Number</th>
                 <th className="py-3 px-4">Type</th>
                 <th className="py-3 px-4">Role</th>
-                <th className="py-3 px-4">Project</th>
                 <th className="py-3 px-4 text-center">Action</th>
               </tr>
             </thead>
@@ -384,6 +425,7 @@ const EmployeeTable = ({ employees }) => {
                     <td className="py-3 px-4 font-medium">
                       {employee.firstName} {employee.lastName}
                     </td>
+                    <td className="py-3 px-4">{employee.project}</td>
                     <td className="py-3 px-4">{employee.gender}</td>
                     <td className="py-3 px-4">{employee.phoneNumber}</td>
                     <td className="py-3 px-4">
@@ -392,18 +434,27 @@ const EmployeeTable = ({ employees }) => {
                       </span>
                     </td>
                     <td className="py-3 px-4">{employee.role}</td>
-                    <td className="py-3 px-4">{employee.project}</td>
-                    <td className="py-3 px-4 text-center">
-                      <Link 
-                        href={`/dashboard/employees/${employee._id}`} 
-                        className="text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        View
-                      </Link>
+                    <td className="py-3 px-4 flex gap-2 justify-center">
+                      {
+                        data?.permissions?.employee?.edit && (
+                          <Link 
+                            href={`/dashboard/employees/${employee._id}`} 
+                            className="text-blue-600 hover:text-blue-800 hover:bg-gray-200 p-2 inline-flex items-center"
+                          >
+                            <MdEdit/>
+                          </Link>
+                        )
+                      }
+                      {
+                        data?.permissions?.employee?.delete && (
+                          <button 
+                            onClick={() => handleDelete(employee._id)}
+                            className="text-red-600 hover:text-red-800 hover:bg-gray-200 p-2 inline-flex items-center"
+                          >
+                            <MdDelete/>
+                          </button>
+                        )
+                      }
                     </td>
                   </tr>
                 ))

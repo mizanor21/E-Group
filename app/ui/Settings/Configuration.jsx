@@ -15,6 +15,17 @@ const Configuration = () => {
       <div className="bg-gray-50 p-6 rounded-lg shadow-lg">
         {/* Tabs */}
         <div className="flex gap-6 border-b pb-2 mb-6 text-gray-600">
+        <button
+            onClick={() => setActiveTab("project")}
+            className={`${
+              activeTab === "project"
+                ? "border-b-4 border-blue-500 text-blue-500"
+                : "hover:text-blue-500"
+            } pb-2 font-medium`}
+          >
+            Project Name
+          </button>
+
           <button
             onClick={() => setActiveTab("company")}
             className={`${
@@ -25,16 +36,7 @@ const Configuration = () => {
           >
             Company
           </button>
-          <button
-            onClick={() => setActiveTab("project")}
-            className={`${
-              activeTab === "project"
-                ? "border-b-4 border-blue-500 text-blue-500"
-                : "hover:text-blue-500"
-            } pb-2 font-medium`}
-          >
-            Project Name
-          </button>
+          
           <button
             onClick={() => setActiveTab("group")}
             className={`${
@@ -48,8 +50,8 @@ const Configuration = () => {
         </div>
 
         {/* Render Components Based on Active Tab */}
-        {activeTab === "company" && <Company />}
         {activeTab === "project" && <Project />}
+        {activeTab === "company" && <Company />}
         {activeTab === "group" && <Group />}
       </div>
     </div>
