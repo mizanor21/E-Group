@@ -6,8 +6,10 @@ import CompanyModal from "./CModal";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import { useLoginUserData } from "@/app/data/DataFetch";
 
 const CompanyTable = ({ initialCompanies = [] }) => {
+  const {data} = useLoginUserData([])
   const [companies, setCompanies] = useState(initialCompanies); // Company data
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default rows per page
@@ -169,12 +171,16 @@ const CompanyTable = ({ initialCompanies = [] }) => {
           >
             Download All as PDF
           </button>
-          <button
-            onClick={handleAddCompany}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
-          >
-            Add New Company
-          </button>
+          {
+            data?.permissions?.settings?.create && (
+              <button
+                onClick={handleAddCompany}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
+              >
+                Add New Company
+              </button>
+            )
+          }
         </div>
       </div>
 
@@ -218,19 +224,27 @@ const CompanyTable = ({ initialCompanies = [] }) => {
                   <td className="py-2 px-4">{company.location}</td>
                   <td className="py-2 px-4">{company.category}</td>
                   <td className="py-2 px-4">
-                    <button
-                      onClick={() => handleEditCompany(company)}
-                      className="text-blue-500 hover:underline"
-                    >
-                      Edit
-                    </button>{" "}
-                    |{" "}
-                    <button
-                      onClick={() => handleDelete(company._id)}
-                      className="text-red-500 hover:underline"
-                    >
-                      Delete
-                    </button>
+                    {
+                      data?.permissions?.settings?.edit && (
+                        <button
+                          onClick={() => handleEditCompany(company)}
+                          className="text-blue-500 hover:underline"
+                        >
+                          Edit
+                        </button>
+                      )
+                    }
+                    {" "}
+                    {
+                      data?.permissions?.settings?.delete && (
+                        <button
+                          onClick={() => handleDelete(company._id)}
+                          className="text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      )
+                    }
                   </td>
                 </tr>
               ))

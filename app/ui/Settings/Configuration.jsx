@@ -5,7 +5,7 @@ import Group from "./Group/Group";
 import Project from "./Project/Project";
 
 const Configuration = () => {
-  const [activeTab, setActiveTab] = useState("company"); // Manage active tab
+  const [activeTab, setActiveTab] = useState("project"); // Manage active tab
 
   return (
     <div className="">

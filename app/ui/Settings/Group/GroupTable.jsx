@@ -6,8 +6,10 @@ import GroupModal from "./GModal";
 import Swal from "sweetalert2";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useLoginUserData } from "@/app/data/DataFetch";
 
 const GroupTable = ({ groupsData = [] }) => {
+  const {data} = useLoginUserData([])
   const [groups, setGroups] = useState(groupsData); // group data
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default rows per page
@@ -175,12 +177,16 @@ const GroupTable = ({ groupsData = [] }) => {
           >
             Download All as PDF
           </button>
-          <button
-            onClick={handleAddGroup}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
-          >
-            Add New group
-          </button>
+          {
+            data?.permissions?.settings?.create && (
+              <button
+                onClick={handleAddGroup}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
+              >
+                Add New group
+              </button>
+            )
+          }
         </div>
       </div>
 
@@ -222,19 +228,27 @@ const GroupTable = ({ groupsData = [] }) => {
                   <td className="py-2 px-4">{group.location}</td>
                   <td className="py-2 px-4">{group.category}</td>
                   <td className="py-2 px-4">
-                    <button
-                      onClick={() => handleEditGroup(group)}
-                      className="text-blue-500 hover:underline"
-                    >
-                      Edit
-                    </button>{" "}
-                    |{" "}
-                    <button
-                      onClick={() => handleDelete(group._id)}
-                      className="text-red-500 hover:underline"
-                    >
-                      Delete
-                    </button>
+                    {
+                      data?.permissions?.settings?.edit && (
+                        <button
+                          onClick={() => handleEditGroup(group)}
+                          className="text-blue-500 hover:underline"
+                        >
+                          Edit
+                        </button>
+                      )
+                    }
+                    {" "}
+                    {
+                      data?.permissions?.settings?.delete && (
+                        <button
+                          onClick={() => handleDelete(group._id)}
+                          className="text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      )
+                    }
                   </td>
                 </tr>
               ))

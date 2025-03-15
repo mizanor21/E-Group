@@ -10,8 +10,10 @@ import WpsModal from "./WPS/WpsModal";
 import { CiEdit } from "react-icons/ci";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { RiDeleteBin6Fill } from "react-icons/ri";
+import { useLoginUserData } from "@/app/data/DataFetch";
 
 const EmployeeSalaryTable = ({ employees }) => {
+  const {data}  = useLoginUserData([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -156,14 +158,18 @@ const EmployeeSalaryTable = ({ employees }) => {
 
         {/* Download and Reset Buttons */}
         <div className="bg-white px-6 py-3 rounded-lg space-y-1">
-          <button
-            onClick={openModal}
-            type="button"
-            className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-800 hover:to-orange-500"
-          >
-            <SiApacheopenoffice className="text-xl" />
-            WPS
-          </button>
+          {
+            data?.permissions?.payroll?.create && (
+            <button
+              onClick={openModal}
+              type="button"
+              className="btn flex gap-3 text-white w-28 lg:w-44 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-800 hover:to-orange-500"
+            >
+              <SiApacheopenoffice className="text-xl" />
+              WPS
+            </button>
+            )
+          }
           <button
             onClick={handleDownloadPDF}
             type="button"
@@ -238,18 +244,16 @@ const EmployeeSalaryTable = ({ employees }) => {
                       {employee?.netPayable || "0.00"}
                     </td>
                     <td className="py-2 px-4">
-                      <div className="flex gap-2">
+                      <div className="flex justify-center gap-2">
+                        {
+                          data?.permissions?.payroll?.create && (
                         <Link href={`/dashboard/payroll/${employee._id}`}>
                           <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
                             <FaMoneyCheckDollar />
                           </button>
                         </Link>
-                        {/* <button className="text-blue-500 hover:underline text-sm">
-                          <CiEdit />
-                        </button> */}
-                        <button className="text-red-500 hover:underline text-sm">
-                          <RiDeleteBin6Fill />
-                        </button>
+                          )
+                        }
                       </div>
                     </td>
                   </tr>
