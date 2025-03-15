@@ -438,7 +438,7 @@ const EmployeeBasicInfo = () => {
 
           <SelectField
             id="role"
-            label="Role"
+            label="Role *"
             options={[
               { value: "", label: "Select Role" },
               { value: "employee", label: "Employee" },

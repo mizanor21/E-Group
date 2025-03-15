@@ -60,7 +60,6 @@ export default function AddEmployee() {
 
     try {
       const response = await axios.post("/api/employees", data)
-      console.log(response)
 
       if (response.status === 201) {
         toast.success("Employee successfully added!")
@@ -69,7 +68,7 @@ export default function AddEmployee() {
         setCurrentStep(0) // Go back to first step
       }
     } catch (error) {
-      toast.error(`${error.message}, Please provide valid info and try again.`)
+      toast.error(` Please employee email and try again.`)
     }
   }
 
