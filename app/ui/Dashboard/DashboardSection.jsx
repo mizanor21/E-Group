@@ -1,28 +1,46 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useExpensesData, useIncomeData, useInvestmentData, useSalaryData } from "@/app/data/DataFetch"
-import TransactionGraph from "../Accounts/AccountsDash/Transaction/transaction-graph"
-import AnnualPayrollSummary from "../Payroll/AnnualPayrollSummary"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react";
+import {
+  useExpensesData,
+  useIncomeData,
+  useInvestmentData,
+  useSalaryData,
+} from "@/app/data/DataFetch";
+import TransactionGraph from "../Accounts/AccountsDash/Transaction/transaction-graph";
+import AnnualPayrollSummary from "../Payroll/AnnualPayrollSummary";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [], employees = [] }) => {
-  const { data: income } = useIncomeData()
-  const { data: expenses } = useExpensesData()
-  const { data: investment } = useInvestmentData()
-  const { data: salaryData } = useSalaryData()
+const DashboardSection = ({
+  stats = [],
+  feed = [],
+  meetings = [],
+  payments = [],
+  employees = [],
+}) => {
+  const { data: income } = useIncomeData();
+  const { data: expenses } = useExpensesData();
+  const { data: investment } = useInvestmentData();
+  const { data: salaryData } = useSalaryData();
 
-  const [selectedYear, setSelectedYear] = useState("")
+  const [selectedYear, setSelectedYear] = useState("");
 
   const years = Array.from(
     new Set([
       ...(income?.map((item) => new Date(item.date).getFullYear()) || []),
       ...(expenses?.map((item) => new Date(item.date).getFullYear()) || []),
       ...(investment?.map((item) => new Date(item.date).getFullYear()) || []),
-      ...(salaryData?.flatMap((employee) => employee.salaries.map((salary) => new Date(salary.month).getFullYear())) ||
-        []),
-    ]),
-  ).sort((a, b) => b - a)
+      ...(salaryData?.flatMap((employee) =>
+        employee.salaries.map((salary) => new Date(salary.month).getFullYear())
+      ) || []),
+    ])
+  ).sort((a, b) => b - a);
 
   const months = [
     "January",
@@ -37,12 +55,12 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
     "October",
     "November",
     "December",
-  ]
+  ];
 
   useEffect(() => {
-    const currentYear = new Date().getFullYear().toString()
-    setSelectedYear(currentYear)
-  }, [])
+    const currentYear = new Date().getFullYear().toString();
+    setSelectedYear(currentYear);
+  }, []);
 
   // Prepare data for the transaction graph
   const prepareGraphData = () => {
@@ -50,48 +68,57 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
       const monthIncome =
         income
           ?.filter((item) => {
-            const itemDate = new Date(item.date)
-            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+            const itemDate = new Date(item.date);
+            return (
+              itemDate.getFullYear() === Number.parseInt(selectedYear) &&
+              itemDate.getMonth() === index
+            );
           })
-          .reduce((sum, item) => sum + item.amount, 0) || 0
+          .reduce((sum, item) => sum + item.amount, 0) || 0;
 
       const monthInvestment =
         investment
           ?.filter((item) => {
-            const itemDate = new Date(item.date)
-            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+            const itemDate = new Date(item.date);
+            return (
+              itemDate.getFullYear() === Number.parseInt(selectedYear) &&
+              itemDate.getMonth() === index
+            );
           })
-          .reduce((sum, item) => sum + item.amount, 0) || 0
+          .reduce((sum, item) => sum + item.amount, 0) || 0;
 
       const monthExpenses =
         expenses
           ?.filter((item) => {
-            const itemDate = new Date(item.date)
-            return itemDate.getFullYear() === Number.parseInt(selectedYear) && itemDate.getMonth() === index
+            const itemDate = new Date(item.date);
+            return (
+              itemDate.getFullYear() === Number.parseInt(selectedYear) &&
+              itemDate.getMonth() === index
+            );
           })
-          .reduce((sum, item) => sum + item.amount, 0) || 0
+          .reduce((sum, item) => sum + item.amount, 0) || 0;
 
       const monthSalary =
         salaryData
           ?.flatMap((employee) =>
             employee.salaries.filter((salary) => {
-              const [year, salaryMonth] = salary.month.split("-")
-              return year === selectedYear && Number(salaryMonth) - 1 === index
-            }),
+              const [year, salaryMonth] = salary.month.split("-");
+              return year === selectedYear && Number(salaryMonth) - 1 === index;
+            })
           )
-          .reduce((sum, salary) => sum + salary.netSalary, 0) || 0
+          .reduce((sum, salary) => sum + salary.netSalary, 0) || 0;
 
       return {
         name: month,
         income: monthIncome + monthInvestment,
         expenses: monthExpenses + monthSalary,
-      }
-    })
+      };
+    });
 
-    return graphData
-  }
+    return graphData;
+  };
 
-  const graphData = prepareGraphData()
+  const graphData = prepareGraphData();
 
   return (
     <div className="space-y-8 min-h-screen">
@@ -108,36 +135,34 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
             <div>
               <h2 className="text-lg font-semibold">{stat.title}</h2>
               <p className="text-4xl font-extrabold">{stat.value}</p>
-              <p className="text-sm mt-2 opacity-75">+{stat.percentage}% Increase</p>
+              <p className="text-sm mt-2 opacity-75">
+                +{stat.percentage}% Increase
+              </p>
             </div>
             <div className="text-6xl opacity-20">{stat.icon}</div>
           </div>
         ))}
       </div>
 
-      
-
       {/* Transaction Graph and Annual Payroll Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 2xl:grid-cols-2 gap-8">
         <div className="relative">
-
-        <TransactionGraph data={graphData} />
-        {/* Year Selection */}
-      <div className="absolute top-3 right-3 flex justify-end">
-        <Select onValueChange={setSelectedYear} value={selectedYear}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Year" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((year) => (
-              <SelectItem key={year} value={year.toString()}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
+          <TransactionGraph data={graphData} />
+          {/* Year Selection */}
+          <div className="absolute top-3 right-3 flex justify-end">
+            <Select onValueChange={setSelectedYear} value={selectedYear}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <AnnualPayrollSummary />
       </div>
@@ -146,14 +171,22 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
       <div className="grid grid-cols-2 gap-8">
         {/* Recent Employee List */}
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Employee List</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            Recent Employee List
+          </h3>
           <table className="w-full text-left text-sm border-collapse">
             <thead>
               <tr className="border-b">
                 <th className="py-2 px-3 font-medium text-gray-700">S/N</th>
-                <th className="py-2 px-3 font-medium text-gray-700">Staff Name</th>
-                <th className="py-2 px-3 font-medium text-gray-700">Staff Role</th>
-                <th className="py-2 px-3 font-medium text-gray-700">Designation</th>
+                <th className="py-2 px-3 font-medium text-gray-700">
+                  Staff Name
+                </th>
+                <th className="py-2 px-3 font-medium text-gray-700">
+                  Staff Role
+                </th>
+                <th className="py-2 px-3 font-medium text-gray-700">
+                  Designation
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -226,8 +259,7 @@ const DashboardSection = ({ stats = [], feed = [], meetings = [], payments = [],
         </div>
       </div> */}
     </div>
-  )
-}
+  );
+};
 
-export default DashboardSection
-
+export default DashboardSection;

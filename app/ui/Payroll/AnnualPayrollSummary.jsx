@@ -173,7 +173,7 @@ const AnnualPayrollSummary = () => {
       },
       title: {
         display: true,
-        text: `Annual Payroll Summary ${selectedYear}`,
+        text: `Annual Salary Summary ${selectedYear}`,
       },
     },
     scales: {
@@ -243,12 +243,10 @@ const AnnualPayrollSummary = () => {
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow">
+    <div className="p-5 bg-white rounded-lg shadow">
       {/* Year selector */}
-      <div className="mb-6 flex justify-between items-center">
-        <div className="text-xl">
-          {data?.length || 0} employees
-        </div>
+      <div className="flex justify-between items-center">
+        <div className=""></div>
         <div className="">
           <select
             id="year-select"
