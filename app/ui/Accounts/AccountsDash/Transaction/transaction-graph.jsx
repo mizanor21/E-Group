@@ -10,7 +10,7 @@ const TransactionGraph = ({ data }) => {
         <CardTitle>Financial Statement</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={360}>
           <LineChart
             data={data}
             margin={{
