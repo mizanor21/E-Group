@@ -1,11 +1,13 @@
 "use client";
 import { useFormContext } from "react-hook-form";
+import { useState } from "react";
 import {
   CalendarIcon,
   UserIcon,
   PhoneIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
   <div className="w-full">
@@ -47,39 +49,117 @@ const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
   </div>
 );
 
-const FileUpload = ({ id, label, validation, error }) => (
-  <div className="space-y-1">
-    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-      {label}
-    </label>
-    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-      <div className="space-y-1 text-center">
-        <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-        <div className="flex text-sm text-gray-600">
-          <label
-            htmlFor={id}
-            className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-          >
-            <span>Upload a file</span>
-            <input id={id} type="file" className="sr-only" {...validation} />
-          </label>
-          <p className="pl-1">or drag and drop</p>
+const FileUpload = ({ id, label, validation, error, setValue }) => {
+  const [preview, setPreview] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [fileUrl, setFileUrl] = useState("");
+
+  const handleFileChange = async (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setPreview(URL.createObjectURL(file));
+      
+      // Begin upload to Cloudinary
+      setUploading(true);
+      
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "habson"); // Replace with your Cloudinary upload preset
+
+        const response = await fetch(
+          "https://api.cloudinary.com/v1_1/dov6k7xdk/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Upload failed");
+        }
+
+        const data = await response.json();
+        setFileUrl(data.secure_url);
+        
+        // Update the form value with the Cloudinary URL
+        setValue(id, data.secure_url);
+        
+        toast.success(`${label} uploaded successfully`);
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        toast.error(`Failed to upload ${label}`);
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+        <div className="space-y-1 text-center">
+          {uploading ? (
+            <div className="flex flex-col items-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+              <p className="mt-2 text-sm text-gray-500">Uploading...</p>
+            </div>
+          ) : preview ? (
+            <div className="flex flex-col items-center">
+              <img
+                src={preview}
+                alt="File preview"
+                className="h-32 object-contain mb-2"
+              />
+              <span className="text-sm text-gray-500">
+                {fileUrl ? "Uploaded to Cloudinary" : "Processing..."}
+              </span>
+            </div>
+          ) : (
+            <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
+          )}
+          <div className="flex text-sm text-gray-600">
+            <label
+              htmlFor={id}
+              className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+            >
+              <span>{fileUrl ? "Change file" : "Upload a file"}</span>
+              <input
+                id={id}
+                type="file"
+                className="sr-only"
+                onChange={handleFileChange}
+                disabled={uploading}
+              />
+            </label>
+            <p className="pl-1">or drag and drop</p>
+          </div>
+          <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
+          {fileUrl && (
+            <p className="text-xs text-green-500 break-all mt-1">
+              File uploaded: {fileUrl.substring(0, 30)}...
+            </p>
+          )}
         </div>
-        <p className="text-xs text-gray-500">PDF, JPG, PNG up to 10MB</p>
       </div>
+      {error && <p className="text-sm text-red-600">{error.message}</p>}
     </div>
-    {error && <p className="text-sm text-red-600">{error.message}</p>}
-  </div>
-);
+  );
+};
 
 const Documents = () => {
   const {
     register,
     formState: { errors },
+    setValue,
   } = useFormContext();
 
   return (
     <div className="space-y-8">
+      
       {/* VISA Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">VISA Information</h3>
@@ -196,9 +276,9 @@ const Documents = () => {
             validation={register("hiredFromExpiryDate")}
             error={errors.hiredFromExpiryDate}
           />
-          
         </div>
       </div>
+      
       {/* Hired By */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Hired By</h3>
@@ -246,7 +326,6 @@ const Documents = () => {
             validation={register("hiredByExpiryDate")}
             error={errors.hiredByExpiryDate}
           />
-
           <InputField
             id="nocExpiryDate"
             label="NOC Expiry Date"
@@ -262,35 +341,40 @@ const Documents = () => {
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Documents</h3>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <FileUpload
+          <FileUpload
             id="visaProof"
             label="VISA Proof"
             validation={register("visaProof")}
             error={errors.visaProof}
+            setValue={setValue}
           />
           <FileUpload
             id="passportProof"
             label="Passport Proof"
             validation={register("passportProof")}
             error={errors.passportProof}
+            setValue={setValue}
           />
           <FileUpload
             id="rpIdProof"
             label="RP/ID Proof"
             validation={register("rpIdProof")}
             error={errors.rpIdProof}
+            setValue={setValue}
           />      
           <FileUpload
             id="hiredFromDocuments"
             label="Hired From Document"
             validation={register("hiredFromDocuments")}
             error={errors.hiredFromDocuments}
+            setValue={setValue}
           />
           <FileUpload
             id="hiredByDocuments"
             label="Hired By Document"
             validation={register("hiredByDocuments")}
             error={errors.hiredByDocuments}
+            setValue={setValue}
           />
         </div>
       </div>
