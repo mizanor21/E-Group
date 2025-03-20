@@ -8,7 +8,9 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 
 const EmployeeTable = ({ employees }) => {
-  const {data}  = useLoginUserData([]);
+  const { data, isLoading } = useLoginUserData([]);
+  // If your hook doesn't return isLoading, you can create it:
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const [employeeData, setEmployeeData] = useState(employees || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -18,6 +20,18 @@ const EmployeeTable = ({ employees }) => {
   const [filterProject, setFilterProject] = useState("");
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
+
+  // Check if data is loaded before accessing permissions
+  const hasCreatePermission = data?.permissions?.employee?.create || false;
+  const hasEditPermission = data?.permissions?.employee?.edit || false;
+  const hasDeletePermission = data?.permissions?.employee?.delete || false;
+
+  // Handle loading state if hook doesn't provide it
+  useEffect(() => {
+    if (data) {
+      setIsDataLoading(false);
+    }
+  }, [data]);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -47,7 +61,9 @@ const EmployeeTable = ({ employees }) => {
 
   // Filtered employees based on all criteria
   const filteredEmployees = useMemo(() => {
-    return employeeData?.filter(
+    if (!employeeData) return [];
+    
+    return employeeData.filter(
       (employee) =>
         (filterRole === "" || employee.role === filterRole) &&
         (filterEmployeeType === "" || employee.employeeType === filterEmployeeType) &&
@@ -56,7 +72,7 @@ const EmployeeTable = ({ employees }) => {
           .join(" ")
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
-    ) || [];
+    );
   }, [employeeData, filterRole, filterEmployeeType, filterProject, searchQuery]);
   
   // Smart pagination
@@ -152,38 +168,52 @@ const EmployeeTable = ({ employees }) => {
   };
 
   // Handle user deletion with toast notification
-    const handleDelete = (id) => {
-      // Show confirmation dialog
-      Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            // Make API call to delete
-            await axios.delete(`/api/employees?id=${id}`);
-            setEmployeeData((prevEmployee) =>
-              prevEmployee.filter((employee) => employee._id !== id)
-            ); // Update the state
-  
-            // Show success alert
-            Swal.fire({
-              title: "Deleted!",
-              text: "The employee has been deleted.",
-              icon: "success",
-            });
-          } catch (error) {
-            // Handle error
-            toast.error("Failed to delete employee. Please try again.");
-          }
+  const handleDelete = (id) => {
+    // Show confirmation dialog
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          // Make API call to delete
+          await axios.delete(`/api/employees?id=${id}`);
+          setEmployeeData((prevEmployee) =>
+            prevEmployee.filter((employee) => employee._id !== id)
+          ); // Update the state
+
+          // Show success alert
+          Swal.fire({
+            title: "Deleted!",
+            text: "The employee has been deleted.",
+            icon: "success",
+          });
+        } catch (error) {
+          // Handle error
+          toast.error("Failed to delete employee. Please try again.");
         }
-      });
-    };
+      }
+    });
+  };
+
+  // Loading state UI
+  if (isLoading || isDataLoading) {
+    return (
+      <div className="rounded-lg space-y-5">
+        <div className="bg-white p-6 rounded-lg shadow-sm flex justify-center items-center h-64">
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="h-12 w-12 rounded-full border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent animate-spin"></div>
+            <p className="mt-4 text-gray-600">Loading employee data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg space-y-5">
@@ -192,7 +222,7 @@ const EmployeeTable = ({ employees }) => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4 md:mb-0">Employee Directory</h2>
           {
-            data?.permissions?.employee?.create && (
+            hasCreatePermission && (
             <Link
               href={"/dashboard/add-employee"}
               className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition flex items-center"
@@ -317,13 +347,11 @@ const EmployeeTable = ({ employees }) => {
             </select>
           </div>
 
-          
-
           {/* Total Employees Stats Box */}
           <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Employees</p>
-              <h2 className="text-2xl font-bold text-gray-800">{employees?.length || 0}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{employeeData?.length || 0}</h2>
               {isFilterActive && (
                 <p className="text-sm text-blue-600">
                   {filteredEmployees.length} filtered
@@ -436,7 +464,7 @@ const EmployeeTable = ({ employees }) => {
                     <td className="py-3 px-4">{employee.role}</td>
                     <td className="py-3 px-4 flex gap-2 justify-center">
                       {
-                        data?.permissions?.employee?.edit && (
+                        hasEditPermission && (
                           <Link 
                             href={`/dashboard/employees/${employee._id}`} 
                             className="text-blue-600 hover:text-blue-800 hover:bg-gray-200 p-2 inline-flex items-center"
@@ -446,7 +474,7 @@ const EmployeeTable = ({ employees }) => {
                         )
                       }
                       {
-                        data?.permissions?.employee?.delete && (
+                        hasDeletePermission && (
                           <button 
                             onClick={() => handleDelete(employee._id)}
                             className="text-red-600 hover:text-red-800 hover:bg-gray-200 p-2 inline-flex items-center"
