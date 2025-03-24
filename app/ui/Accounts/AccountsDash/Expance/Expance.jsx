@@ -4,7 +4,7 @@ const Expance = ({ data }) => {
   // const totalExpenses = data?.reduce((sum, item) => sum + item.amount, 0) || 0
 
   return (
-    <Card className="w-full bg-[#FF0000]/70 text-white rounded-2xl flex justify-center items-center text-center">
+    <Card className="w-full bg-[#FF0000]/10 rounded-2xl flex justify-center items-center text-center">
       <div className="">
       <CardHeader>
         <CardTitle>Expenses</CardTitle>

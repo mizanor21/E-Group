@@ -140,7 +140,7 @@ const Page = () => {
   };
 
   const netProfit = calculateNetProfit();
-  const netProfitColor = netProfit >= 0 ? "bg-green-500" : "bg-red-500";
+  const netProfitColor = netProfit >= 0 ? "bg-green-500/70" : "bg-red-500/60";
 
   // Prepare data for the transaction graph
   const prepareGraphData = () => {
@@ -232,9 +232,9 @@ const Page = () => {
       <div className="grid grid-cols-2 gap-5">
         <div className="grid grid-cols-2 gap-3 2xl:gap-5">
           <PreMonthIncome data={initialIncome} />
+          <Expance data={totalExpenses} salaryData={filteredSalary} />
           <Investment data={filteredInvestment} />
           <Withdraw data={filteredWithdraw} />
-          <Expance data={totalExpenses} salaryData={filteredSalary} />
           <Card
             className={`rounded-2xl p-4 ${netProfitColor} flex items-center justify-center text-center`}
           >

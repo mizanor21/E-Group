@@ -4,7 +4,7 @@ const PreMonthIncome = ({ data }) => {
 //   const totalIncome = data?.reduce((sum, item) => sum + item.amount, 0) || 0
 
   return (
-    <Card className="w-full bg-[#09AF5F]/80 text-white rounded-2xl flex justify-center items-center text-center">
+    <Card className="w-full bg-[#09AF5F]/10 rounded-2xl flex justify-center items-center text-center">
       <div className="">
       <CardHeader>
         <CardTitle>Income</CardTitle>
