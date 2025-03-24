@@ -349,21 +349,21 @@ const SmartIncomeManagement = ({
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const centerX = pageWidth / 2;
+    const margin = 20;
 
-    // Modern header with dark background
-    doc.setFillColor(33, 37, 41);
-    doc.rect(0, 0, pageWidth, 30, "F");
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("E-Group", 14, 20);
-
-    // Expense title
-    doc.setTextColor(33, 37, 41);
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text("Income Voucher", centerX, 45, { align: "center" });
+    doc.addImage('https://i.postimg.cc/B68xshJ4/file2.png', 'PNG', margin, 15, 30, 30); // Logo (replace with actual path)
+  
+  // Company name in Arabic and English (blue color)
+  doc.setTextColor(0, 0, 255);
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("EAGLE ARABIA CONTRACTING EST.", pageWidth - 30, 25, { align: "right" });
+  doc.text("NEW EAGLE ARABIA CONTRACTING EST.", pageWidth - 30, 32, { align: "right" });
+  
+  // INVOICE header in black
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(14);
+  doc.text("INVOICE", pageWidth / 2, 50, { align: "center" });
 
     // Format dates for display
     const formatDate = (dateString) => {
@@ -463,17 +463,6 @@ const SmartIncomeManagement = ({
       },
     });
 
-    // Payment verification seal for cleared items
-    if (item.status === "Cleared") {
-      doc.setDrawColor(0, 128, 0);
-      doc.setLineWidth(2);
-      doc.circle(pageWidth - 40, 50, 15);
-      
-      doc.setTextColor(0, 128, 0);
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.text("PAID", pageWidth - 40, 50, { align: "center" });
-    }
 
     // Footer
     doc.setFillColor(240, 240, 240);
