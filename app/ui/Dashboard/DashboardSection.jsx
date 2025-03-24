@@ -135,9 +135,9 @@ const DashboardSection = ({
             <div>
               <h2 className="text-lg font-semibold">{stat.title}</h2>
               <p className="text-4xl font-extrabold">{stat.value}</p>
-              <p className="text-sm mt-2 opacity-75">
+              {/* <p className="text-sm mt-2 opacity-75">
                 +{stat.percentage}% Increase
-              </p>
+              </p> */}
             </div>
             <div className="text-6xl opacity-20">{stat.icon}</div>
           </div>
