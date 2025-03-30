@@ -1,18 +1,24 @@
 "use client";
-import { useLoginUserData } from "@/app/data/DataFetch";
+import { useLoginUserData, useEmployeeData } from "@/app/data/DataFetch";
 import axios from "axios";
 import Link from "next/link";
-import { Router } from "next/router";
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
+import { mutate } from "swr";
 
-const EmployeeTable = ({ employees }) => {
-  const { data, isLoading } = useLoginUserData([]);
+// Assuming this is defined in your app or can be imported
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+const EmployeeTable = () => {
+  const router = useRouter();
+  const { data: userData, isLoading: isUserLoading } = useLoginUserData();
+  const { data: employees, isLoading: isEmployeesLoading } = useEmployeeData();
+  
   // If your hook doesn't return isLoading, you can create it:
   const [isDataLoading, setIsDataLoading] = useState(true);
-  // const [employees, setemployees] = useState(employees || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,16 +29,16 @@ const EmployeeTable = ({ employees }) => {
   const [activeFilters, setActiveFilters] = useState([]);
 
   // Check if data is loaded before accessing permissions
-  const hasCreatePermission = data?.permissions?.employee?.create || false;
-  const hasEditPermission = data?.permissions?.employee?.edit || false;
-  const hasDeletePermission = data?.permissions?.employee?.delete || false;
+  const hasCreatePermission = userData?.permissions?.employee?.create || false;
+  const hasEditPermission = userData?.permissions?.employee?.edit || false;
+  const hasDeletePermission = userData?.permissions?.employee?.delete || false;
 
-  // Handle loading state if hook doesn't provide it
+  // Handle loading state
   useEffect(() => {
-    if (data) {
+    if (userData && employees) {
       setIsDataLoading(false);
     }
-  }, [data]);
+  }, [userData, employees]);
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
@@ -168,9 +174,8 @@ const EmployeeTable = ({ employees }) => {
     }
   };
 
-  // Handle user deletion with toast notification
+  // Handle user deletion with toast notification and SWR cache updates
   const handleDelete = (id) => {
-    // Show confirmation dialog
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -182,29 +187,43 @@ const EmployeeTable = ({ employees }) => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Make API call to delete
+          // Get the SWR key that matches your useEmployeeData hook
+          const swrKey = `${API_URL}/api/employees`;
+          
+          // Optimistically update the local cache
+          mutate(
+            swrKey,
+            // Update the data immediately, filtering out the deleted employee
+            employees?.filter(employee => employee._id !== id),
+            // Don't revalidate immediately with the server
+            false
+          );
+          
+          // Make the actual API call
           await axios.delete(`/api/employees?id=${id}`);
           
-          // setemployees((prevEmployee) =>
-          //   prevEmployee.filter((employee) => employee._id !== id)
-          // ); // Update the state
-
-          // Show success alert
+          // Show success message
           Swal.fire({
             title: "Deleted!",
             text: "The employee has been deleted.",
             icon: "success",
           });
+          
+          // Trigger a revalidation to ensure our cache is consistent with the server
+          mutate(swrKey);
         } catch (error) {
-          // Handle error
+          // If the deletion fails, show an error and revalidate to restore the correct data
           toast.error("Failed to delete employee. Please try again.");
+          
+          // Revalidate to restore the correct state
+          mutate(`${API_URL}/api/employees`);
         }
       }
     });
   };
 
   // Loading state UI
-  if (isLoading || isDataLoading) {
+  if (isUserLoading || isEmployeesLoading || isDataLoading) {
     return (
       <div className="rounded-lg space-y-5">
         <div className="bg-white p-6 rounded-lg shadow-sm flex justify-center items-center h-64">
