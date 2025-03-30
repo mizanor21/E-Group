@@ -212,10 +212,10 @@ const EmployeeBasicInfo = () => {
           />
           <InputField
             id="phoneNumber"
-            label="Phone Number *"
+            label="Phone Number"
             type="tel"
             icon={PhoneIcon}
-            validation={register("phoneNumber", { required: "Phone number is required" })}
+            validation={register("phoneNumber")}
             error={errors.phoneNumber}
           />
           <InputField
@@ -265,7 +265,7 @@ const EmployeeBasicInfo = () => {
           />
           <SelectField
             id="bloodGroup"
-            label="Blood Group *"
+            label="Blood Group"
             options={[
               { value: "", label: "Select Blood Group" },
               { value: "A+", label: "A+" },
@@ -277,7 +277,7 @@ const EmployeeBasicInfo = () => {
               { value: "O+", label: "O+" },
               { value: "O-", label: "O-" },
             ]}
-            validation={register("bloodGroup", { required: "Blood group is required" })}
+            validation={register("bloodGroup")}
             error={errors.bloodGroup}
           />
           <InputField
@@ -295,10 +295,10 @@ const EmployeeBasicInfo = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="presentAddress1"
-            label="Present Address Line 1 *"
+            label="Present Address Line 1"
             type="text"
             icon={HomeIcon}
-            validation={register("presentAddress1", { required: "Present address is required" })}
+            validation={register("presentAddress1")}
             error={errors.presentAddress1}
           />
           <InputField
@@ -311,26 +311,26 @@ const EmployeeBasicInfo = () => {
           />
           <InputField
             id="presentCity"
-            label="Present City *"
+            label="Present City"
             type="text"
             icon={HomeIcon}
-            validation={register("presentCity", { required: "Present city is required" })}
+            validation={register("presentCity")}
             error={errors.presentCity}
           />
           <InputField
             id="presentDivision"
-            label="Present Division/State *"
+            label="Present Division/State"
             type="text"
             icon={HomeIcon}
-            validation={register("presentDivision", { required: "Present division/state is required" })}
+            validation={register("presentDivision")}
             error={errors.presentDivision}
           />
           <InputField
             id="presentPostOrZipCode"
-            label="Present Post/Zip Code *"
+            label="Present Post/Zip Code"
             type="text"
             icon={HomeIcon}
-            validation={register("presentPostOrZipCode", { required: "Present post/zip code is required" })}
+            validation={register("presentPostOrZipCode")}
             error={errors.presentPostOrZipCode}
           />
         </div>
@@ -354,7 +354,7 @@ const EmployeeBasicInfo = () => {
               label="Permanent Address Line 1"
               type="text"
               icon={HomeIcon}
-              validation={register("permanentAddress1", { required: "Permanent address is required" })}
+              validation={register("permanentAddress1")}
               error={errors.permanentAddress1}
             />
             <InputField
@@ -370,7 +370,7 @@ const EmployeeBasicInfo = () => {
               label="Permanent City"
               type="text"
               icon={HomeIcon}
-              validation={register("permanentCity", { required: "Permanent city is required" })}
+              validation={register("permanentCity")}
               error={errors.permanentCity}
             />
             <InputField
@@ -378,7 +378,7 @@ const EmployeeBasicInfo = () => {
               label="Permanent Division/State"
               type="text"
               icon={HomeIcon}
-              validation={register("permanentDivision", { required: "Permanent division/state is required" })}
+              validation={register("permanentDivision")}
               error={errors.permanentDivision}
             />
             <InputField
@@ -386,7 +386,7 @@ const EmployeeBasicInfo = () => {
               label="Permanent Post/Zip Code"
               type="text"
               icon={HomeIcon}
-              validation={register("permanentPostOrZipCode", { required: "Permanent post/zip code is required" })}
+              validation={register("permanentPostOrZipCode")}
               error={errors.permanentPostOrZipCode}
             />
           </div>
@@ -438,14 +438,14 @@ const EmployeeBasicInfo = () => {
 
           <SelectField
             id="role"
-            label="Role *"
+            label="Role"
             options={[
               { value: "", label: "Select Role" },
               { value: "employee", label: "Employee" },
               { value: "manager", label: "Manager" },
               { value: "admin", label: "Admin" },
             ]}
-            validation={register("role", { required: "Role is required" })}
+            validation={register("role")}
             error={errors.role}
           />
           <InputField

@@ -14,9 +14,9 @@ const employeeSchema = new mongoose.Schema({
   religion: { type: String },
 
   // Address Information
-  presentAddress1: { type: String, required: true },
+  presentAddress1: { type: String },
   presentAddress2: { type: String },
-  presentCity: { type: String, required: true },
+  presentCity: { type: String },
   presentDivision: { type: String },
   presentPostOrZipCode: { type: String },
   permanentAddress1: { type: String },

@@ -2,6 +2,7 @@
 import { useLoginUserData } from "@/app/data/DataFetch";
 import axios from "axios";
 import Link from "next/link";
+import { Router } from "next/router";
 import React, { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 import { MdDelete, MdEdit } from "react-icons/md";
@@ -11,7 +12,7 @@ const EmployeeTable = ({ employees }) => {
   const { data, isLoading } = useLoginUserData([]);
   // If your hook doesn't return isLoading, you can create it:
   const [isDataLoading, setIsDataLoading] = useState(true);
-  const [employeeData, setEmployeeData] = useState(employees || []);
+  // const [employees, setemployees] = useState(employees || []);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,14 +36,14 @@ const EmployeeTable = ({ employees }) => {
 
   // Extract unique values for filters
   const filterOptions = useMemo(() => {
-    if (!employeeData?.length) return { roles: [], employeeTypes: [], projects: [] };
+    if (!employees?.length) return { roles: [], employeeTypes: [], projects: [] };
     
-    const roles = [...new Set(employeeData.map(emp => emp.role))].filter(Boolean);
-    const employeeTypes = [...new Set(employeeData.map(emp => emp.employeeType))].filter(Boolean);
-    const projects = [...new Set(employeeData.map(emp => emp.project))].filter(Boolean);
+    const roles = [...new Set(employees.map(emp => emp.role))].filter(Boolean);
+    const employeeTypes = [...new Set(employees.map(emp => emp.employeeType))].filter(Boolean);
+    const projects = [...new Set(employees.map(emp => emp.project))].filter(Boolean);
     
     return { roles, employeeTypes, projects };
-  }, [employeeData]);
+  }, [employees]);
 
   // Handle active filters display
   useEffect(() => {
@@ -61,9 +62,9 @@ const EmployeeTable = ({ employees }) => {
 
   // Filtered employees based on all criteria
   const filteredEmployees = useMemo(() => {
-    if (!employeeData) return [];
+    if (!employees) return [];
     
-    return employeeData.filter(
+    return employees.filter(
       (employee) =>
         (filterRole === "" || employee.role === filterRole) &&
         (filterEmployeeType === "" || employee.employeeType === filterEmployeeType) &&
@@ -73,7 +74,7 @@ const EmployeeTable = ({ employees }) => {
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
     );
-  }, [employeeData, filterRole, filterEmployeeType, filterProject, searchQuery]);
+  }, [employees, filterRole, filterEmployeeType, filterProject, searchQuery]);
   
   // Smart pagination
   const totalItems = filteredEmployees.length;
@@ -183,9 +184,10 @@ const EmployeeTable = ({ employees }) => {
         try {
           // Make API call to delete
           await axios.delete(`/api/employees?id=${id}`);
-          setEmployeeData((prevEmployee) =>
-            prevEmployee.filter((employee) => employee._id !== id)
-          ); // Update the state
+          
+          // setemployees((prevEmployee) =>
+          //   prevEmployee.filter((employee) => employee._id !== id)
+          // ); // Update the state
 
           // Show success alert
           Swal.fire({
@@ -351,7 +353,7 @@ const EmployeeTable = ({ employees }) => {
           <div className="bg-blue-50 p-4 rounded-lg flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Employees</p>
-              <h2 className="text-2xl font-bold text-gray-800">{employeeData?.length || 0}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{employees?.length || 0}</h2>
               {isFilterActive && (
                 <p className="text-sm text-blue-600">
                   {filteredEmployees.length} filtered
