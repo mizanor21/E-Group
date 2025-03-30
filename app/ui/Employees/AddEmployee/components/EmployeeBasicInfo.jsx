@@ -198,11 +198,10 @@ const EmployeeBasicInfo = () => {
           />
           <InputField
             id="email"
-            label="Email *"
+            label="Email"
             type="email"
             icon={EnvelopeIcon}
             validation={register("email", {
-              required: "Email is required",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                 message: "Invalid email address",
@@ -241,7 +240,7 @@ const EmployeeBasicInfo = () => {
             icon={IdentificationIcon}
             validation={register("employeeID", { required: "Employee ID is required" })}
             error={errors.employeeID}
-            disabled={employeeIdGenerated} // Disable the field if ID is auto-generated
+            // disabled={employeeIdGenerated} // Disable the field if ID is auto-generated
           />
           <SelectField
             id="gender"
