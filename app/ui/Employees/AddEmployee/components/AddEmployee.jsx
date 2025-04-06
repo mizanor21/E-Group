@@ -68,7 +68,7 @@ export default function AddEmployee() {
         setCurrentStep(0) // Go back to first step
       }
     } catch (error) {
-      toast.error(` Please check employee email and try again.`)
+      toast.error(` Please valid info provide and try again.`)
     }
   }
 
