@@ -14,8 +14,6 @@ export async function GET() {
 export async function POST(req) {
   try {
     const data = await req.json();
-    console.log(data)
-
     // Connect to the database
     await connectToDB();
     await Employees.create(data);
@@ -24,9 +22,9 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating edge data:", error);
+    console.log(error)
     return NextResponse.json(
-      { message: "Failed to create edge data" },
+      { message: "Failed to create employee data" },
       { status: 500 }
     );
   }

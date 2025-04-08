@@ -197,18 +197,21 @@ const EmployeeBasicInfo = () => {
             error={errors.lastName}
           />
           <InputField
+            id="eEmail"
+            label="Email"
+            type="text"
+            icon={EnvelopeIcon}
+            validation={register("eEmail")}
+            error={errors.eEmail}
+          />
+          {/* <InputField
             id="email"
             label="Email"
-            type="email"
+            type="text"
             icon={EnvelopeIcon}
-            validation={register("email", {
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Invalid email address",
-              },
-            })}
+            validation={register("email")}
             error={errors.email}
-          />
+          /> */}
           <InputField
             id="phoneNumber"
             label="Phone Number"

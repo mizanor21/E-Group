@@ -282,7 +282,6 @@ const EmployeeProfileUpdate = ({ employeeData, employeeId }) => {
               <Controller
                 name="lastName"
                 control={control}
-                rules={{ required: "Last name is required" }}
                 render={({ field }) => (
                   <input
                     {...field}
@@ -303,10 +302,9 @@ const EmployeeProfileUpdate = ({ employeeData, employeeId }) => {
                 Email
               </label>
               <Controller
-                name="email"
+                name="eEmail"
                 control={control}
                 rules={{
-                  required: "Email is required",
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                     message: "Invalid email address",
@@ -320,8 +318,8 @@ const EmployeeProfileUpdate = ({ employeeData, employeeId }) => {
                   />
                 )}
               />
-              {errors.email && (
-                <p className="text-red-500 text-xs">{errors.email.message}</p>
+              {errors.eEmail && (
+                <p className="text-red-500 text-xs">{errors.eEmail.message}</p>
               )}
             </div>
 

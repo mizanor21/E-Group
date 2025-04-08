@@ -4,7 +4,7 @@ const employeeSchema = new mongoose.Schema({
   // Basic Information
   firstName: { type: String, required: true },
   lastName: { type: String },
-  email: { type: String },
+  eEmail: { type: String },
   phoneNumber: { type: String },
   dob: { type: Date},
   employeeID: { type: String, required: true, unique: true },
