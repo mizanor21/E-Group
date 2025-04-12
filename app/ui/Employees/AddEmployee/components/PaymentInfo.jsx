@@ -10,12 +10,13 @@ import {
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
+import { useEmployeeFieldData } from "@/app/data/DataFetch"
 
-const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
+const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
     {/* Label */}
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-      {label}
+      {label} {isRequired && <span className="text-red-500">*</span>}
     </label>
 
     {/* Input Wrapper */}
@@ -32,7 +33,7 @@ const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
         id={id}
         type={type}
         {...validation}
-        className={`w-full px-4 py-2 pl-10 border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
+        className={`w-full px-4 py-2 ${Icon ? 'pl-10' : 'pl-4'} border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
           ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"}`}
         placeholder={`Enter ${label.toLowerCase()}...`}
@@ -46,6 +47,7 @@ const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
 
 
 const PaymentInfo = () => {
+  const { data: requiredFieldData, isLoading } = useEmployeeFieldData([]);
   const {
     register,
     formState: { errors },
@@ -59,6 +61,30 @@ const PaymentInfo = () => {
     defaultValue: "hourly",
   })
 
+  // Extract field requirements from API data
+  const getFieldRequirement = (fieldId) => {
+    if (!requiredFieldData || requiredFieldData.length === 0) return false;
+    return requiredFieldData[0][fieldId] === "true";
+  };
+
+  // Create dynamic validation based on field requirements
+  const createValidation = (fieldId, additionalValidation = {}) => {
+    const isRequired = getFieldRequirement(fieldId);
+    const validation = isRequired 
+      ? { required: `${fieldId} is required`, ...additionalValidation } 
+      : { ...additionalValidation };
+    
+    return register(fieldId, validation);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
   return (
     (<div className="space-y-8">
       {/* Employee Work Information */}
@@ -69,14 +95,14 @@ const PaymentInfo = () => {
           {/* Employee Type */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Employee Type <span className="text-red-500">*</span>
+              Employee Type {getFieldRequirement("employeeType") && <span className="text-red-500">*</span>}
             </label>
             <div className="flex space-x-4">
               {["hourly", "daily", "monthly", "others"].map((type) => (
                 <label key={type} className="inline-flex items-center">
                   <input
                     type="radio"
-                    {...register("employeeType", { required: "Employee type is required" })}
+                    {...createValidation("employeeType")}
                     value={type}
                     className="form-radio h-4 w-4 text-blue-600" />
                   <span className="ml-2 capitalize">{type}</span>
@@ -90,37 +116,37 @@ const PaymentInfo = () => {
           {employeeType === "hourly" && (
             <InputField
               id="hourlyRate"
-              label="Hourly Rate *"
+              label="Hourly Rate"
               type="number"
               icon={CurrencyDollarIcon}
-              placeholder="Enter hourly rate"
-              validation={register("hourlyRate", { required: "Hourly rate is required" })}
+              validation={createValidation("hourlyRate")}
               error={errors.hourlyRate}
-              required />
+              isRequired={getFieldRequirement("hourlyRate")}
+            />
           )}
 
           {employeeType === "daily" && (
             <InputField
               id="dailyRate"
-              label="Daily Rate *"
+              label="Daily Rate"
               type="number"
               icon={CurrencyDollarIcon}
-              placeholder="Enter daily rate"
-              validation={register("dailyRate", { required: "Daily rate is required" })}
+              validation={createValidation("dailyRate")}
               error={errors.dailyRate}
-              required />
+              isRequired={getFieldRequirement("dailyRate")}
+            />
           )}
 
           {employeeType === "monthly" && (
             <InputField
               id="basicPay"
-              label="Basic Pay *"
+              label="Basic Pay"
               type="number"
               icon={CurrencyDollarIcon}
-              placeholder="Enter basic pay"
-              validation={register("basicPay", { required: "Basic pay is required" })}
+              validation={createValidation("basicPay")}
               error={errors.basicPay}
-              required />
+              isRequired={getFieldRequirement("basicPay")}
+            />
           )}
 
           {/* Extra Options */}
@@ -136,62 +162,42 @@ const PaymentInfo = () => {
 
             {showExtra && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* <InputField
-                  id="overTimeHours"
-                  label="Over Time Hours (Normal @1.25)"
-                  type="number"
-                  icon={ClockIcon}
-                  placeholder="0"
-                  validation={register("overTimeHours")}
-                  error={errors.overTimeHours} />
-                <InputField
-                  id="holidayOT"
-                  label="Holiday OT (@1.50)"
-                  type="number"
-                  icon={ClockIcon}
-                  placeholder="0"
-                  validation={register("holidayOT")}
-                  error={errors.holidayOT} />
-                <InputField
-                  id="commission"
-                  label="Commission (%)"
-                  type="number"
-                  icon={CurrencyDollarIcon}
-                  placeholder="0"
-                  validation={register("commission")}
-                  error={errors.commission} /> */}
                 <InputField
                   id="accAllowance"
                   label="ACC Allowance"
                   type="number"
                   icon={BanknotesIcon}
-                  placeholder="0"
-                  validation={register("accAllowance")}
-                  error={errors.accAllowance} />
+                  validation={createValidation("accAllowance")}
+                  error={errors.accAllowance}
+                  isRequired={getFieldRequirement("accAllowance")}
+                />
                 <InputField
                   id="foodAllowance"
                   label="Food Allowance"
                   type="number"
                   icon={BanknotesIcon}
-                  placeholder="0"
-                  validation={register("foodAllowance")}
-                  error={errors.foodAllowance} />
+                  validation={createValidation("foodAllowance")}
+                  error={errors.foodAllowance}
+                  isRequired={getFieldRequirement("foodAllowance")}
+                />
                 <InputField
                   id="telephoneAllowance"
                   label="Telephone Allowance"
                   type="number"
                   icon={PhoneIcon}
-                  placeholder="0"
-                  validation={register("telephoneAllowance")}
-                  error={errors.telephoneAllowance} />
+                  validation={createValidation("telephoneAllowance")}
+                  error={errors.telephoneAllowance}
+                  isRequired={getFieldRequirement("telephoneAllowance")}
+                />
                 <InputField
                   id="transportAllowance"
                   label="Transport Allowance"
                   type="number"
                   icon={TruckIcon}
-                  placeholder="0"
-                  validation={register("transportAllowance")}
-                  error={errors.transportAllowance} />
+                  validation={createValidation("transportAllowance")}
+                  error={errors.transportAllowance}
+                  isRequired={getFieldRequirement("transportAllowance")}
+                />
               </div>
             )}
           </div>
@@ -208,28 +214,28 @@ const PaymentInfo = () => {
             label="Vendor Name"
             type="text"
             icon={BuildingOfficeIcon}
-            placeholder="Enter vendor name"
-            validation={register("vendorName")}
+            validation={createValidation("vendorName")}
             error={errors.vendorName}
-            required />
+            isRequired={getFieldRequirement("vendorName")}
+          />
           <InputField
             id="vendorWorkingHours"
             label="Working Hours"
             type="number"
             icon={ClockIcon}
-            placeholder="Enter hours"
-            validation={register("vendorWorkingHours")}
+            validation={createValidation("vendorWorkingHours")}
             error={errors.vendorWorkingHours}
-            required />
+            isRequired={getFieldRequirement("vendorWorkingHours")}
+          />
           <InputField
             id="vendorRate"
             label="Rate"
             type="number"
             icon={CurrencyDollarIcon}
-            placeholder="Enter rate"
-            validation={register("vendorRate")}
+            validation={createValidation("vendorRate")}
             error={errors.vendorRate}
-            required />
+            isRequired={getFieldRequirement("vendorRate")}
+          />
         </div>
       </div>
       {/* Customer Billing Information */}
@@ -243,28 +249,28 @@ const PaymentInfo = () => {
             label="Customer Name"
             type="text"
             icon={UserIcon}
-            placeholder="Enter customer name"
-            validation={register("customerName")}
+            validation={createValidation("customerName")}
             error={errors.customerName}
-            required />
+            isRequired={getFieldRequirement("customerName")}
+          />
           <InputField
             id="customerWorkingHours"
             label="Working Hours"
             type="number"
             icon={ClockIcon}
-            placeholder="Enter hours"
-            validation={register("customerWorkingHours")}
+            validation={createValidation("customerWorkingHours")}
             error={errors.customerWorkingHours}
-            required />
+            isRequired={getFieldRequirement("customerWorkingHours")}
+          />
           <InputField
             id="customerRate"
             label="Rate"
             type="number"
             icon={CurrencyDollarIcon}
-            placeholder="Enter rate"
-            validation={register("customerRate")}
+            validation={createValidation("customerRate")}
             error={errors.customerRate}
-            required />
+            isRequired={getFieldRequirement("customerRate")}
+          />
         </div>
       </div>
     </div>)
@@ -272,4 +278,3 @@ const PaymentInfo = () => {
 }
 
 export default PaymentInfo
-

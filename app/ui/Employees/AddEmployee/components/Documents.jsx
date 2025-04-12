@@ -8,15 +8,16 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
+import { useEmployeeFieldData } from "@/app/data/DataFetch";
 
-const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
+const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
     {/* Label */}
     <label
       htmlFor={id}
       className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
     >
-      {label}
+      {label} {isRequired && <span className="text-red-500">*</span>}
     </label>
 
     {/* Input Wrapper */}
@@ -33,7 +34,7 @@ const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
         id={id}
         type={type}
         {...validation}
-        className={`w-full px-4 py-2 pl-10 border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
+        className={`w-full px-4 py-2 ${Icon ? 'pl-10' : 'pl-4'} border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
           ${
             error
@@ -49,7 +50,7 @@ const InputField = ({ id, label, type, icon: Icon, validation, error }) => (
   </div>
 );
 
-const FileUpload = ({ id, label, validation, error, setValue }) => {
+const FileUpload = ({ id, label, validation, error, setValue, isRequired }) => {
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [fileUrl, setFileUrl] = useState("");
@@ -98,7 +99,7 @@ const FileUpload = ({ id, label, validation, error, setValue }) => {
   return (
     <div className="space-y-1">
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-        {label}
+        {label} {isRequired && <span className="text-red-500">*</span>}
       </label>
       <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
         <div className="space-y-1 text-center">
@@ -151,11 +152,32 @@ const FileUpload = ({ id, label, validation, error, setValue }) => {
 };
 
 const Documents = () => {
+  const { data: requiredFieldData, isLoading } = useEmployeeFieldData([]);
   const {
     register,
     formState: { errors },
     setValue,
   } = useFormContext();
+
+  // Extract field requirements from API data
+  const getFieldRequirement = (fieldId) => {
+    if (!requiredFieldData || requiredFieldData.length === 0) return false;
+    return requiredFieldData[0][fieldId] === "true";
+  };
+
+  // Create dynamic validation based on field requirements
+  const createValidation = (fieldId) => {
+    const isRequired = getFieldRequirement(fieldId);
+    return register(fieldId, isRequired ? { required: `${fieldId} is required` } : {});
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -169,12 +191,12 @@ const Documents = () => {
               htmlFor="visaType"
               className="block text-sm font-medium text-gray-700"
             >
-              VISA Type
+              VISA Type {getFieldRequirement("visaType") && <span className="text-red-500">*</span>}
             </label>
             <select
               id="visaType"
-              {...register("visaType")}
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              {...createValidation("visaType")}
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-800 dark:text-white dark:border-gray-600"
             >
               <option value="">Select VISA Type</option>
               <option value="tourist">Tourist</option>
@@ -191,40 +213,45 @@ const Documents = () => {
             label="Entry Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("visaEntryDate")}
+            validation={createValidation("visaEntryDate")}
             error={errors.visaEntryDate}
+            isRequired={getFieldRequirement("visaEntryDate")}
           />
           <InputField
             id="visaExpiryDate"
             label="VISA Expiry Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("visaExpiryDate")}
+            validation={createValidation("visaExpiryDate")}
             error={errors.visaExpiryDate}
+            isRequired={getFieldRequirement("visaExpiryDate")}
           />
           <InputField
             id="medicalDate"
             label="Medical Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("medicalDate")}
+            validation={createValidation("medicalDate")}
             error={errors.medicalDate}
+            isRequired={getFieldRequirement("medicalDate")}
           />
           <InputField
             id="fingerprintDate"
             label="Fingerprint Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("fingerprintDate")}
+            validation={createValidation("fingerprintDate")}
             error={errors.fingerprintDate}
+            isRequired={getFieldRequirement("fingerprintDate")}
           />
           <InputField
             id="deadline"
             label="Deadline"
             type="date"
             icon={CalendarIcon}
-            validation={register("deadline")}
+            validation={createValidation("deadline")}
             error={errors.deadline}
+            isRequired={getFieldRequirement("deadline")}
           />
         </div>
       </div>
@@ -238,43 +265,45 @@ const Documents = () => {
             label="Hired From"
             type="text"
             icon={UserIcon}
-            placeholder="Enter full name you hired from"
-            validation={register("hiredFrom")}
+            validation={createValidation("hiredFrom")}
             error={errors.hiredFrom}
+            isRequired={getFieldRequirement("hiredFrom")}
           />
           <InputField
             id="contactFullName"
             label="Contact Full Name"
             type="text"
             icon={UserIcon}
-            placeholder="Enter full name"
-            validation={register("contactFullName")}
+            validation={createValidation("contactFullName")}
             error={errors.contactFullName}
+            isRequired={getFieldRequirement("contactFullName")}
           />
           <InputField
             id="contactNumber"
             label="Contact Number"
             type="tel"
             icon={PhoneIcon}
-            placeholder="Enter contact number"
-            validation={register("contactNumber")}
+            validation={createValidation("contactNumber")}
             error={errors.contactNumber}
+            isRequired={getFieldRequirement("contactNumber")}
           />
           <InputField
             id="hiredFromDate"
             label="Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("hiredFromDate")}
+            validation={createValidation("hiredFromDate")}
             error={errors.hiredFromDate}
+            isRequired={getFieldRequirement("hiredFromDate")}
           />
           <InputField
             id="hiredFromExpiryDate"
             label="Expiry Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("hiredFromExpiryDate")}
+            validation={createValidation("hiredFromExpiryDate")}
             error={errors.hiredFromExpiryDate}
+            isRequired={getFieldRequirement("hiredFromExpiryDate")}
           />
         </div>
       </div>
@@ -288,51 +317,54 @@ const Documents = () => {
             label="Hired By"
             type="text"
             icon={UserIcon}
-            placeholder="Enter full name you hired by"
-            validation={register("hiredBy")}
+            validation={createValidation("hiredBy")}
             error={errors.hiredBy}
+            isRequired={getFieldRequirement("hiredBy")}
           />
           <InputField
             id="hiredByContactName"
             label="Contact Full Name"
             type="text"
             icon={UserIcon}
-            placeholder="Enter full name"
-            validation={register("hiredByContactName")}
+            validation={createValidation("hiredByContactName")}
             error={errors.hiredByContactName}
+            isRequired={getFieldRequirement("hiredByContactName")}
           />
           <InputField
             id="hiredByContactNumber"
             label="Contact Number"
             type="tel"
             icon={PhoneIcon}
-            placeholder="Enter contact number"
-            validation={register("hiredByContactNumber")}
+            validation={createValidation("hiredByContactNumber")}
             error={errors.hiredByContactNumber}
+            isRequired={getFieldRequirement("hiredByContactNumber")}
           />
           <InputField
             id="hiredByDate"
             label="Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("hiredByDate")}
+            validation={createValidation("hiredByDate")}
             error={errors.hiredByDate}
+            isRequired={getFieldRequirement("hiredByDate")}
           />
           <InputField
             id="hiredByExpiryDate"
             label="Expiry Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("hiredByExpiryDate")}
+            validation={createValidation("hiredByExpiryDate")}
             error={errors.hiredByExpiryDate}
+            isRequired={getFieldRequirement("hiredByExpiryDate")}
           />
           <InputField
             id="nocExpiryDate"
             label="NOC Expiry Date"
             type="date"
             icon={CalendarIcon}
-            validation={register("nocExpiryDate")}
+            validation={createValidation("nocExpiryDate")}
             error={errors.nocExpiryDate}
+            isRequired={getFieldRequirement("nocExpiryDate")}
           />
         </div>
       </div>
@@ -344,37 +376,42 @@ const Documents = () => {
           <FileUpload
             id="visaProof"
             label="VISA Proof"
-            validation={register("visaProof")}
+            validation={createValidation("visaProof")}
             error={errors.visaProof}
             setValue={setValue}
+            isRequired={getFieldRequirement("visaProof")}
           />
           <FileUpload
             id="passportProof"
             label="Passport Proof"
-            validation={register("passportProof")}
+            validation={createValidation("passportProof")}
             error={errors.passportProof}
             setValue={setValue}
+            isRequired={getFieldRequirement("passportProof")}
           />
           <FileUpload
             id="rpIdProof"
             label="RP/ID Proof"
-            validation={register("rpIdProof")}
+            validation={createValidation("rpIdProof")}
             error={errors.rpIdProof}
             setValue={setValue}
+            isRequired={getFieldRequirement("rpIdProof")}
           />      
           <FileUpload
             id="hiredFromDocuments"
             label="Hired From Document"
-            validation={register("hiredFromDocuments")}
+            validation={createValidation("hiredFromDocuments")}
             error={errors.hiredFromDocuments}
             setValue={setValue}
+            isRequired={getFieldRequirement("hiredFromDocuments")}
           />
           <FileUpload
             id="hiredByDocuments"
             label="Hired By Document"
-            validation={register("hiredByDocuments")}
+            validation={createValidation("hiredByDocuments")}
             error={errors.hiredByDocuments}
             setValue={setValue}
+            isRequired={getFieldRequirement("hiredByDocuments")}
           />
         </div>
       </div>
