@@ -56,6 +56,15 @@ export const useWithdrawData = () => {
   const { data, error } = useSWR(`${API_URL}/api/withdraw`, fetcher);
   return { data, error, isLoading: !data && !error };
 };
+export const useUsersData = () => {
+  const { data, error, mutate } = useSWR(`${API_URL}/api/user`, fetcher);
+  return { 
+    data, 
+    error, 
+    isLoading: !data && !error,
+    mutate // Make sure to return mutate
+  };
+};
 export const useLoginUserData = () => {
   const [loginUser] = useAuthState(auth);
   const shouldFetch = loginUser?.email ? `${API_URL}/api/user?email=${loginUser?.email}` : null;
