@@ -117,6 +117,14 @@ const Nav = () => {
               </Link>
             </li>
             <li>
+              <Link href="/dashboard/required-field-manage" className="py-2 font-medium">
+                <div className="flex items-center gap-2">
+                  <Image width={20} height={20} alt="User logo" src={user} />
+                  <span>Manage Field</span>
+                </div>
+              </Link>
+            </li>
+            <li>
               <Link href='/dashboard/signup' className="py-2">
                 <div className="flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
