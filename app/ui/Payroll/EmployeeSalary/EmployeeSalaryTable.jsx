@@ -11,22 +11,101 @@ import { CiEdit } from "react-icons/ci";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { useLoginUserData } from "@/app/data/DataFetch";
+import * as XLSX from "xlsx";
 
 const EmployeeSalaryTable = ({ employees }) => {
-  const {data}  = useLoginUserData([]);
+  const { data } = useLoginUserData([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDepartment, setFilterDepartment] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [processedEmployees, setProcessedEmployees] = useState(employees);
+
+  // Calculate net salary from timesheet data
+  const calculateNetSalary = (timesheetData, employeeData) => {
+    return timesheetData.map((timesheetEntry) => {
+      // Find matching employee
+      const employee = employeeData.find(
+        (emp) => emp.employeeID === timesheetEntry.employeeID
+      );
+
+      if (!employee) {
+        console.warn(`No employee found for ID: ${timesheetEntry.employeeID}`);
+        return null;
+      }
+
+      // Calculate basic salary (hourlyRate * totalHours)
+      const basicSalary = employee.hourlyRate * timesheetEntry.totalHours;
+      
+      // Calculate overtime (if any)
+      const overtimePay = (employee.overTimeHours || 0) * employee.hourlyRate * 1.5;
+      
+      // Sum all allowances
+      const totalAllowances = 
+        (employee.accAllowance || 0) + 
+        (employee.foodAllowance || 0) + 
+        (employee.telephoneAllowance || 0) + 
+        (employee.transportAllowance || 0);
+      
+      // Calculate gross pay
+      const grossPay = basicSalary + overtimePay + totalAllowances;
+      
+      // Calculate deductions (if any)
+      const deductions = 0; // You can add deduction logic here if needed
+      
+      // Calculate net payable
+      const netPayable = grossPay - deductions;
+
+      return {
+        ...employee,
+        opBal: "0.00",
+        salary: basicSalary.toFixed(2),
+        overtime: overtimePay.toFixed(2),
+        allowance: totalAllowances.toFixed(2),
+        grossPay: grossPay.toFixed(2),
+        deduction: deductions.toFixed(2),
+        netPayable: netPayable.toFixed(2),
+        timesheet: {
+          project: timesheetEntry.project,
+          month: timesheetEntry.salaryMonth,
+          totalHours: timesheetEntry.totalHours
+        }
+      };
+    }).filter(Boolean);
+  };
+
+  // Handle timesheet file upload
+  const handleTimesheetUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const timesheetData = XLSX.utils.sheet_to_json(firstSheet);
+        // Calculate salaries
+        const calculatedSalaries = calculateNetSalary(timesheetData, employees);
+        console.log(calculatedSalaries);
+        setProcessedEmployees(calculatedSalaries);
+      } catch (error) {
+        console.error("Error processing timesheet:", error);
+        alert("Error processing timesheet file. Please check the format.");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
 
   // Pagination logic
-  const totalPages = Math.ceil(employees?.length / rowsPerPage);
+  const totalPages = Math.ceil(processedEmployees?.length / rowsPerPage);
   const startRow = (currentPage - 1) * rowsPerPage;
 
   // Filter and search logic
-  const filteredEmployees = employees?.filter(
+  const filteredEmployees = processedEmployees?.filter(
     (employee) =>
       (filterDepartment === "" || employee.department === filterDepartment) &&
       Object.values(employee)
@@ -52,6 +131,7 @@ const EmployeeSalaryTable = ({ employees }) => {
       setSearchQuery("");
       setFilterDepartment("");
       setCurrentPage(1);
+      setProcessedEmployees(employees);
       setIsRefreshing(false);
     }, 1000);
   };
@@ -71,29 +151,25 @@ const EmployeeSalaryTable = ({ employees }) => {
       "Deduction",
       "Net Payable",
     ];
-    const tableRows = employees.map((employee, index) => [
+    const tableRows = processedEmployees.map((employee, index) => [
       index + 1,
-      employee.name,
-      employee.employeeID,
-      employee.opBal,
-      employee.salary,
-      employee.overtime,
-      employee.allowance,
-      employee.grossPay,
-      employee.deduction,
-      employee.netPayable,
+      `${employee?.firstName || ""} ${employee?.lastName || ""}`,
+      employee?.employeeID || "",
+      employee?.opBal || "0.00",
+      employee?.salary || "0.00",
+      employee?.overtime || "0.00",
+      employee?.allowance || "0.00",
+      employee?.grossPay || "0.00",
+      employee?.deduction || "0.00",
+      employee?.netPayable || "0.00",
     ]);
 
     doc.text("Employee Salary List", 14, 15);
-
-    // Generate table
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
       startY: 20,
-      styles: {
-        fontSize: 10,
-      },
+      styles: { fontSize: 10 },
     });
     doc.save("Employee_Salary_List.pdf");
   };
@@ -109,6 +185,19 @@ const EmployeeSalaryTable = ({ employees }) => {
       <div className="lg:flex lg:gap-20 justify-between">
         {/* Filter Section */}
         <div className="lg:w-[70%] bg-white p-6 rounded-lg shadow mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Timesheet Upload */}
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Upload Timesheet
+            </label>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleTimesheetUpload}
+              className="mt-2 block w-full border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
+            />
+          </div>
+
           {/* Search Bar */}
           <div>
             <label className="text-sm font-medium text-gray-600">Search</label>
@@ -137,29 +226,11 @@ const EmployeeSalaryTable = ({ employees }) => {
               <option value="Finance">Finance</option>
             </select>
           </div>
-
-          {/* Rows per Page */}
-          <div>
-            <label className="text-sm font-medium text-gray-600">
-              Rows per Page
-            </label>
-            <select
-              value={rowsPerPage}
-              onChange={handleRowsPerPageChange}
-              className="mt-2 block w-full border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
-            >
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
         </div>
 
         {/* Download and Reset Buttons */}
         <div className="bg-white px-6 py-3 rounded-lg space-y-1">
-          {
-            data?.permissions?.payroll?.create && (
+          {data?.permissions?.payroll?.create && (
             <button
               onClick={openModal}
               type="button"
@@ -168,8 +239,7 @@ const EmployeeSalaryTable = ({ employees }) => {
               <SiApacheopenoffice className="text-xl" />
               WPS
             </button>
-            )
-          }
+          )}
           <button
             onClick={handleDownloadPDF}
             type="button"
@@ -191,7 +261,7 @@ const EmployeeSalaryTable = ({ employees }) => {
         </div>
       </div>
 
-      {/* /* Employee Table  */}
+      {/* Employee Table */}
       <div className="bg-white p-6 rounded-lg shadow mt-10">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse bg-white rounded-lg">
@@ -200,11 +270,10 @@ const EmployeeSalaryTable = ({ employees }) => {
                 <th className="py-2 px-4">S/N</th>
                 <th className="py-2 px-4">Name</th>
                 <th className="py-2 px-4">Employee ID</th>
-                <th className="py-2 px-4">OP BAL</th>
-                <th className="py-2 px-4">Salary</th>
-                <th className="py-2 px-4">Over Time</th>
+                <th className="py-2 px-4">Hourly Rate</th>
+                <th className="py-2 px-4">Total Hours</th>
+                <th className="py-2 px-4">Basic Salary</th>
                 <th className="py-2 px-4">Allowance</th>
-                <th className="py-2 px-4">Gross Pay</th>
                 <th className="py-2 px-4">Deduction</th>
                 <th className="py-2 px-4">Net Payable</th>
                 <th className="py-2 px-4">Actions</th>
@@ -214,7 +283,7 @@ const EmployeeSalaryTable = ({ employees }) => {
               {displayedEmployees?.length > 0 ? (
                 displayedEmployees.map((employee, index) => (
                   <tr
-                    key={employee.regNo}
+                    key={employee._id || index}
                     className="border-t hover:bg-gray-100"
                   >
                     <td className="py-2 px-4">{startRow + index + 1}</td>
@@ -224,18 +293,13 @@ const EmployeeSalaryTable = ({ employees }) => {
                       }`}
                     </td>
                     <td className="py-2 px-4">{employee?.employeeID || ""}</td>
+                    <td className="py-2 px-4">{employee?.hourlyRate || "0.00"}</td>
                     <td className="py-2 px-4">
-                      {employee?.opBal ? employee.opBal : "0.00"}
+                      {employee?.timesheet?.totalHours || "0.00"}
                     </td>
                     <td className="py-2 px-4">{employee?.salary || "0.00"}</td>
                     <td className="py-2 px-4">
-                      {employee?.overtime || "0.00"}
-                    </td>
-                    <td className="py-2 px-4">
                       {employee?.allowance || "0.00"}
-                    </td>
-                    <td className="py-2 px-4">
-                      {employee?.grossPay || "0.00"}
                     </td>
                     <td className="py-2 px-4">
                       {employee?.deduction || "0.00"}
@@ -245,22 +309,20 @@ const EmployeeSalaryTable = ({ employees }) => {
                     </td>
                     <td className="py-2 px-4">
                       <div className="flex justify-center gap-2">
-                        {
-                          data?.permissions?.payroll?.create && (
-                        <Link href={`/dashboard/payroll/${employee._id}`}>
-                          <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
-                            <FaMoneyCheckDollar />
-                          </button>
-                        </Link>
-                          )
-                        }
+                        {data?.permissions?.payroll?.create && (
+                          <Link href={`/dashboard/payroll/${employee._id}`}>
+                            <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
+                              <FaMoneyCheckDollar />
+                            </button>
+                          </Link>
+                        )}
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="11" className="text-center py-4 text-gray-500">
+                  <td colSpan="10" className="text-center py-4 text-gray-500">
                     No records found
                   </td>
                 </tr>
@@ -270,26 +332,28 @@ const EmployeeSalaryTable = ({ employees }) => {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex justify-end space-x-2">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
-              currentPage === 1 && "opacity-50 cursor-not-allowed"
-            }`}
-          >
-            Previous
-          </button>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
-              currentPage === totalPages && "opacity-50 cursor-not-allowed"
-            }`}
-          >
-            Next
-          </button>
-        </div>
+        {totalPages > 1 && (
+          <div className="mt-4 flex justify-end space-x-2">
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
+                currentPage === 1 && "opacity-50 cursor-not-allowed"
+              }`}
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
+                currentPage === totalPages && "opacity-50 cursor-not-allowed"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* WPS Modal */}
