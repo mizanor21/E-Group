@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import toast from "react-hot-toast";
 import ProjectModal from "./PModal";
 import { useLoginUserData } from "@/app/data/DataFetch";
+import Link from "next/link";
 
 const ProjectTable = ({ projectsData = [] }) => {
   const {data} = useLoginUserData([])
@@ -176,12 +177,13 @@ const ProjectTable = ({ projectsData = [] }) => {
           </button>
           {
             data?.permissions?.settings?.create && (
-            <button
-              onClick={handleAddProject}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
-            >
-              Add New Project
-            </button>
+            // <button
+            //   onClick={handleAddProject}
+            //   className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
+            // >
+            //   Add New Project
+            // </button>
+            <Link href={'/dashboard/group'} className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition">Add New Group</Link>
             )
           }
         </div>

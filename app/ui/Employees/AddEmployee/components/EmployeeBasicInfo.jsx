@@ -13,7 +13,7 @@ import {
   AcademicCapIcon,
   BriefcaseIcon,
 } from "@heroicons/react/24/outline"
-import { useEmployeeFieldData, useProjectData } from "@/app/data/DataFetch"
+import { useEmployeeRequiredFieldData, useProjectData } from "@/app/data/DataFetch"
 
 // Project prefix mapping
 const PROJECT_PREFIXES = {
@@ -98,7 +98,7 @@ const SelectField = ({ id, label, options, validation, error, onChange, isRequir
 )
 
 const EmployeeBasicInfo = () => {
-  const { data: requiredFieldData, isLoading } = useEmployeeFieldData([]) // Fetch required field data
+  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([]) // Fetch required field data
   const { data } = useProjectData([]) // Fetch project data
   const {
     register,
