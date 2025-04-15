@@ -1,322 +1,202 @@
-"use client";
-import React, { useState } from "react";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-import axios from "axios";
-import Swal from "sweetalert2";
-import toast from "react-hot-toast";
-import ProjectModal from "./PModal";
-import { useLoginUserData } from "@/app/data/DataFetch";
-import Link from "next/link";
+import { useState } from 'react';
+import { ChevronDown, ChevronRight, Building, Briefcase, FolderOpen, Plus, Search, Filter } from 'lucide-react';
+import { useProjectData } from '@/app/data/DataFetch';
+import Link from 'next/link';
 
-const ProjectTable = ({ projectsData = [] }) => {
-  const {data} = useLoginUserData([])
-  const [projects, setProjects] = useState(projectsData); // Company data
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default rows per page
-  const [searchQuery, setSearchQuery] = useState("");
-  const [modalData, setModalData] = useState(null); // For modal data
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal open state
+export default function CompanyGroupsViewer() {
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [expandedCompanies, setExpandedCompanies] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
-  // Pagination Logic
-  const filteredProjects = projects.filter((company) =>
-    Object.values(company)
-      .join(" ")
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  );
-  const totalPages = Math.ceil(filteredProjects.length / rowsPerPage);
-  const startRow = (currentPage - 1) * rowsPerPage;
-
-  // Filter and paginate the displayed projects
-  const displayedProjects = filteredProjects.slice(
-    startRow,
-    startRow + rowsPerPage
-  );
-
-  // Handle user deletion with toast notification
-  const handleDelete = (id) => {
-    // Show confirmation dialog
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          // Make API call to delete
-          await axios.delete(`/api/projects?id=${id}`);
-          setProjects((prevProjects) =>
-            prevProjects.filter((projects) => projects._id !== id)
-          ); // Update the state
-
-          // Show success alert
-          Swal.fire({
-            title: "Deleted!",
-            text: "The projects has been deleted.",
-            icon: "success",
-          });
-        } catch (error) {
-          // Handle error
-          toast.error("Failed to delete projects. Please try again.");
-        }
-      }
-    });
+  const { data } = useProjectData([]);
+  
+  // Filter and search logic
+  const filteredData = data?.filter(group => {
+    const matchesSearch = group.groupName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      group.companies.some(c => c.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const hasCompanies = group.companies.length > 0;
+    
+    return matchesSearch && 
+      (activeFilter === 'all' || 
+       (activeFilter === 'withCompanies' && hasCompanies) ||
+       (activeFilter === 'withoutCompanies' && !hasCompanies));
+  });
+  
+  const toggleGroup = (groupId) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
   };
-
-  // Handle Rows per Page Change
-  const handleRowsPerPageChange = (e) => {
-    setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page
+  
+  const toggleCompany = (companyId) => {
+    setExpandedCompanies(prev => ({
+      ...prev,
+      [companyId]: !prev[companyId]
+    }));
   };
-
-  // Open Add Company Modal
-  const handleAddProject = () => {
-    setModalData(null); // Reset modal data
-    setIsModalOpen(true); // Open modal
-  };
-
-  // Open Edit Company Modal
-  const handleEditProject = (project) => {
-    setModalData(project); // Set data to edit
-    setIsModalOpen(true); // Open modal
-  };
-
-  // Handle Save Company (Add or Edit)
-  const handleSaveProject = (newData) => {
-    if (newData._id) {
-      // Edit existing project
-      setProjects((prevProjects) =>
-        prevProjects.map((project) =>
-          project._id === newData._id ? newData : project
-        )
-      );
-    } else {
-      // Add new project
-      setProjects((prevProjects) => [
-        ...prevProjects,
-        { ...newData, _id: Date.now().toString() }, // Assign unique ID
-      ]);
-    }
-    setIsModalOpen(false); // Close modal
-  };
-
-  // Close Modal
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setModalData(null);
-  };
-
-  // Generate PDF
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-
-    const tableColumn = ["ID", "Projects Name", "Location", "Category"];
-    const tableRows = projects.map((project) => [
-      project.id,
-      project.project,
-      project.location,
-      project.category,
-    ]);
-
-    doc.text("projects List", 14, 15);
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-    });
-
-    doc.save("projects_List.pdf");
-  };
-
+  
   return (
-    <div className="rounded-lg space-y-5">
-      {/* Header Section */}
-      <div className="bg-white p-6 rounded-lg shadow-sm grid grid-cols-4 ">
-        <div className="relative col-span-2">
-          <label htmlFor="search" className="text-sm font-medium text-gray-600">
-            Super Search
-          </label>
-          <div className="relative mt-2">
+    <div className="max-w-5xl mx-auto p-6 bg-slate-50 rounded-xl shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <h1 className="text-2xl font-bold text-slate-800">Company Groups</h1>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               type="text"
-              id="search"
-              placeholder="Search by any field"
-              className="border px-4 py-2 pl-10 rounded-lg shadow-sm focus:ring focus:ring-blue-200 w-full"
-              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search groups or companies..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <span className="absolute left-3 top-3 text-gray-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-4.35-4.35M15 11a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              </svg>
-            </span>
           </div>
-        </div>
-
-        <div className="flex items-center justify-end col-span-2">
-          <button
-            onClick={handleDownloadPDF}
-            className="mr-5 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-green-600 hover:to-green-700 transition"
-          >
-            Download All as PDF
-          </button>
-          {
-            data?.permissions?.settings?.create && (
-            // <button
-            //   onClick={handleAddProject}
-            //   className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition"
-            // >
-            //   Add New Project
-            // </button>
-            <Link href={'/dashboard/group'} className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition">Add New Group</Link>
-            )
-          }
-        </div>
-      </div>
-
-      {/* Table Section */}
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-800">All projects</h2>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Showing</span>
-            <select
-              value={rowsPerPage}
-              onChange={handleRowsPerPageChange}
-              className="border px-4 py-2 rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+          
+          <div className="flex items-center gap-2 bg-white rounded-lg border border-slate-300 p-1">
+            <Filter className="text-slate-500 ml-2" size={16} />
+            <select 
+              className="py-1 pr-8 pl-2 text-sm rounded-md border-none focus:ring-2 focus:ring-blue-200 outline-none"
+              value={activeFilter}
+              onChange={(e) => setActiveFilter(e.target.value)}
             >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
+              <option value="all">All Groups</option>
+              <option value="withCompanies">With Companies</option>
+              <option value="withoutCompanies">Without Companies</option>
             </select>
-            <span className="text-sm text-gray-600">per page</span>
           </div>
-        </div>
-        <table className="w-full text-left border-collapse bg-white rounded-lg">
-          <thead>
-            <tr className="bg-blue-100 text-gray-800">
-              <th className="py-2 px-4">ID No.</th>
-              <th className="py-2 px-4">projects Name</th>
-              <th className="py-2 px-4">Location</th>
-              <th className="py-2 px-4">Category</th>
-              <th className="py-2 px-4">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayedProjects.length > 0 ? (
-              displayedProjects.map((project, index) => (
-                <tr key={project.id} className="border-t hover:bg-gray-100">
-                  <td className="py-2 px-4">{startRow + index + 1}</td>
-                  <td className="py-2 px-4">{project.project}</td>
-                  <td className="py-2 px-4">{project.location}</td>
-                  <td className="py-2 px-4">{project.category}</td>
-                  <td className="py-2 px-4 gap-2 flex">
-                    {
-                      data?.permissions?.settings?.edit && (
-                      <button
-                        onClick={() => handleEditProject(project)}
-                        className="text-blue-500 hover:underline"
-                      >
-                        Edit
-                      </button>
-                      )
-                    }
-                    {
-                      data?.permissions?.settings?.delete && (
-                      <button
-                        onClick={() => handleDelete(project._id)}
-                        className="text-red-500 hover:underline"
-                      >
-                        Delete
-                      </button>
-                      )
-                    }
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={5}
-                  className="text-center py-4 text-gray-500 italic"
-                >
-                  No projects found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-lg ${
-              currentPage === 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-          >
-            Previous
-          </button>
-          <div className="flex gap-2">
-            {Array.from({ length: totalPages }).map((_, pageIndex) => (
-              <button
-                key={pageIndex}
-                onClick={() => setCurrentPage(pageIndex + 1)}
-                className={`px-4 py-2 rounded-lg ${
-                  currentPage === pageIndex + 1
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                {pageIndex + 1}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded-lg ${
-              currentPage === totalPages
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600"
-            }`}
-          >
-            Next
-          </button>
+          
+          <Link href={'/dashboard/group'} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition whitespace-nowrap">
+            <Plus size={18} />
+            Add Group
+          </Link>
         </div>
       </div>
-
-      {/* Company Modal */}
-      {isModalOpen && (
-        <ProjectModal
-          data={modalData}
-          onClose={handleCloseModal}
-          onSave={handleSaveProject}
-        />
+      
+      {filteredData?.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
+          <p className="text-slate-500">No company groups found</p>
+          <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium">
+            Create your first group
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredData?.map((group) => (
+            <div key={group._id} className="border border-slate-200 rounded-xl bg-white shadow-xs hover:shadow-sm transition overflow-hidden">
+              <div 
+                className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition"
+                onClick={() => toggleGroup(group._id)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${expandedGroups[group._id] ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
+                    <FolderOpen size={20} />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-slate-800">{group.groupName}</h2>
+                    <div className="flex gap-3 mt-1">
+                      <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                        {group.companies.length} {group.companies.length === 1 ? 'company' : 'companies'}
+                      </span>
+                      <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                        {group.companies.reduce((acc, c) => acc + c.projects.length, 0)} projects
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button className="text-slate-400 hover:text-blue-600 p-1">
+                    <Plus size={16} />
+                  </button>
+                  <div className="text-slate-500">
+                    {expandedGroups[group._id] ? 
+                      <ChevronDown size={20} /> : 
+                      <ChevronRight size={20} />
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              {expandedGroups[group._id] && (
+                <div className="p-4 pt-0 space-y-3">
+                  {group.companies.length > 0 ? (
+                    group.companies.map((company) => (
+                      <div key={company._id} className="border border-slate-100 rounded-lg overflow-hidden hover:border-slate-200 transition">
+                        <div 
+                          className="flex items-center justify-between p-3 cursor-pointer hover:bg-slate-50"
+                          onClick={() => toggleCompany(company._id)}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-md ${expandedCompanies[company._id] ? 'bg-blue-50 text-blue-500' : 'bg-slate-50 text-slate-500'}`}>
+                              <Building size={18} />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-slate-800">{company.companyName}</h3>
+                              <div className="flex gap-2 mt-1">
+                                <span className="text-xs text-slate-500">
+                                  {company.companyShortName}
+                                </span>
+                                <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                                  {company.projects.length} {company.projects.length === 1 ? 'project' : 'projects'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <button className="text-slate-400 hover:text-blue-600 p-1">
+                              <Plus size={16} />
+                            </button>
+                            <div className="text-slate-500">
+                              {expandedCompanies[company._id] ? 
+                                <ChevronDown size={18} /> : 
+                                <ChevronRight size={18} />
+                              }
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {expandedCompanies[company._id] && (
+                          <div className="bg-slate-50 p-3 border-t border-slate-100">
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="text-sm font-medium text-slate-600">Projects</h4>
+                              <button className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                <Plus size={14} /> Add Project
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {company.projects.map((project) => (
+                                <div 
+                                  key={project._id}
+                                  className="flex items-center gap-2 p-2 bg-white rounded border border-slate-100 hover:border-blue-200 hover:bg-blue-50 transition"
+                                >
+                                  <Briefcase size={16} className="text-blue-500 flex-shrink-0" />
+                                  <div className="truncate">
+                                    <span className="text-slate-700 truncate">{project.projectName}</span>
+                                    <span className="block text-xs text-slate-400 truncate">ID: {project._id}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                      <p className="text-slate-500 mb-3">No companies in this group</p>
+                      <button className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center gap-1 mx-auto">
+                        <Plus size={16} /> Add Company
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
-};
-
-export default ProjectTable;
+}
