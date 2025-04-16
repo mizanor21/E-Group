@@ -17,7 +17,7 @@ const EmployeePayslipsTable = ({ employees }) => {
     const processEmployeeData = () => {
         const flattenedData = [];
         
-        employees.forEach(employee => {
+        employees?.forEach(employee => {
             if (employee.salaries && employee.salaries.length > 0) {
                 employee.salaries.forEach(salary => {
                     flattenedData.push({

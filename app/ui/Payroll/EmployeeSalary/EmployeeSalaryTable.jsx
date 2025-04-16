@@ -26,38 +26,27 @@ const EmployeeSalaryTable = ({ employees }) => {
   // Calculate net salary from timesheet data
   const calculateNetSalary = (timesheetData, employeeData) => {
     return timesheetData.map((timesheetEntry) => {
-      // Find matching employee
       const employee = employeeData.find(
         (emp) => emp.employeeID === timesheetEntry.employeeID
       );
-
+  
       if (!employee) {
         console.warn(`No employee found for ID: ${timesheetEntry.employeeID}`);
         return null;
       }
-
-      // Calculate basic salary (hourlyRate * totalHours)
+  
       const basicSalary = employee.hourlyRate * timesheetEntry.totalHours;
-      
-      // Calculate overtime (if any)
-      const overtimePay = (employee.overTimeHours || 0) * employee.hourlyRate * 1.5;
-      
-      // Sum all allowances
+      const overtimePay = (employee.overTimeHours || 0) * employee.hourlyRate * 1.25;
       const totalAllowances = 
         (employee.accAllowance || 0) + 
         (employee.foodAllowance || 0) + 
         (employee.telephoneAllowance || 0) + 
-        (employee.transportAllowance || 0);
-      
-      // Calculate gross pay
+        (employee.transportAllowance || 0) +
+        (timesheetEntry.allowance || 0);
       const grossPay = basicSalary + overtimePay + totalAllowances;
-      
-      // Calculate deductions (if any)
-      const deductions = 0; // You can add deduction logic here if needed
-      
-      // Calculate net payable
+      const deductions = (timesheetEntry?.deduction || 0);
       const netPayable = grossPay - deductions;
-
+  
       return {
         ...employee,
         opBal: "0.00",
@@ -69,7 +58,9 @@ const EmployeeSalaryTable = ({ employees }) => {
         netPayable: netPayable.toFixed(2),
         timesheet: {
           project: timesheetEntry.project,
-          month: timesheetEntry.salaryMonth,
+          month: timesheetEntry.salaryMonth, // This will show in the month column
+          allowance: timesheetEntry.allowance,
+          deduction: timesheetEntry.deduction,
           totalHours: timesheetEntry.totalHours
         }
       };
@@ -88,9 +79,9 @@ const EmployeeSalaryTable = ({ employees }) => {
         const workbook = XLSX.read(data, { type: "array" });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const timesheetData = XLSX.utils.sheet_to_json(firstSheet);
+        console.log(timesheetData);
         // Calculate salaries
         const calculatedSalaries = calculateNetSalary(timesheetData, employees);
-        console.log(calculatedSalaries);
         setProcessedEmployees(calculatedSalaries);
       } catch (error) {
         console.error("Error processing timesheet:", error);
@@ -270,6 +261,7 @@ const EmployeeSalaryTable = ({ employees }) => {
                 <th className="py-2 px-4">S/N</th>
                 <th className="py-2 px-4">Name</th>
                 <th className="py-2 px-4">Employee ID</th>
+                <th className="py-2 px-4">Month</th>
                 <th className="py-2 px-4">Hourly Rate</th>
                 <th className="py-2 px-4">Total Hours</th>
                 <th className="py-2 px-4">Basic Salary</th>
@@ -288,21 +280,21 @@ const EmployeeSalaryTable = ({ employees }) => {
                   >
                     <td className="py-2 px-4">{startRow + index + 1}</td>
                     <td className="py-2 px-4">
-                      {`${employee?.firstName || ""} ${
-                        employee?.lastName || ""
-                      }`}
+                      {`${employee?.firstName || ""} ${employee?.lastName || ""
+                        }`}
                     </td>
                     <td className="py-2 px-4">{employee?.employeeID || ""}</td>
+                    <td className="py-2 px-4">{employee?.timesheet?.month || ""}</td>
                     <td className="py-2 px-4">{employee?.hourlyRate || "0.00"}</td>
                     <td className="py-2 px-4">
                       {employee?.timesheet?.totalHours || "0.00"}
                     </td>
                     <td className="py-2 px-4">{employee?.salary || "0.00"}</td>
                     <td className="py-2 px-4">
-                      {employee?.allowance || "0.00"}
+                      {employee?.timesheet?.allowance || "0.00"}
                     </td>
                     <td className="py-2 px-4">
-                      {employee?.deduction || "0.00"}
+                      {employee?.timesheet?.deduction || "0.00"}
                     </td>
                     <td className="py-2 px-4">
                       {employee?.netPayable || "0.00"}
@@ -322,7 +314,7 @@ const EmployeeSalaryTable = ({ employees }) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="10" className="text-center py-4 text-gray-500">
+                  <td colSpan="11" className="text-center py-4 text-gray-500">
                     No records found
                   </td>
                 </tr>
@@ -337,18 +329,16 @@ const EmployeeSalaryTable = ({ employees }) => {
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
-                currentPage === 1 && "opacity-50 cursor-not-allowed"
-              }`}
+              className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${currentPage === 1 && "opacity-50 cursor-not-allowed"
+                }`}
             >
               Previous
             </button>
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${
-                currentPage === totalPages && "opacity-50 cursor-not-allowed"
-              }`}
+              className={`px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 ${currentPage === totalPages && "opacity-50 cursor-not-allowed"
+                }`}
             >
               Next
             </button>
