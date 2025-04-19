@@ -12,6 +12,7 @@ import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { RiDeleteBin6Fill } from "react-icons/ri";
 import { useLoginUserData } from "@/app/data/DataFetch";
 import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 const EmployeeSalaryTable = ({ employees }) => {
   const { data } = useLoginUserData([]);
@@ -22,73 +23,250 @@ const EmployeeSalaryTable = ({ employees }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [processedEmployees, setProcessedEmployees] = useState(employees);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [hasTimesheetData, setHasTimesheetData] = useState(false);
 
-  // Calculate net salary from timesheet data
+  // Unified function to post salary data
+  const postSalaryData = async (salaryData) => {
+    try {
+      const response = await fetch("/api/salary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(salaryData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create salary");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error creating salary:", error);
+      throw error;
+    }
+  };
+
+  // Calculate net salary in the required format
   const calculateNetSalary = (timesheetData, employeeData) => {
     return timesheetData.map((timesheetEntry) => {
       const employee = employeeData.find(
         (emp) => emp.employeeID === timesheetEntry.employeeID
       );
-  
+
       if (!employee) {
         console.warn(`No employee found for ID: ${timesheetEntry.employeeID}`);
         return null;
       }
-  
-      const basicSalary = employee.hourlyRate * timesheetEntry.totalHours;
-      const overtimePay = (employee.overTimeHours || 0) * employee.hourlyRate * 1.25;
-      const totalAllowances = 
-        (employee.accAllowance || 0) + 
-        (employee.foodAllowance || 0) + 
-        (employee.telephoneAllowance || 0) + 
-        (employee.transportAllowance || 0) +
-        (timesheetEntry.allowance || 0);
-      const grossPay = basicSalary + overtimePay + totalAllowances;
-      const deductions = (timesheetEntry?.deduction || 0);
-      const netPayable = grossPay - deductions;
-  
+
+      const workingDays = 30; // Default working days
+      const baseSalary = employee.hourlyRate * timesheetEntry.totalHours;
+      const normalOvertimeHours = employee.overTimeHours || 0;
+      const normalOvertimeEarning = normalOvertimeHours * employee.hourlyRate * 1.25;
+      
+      const allowances = {
+        allowances: timesheetEntry.allowance || 0,
+        specialAllowances: 0,
+        accommodation: employee.accAllowance || 0,
+        foodAllowance: employee.foodAllowance || 0,
+        telephoneAllowance: employee.telephoneAllowance || 0,
+        transportAllowance: employee.transportAllowance || 0,
+        total: (timesheetEntry.allowance || 0) + 
+               (employee.accAllowance || 0) + 
+               (employee.foodAllowance || 0) + 
+               (employee.telephoneAllowance || 0) + 
+               (employee.transportAllowance || 0)
+      };
+
+      const deductions = {
+        numberOfLeave: 0,
+        dedFines: 0,
+        dedDoc: 0,
+        dedOthers: 0,
+        total: timesheetEntry.deduction || 0
+      };
+
+      const otherEarnings = {
+        advRecovery: 0,
+        arrearPayments: 0,
+        currentBalance: 0,
+        total: 0
+      };
+
+      const netSalary = baseSalary + normalOvertimeEarning + allowances.total - deductions.total;
+
       return {
         ...employee,
         opBal: "0.00",
-        salary: basicSalary.toFixed(2),
-        overtime: overtimePay.toFixed(2),
-        allowance: totalAllowances.toFixed(2),
-        grossPay: grossPay.toFixed(2),
-        deduction: deductions.toFixed(2),
-        netPayable: netPayable.toFixed(2),
+        salary: baseSalary.toFixed(2),
+        overtime: normalOvertimeEarning.toFixed(2),
+        allowance: allowances.total.toFixed(2),
+        grossPay: (baseSalary + normalOvertimeEarning + allowances.total).toFixed(2),
+        deduction: deductions.total.toFixed(2),
+        netPayable: netSalary.toFixed(2),
         timesheet: {
           project: timesheetEntry.project,
-          month: timesheetEntry.salaryMonth, // This will show in the month column
+          month: timesheetEntry.salaryMonth,
           allowance: timesheetEntry.allowance,
           deduction: timesheetEntry.deduction,
           totalHours: timesheetEntry.totalHours
+        },
+        fullSalaryData: {
+          employeeId: employee.employeeID,
+          name: `${employee.firstName} ${employee.lastName}`,
+          month: timesheetEntry.salaryMonth,
+          workingDays: workingDays,
+          baseSalary: baseSalary,
+          overtime: {
+            normal: {
+              hours: normalOvertimeHours,
+              earning: normalOvertimeEarning
+            },
+            holiday: {
+              hours: 0,
+              earning: 0
+            }
+          },
+          allowances: allowances,
+          deductions: deductions,
+          otherEarnings: otherEarnings,
+          netSalary: netSalary
         }
       };
     }).filter(Boolean);
   };
 
-  // Handle timesheet file upload
-  const handleTimesheetUpload = (event) => {
+  // Handle timesheet file upload and salary generation
+  const handleTimesheetUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    setIsGenerating(true);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = e.target.result;
         const workbook = XLSX.read(data, { type: "array" });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const timesheetData = XLSX.utils.sheet_to_json(firstSheet);
-        console.log(timesheetData);
-        // Calculate salaries
+        
         const calculatedSalaries = calculateNetSalary(timesheetData, employees);
+        
+        await Promise.all(
+          calculatedSalaries.map(salary => 
+            postSalaryData(salary.fullSalaryData)
+          )
+        );
+        
         setProcessedEmployees(calculatedSalaries);
+        setHasTimesheetData(true);
+        toast.success("Salaries successfully generated and saved!");
       } catch (error) {
         console.error("Error processing timesheet:", error);
-        alert("Error processing timesheet file. Please check the format.");
+        alert(`Error: ${error.message}`);
+      } finally {
+        setIsGenerating(false);
       }
     };
     reader.readAsArrayBuffer(file);
+  };
+
+  // Handle individual salary generation
+  const handleGenerateSalary = async (employeeId) => {
+    setIsGenerating(true);
+    try {
+      const employee = employees.find(emp => emp._id === employeeId);
+      const timesheetEntry = processedEmployees.find(
+        emp => emp.employeeID === employee.employeeID
+      )?.timesheet;
+
+      if (!employee || !timesheetEntry) {
+        throw new Error("Employee or timesheet data not found");
+      }
+
+      const salaryData = {
+        employeeId: employee.employeeID,
+        name: `${employee.firstName} ${employee.lastName}`,
+        month: timesheetEntry.month,
+        workingDays: 30,
+        baseSalary: employee.hourlyRate * timesheetEntry.totalHours,
+        overtime: {
+          normal: {
+            hours: employee.overTimeHours || 0,
+            earning: (employee.overTimeHours || 0) * employee.hourlyRate * 1.25
+          },
+          holiday: {
+            hours: 0,
+            earning: 0
+          }
+        },
+        allowances: {
+          allowances: timesheetEntry.allowance || 0,
+          specialAllowances: 0,
+          accommodation: employee.accAllowance || 0,
+          foodAllowance: employee.foodAllowance || 0,
+          telephoneAllowance: employee.telephoneAllowance || 0,
+          transportAllowance: employee.transportAllowance || 0,
+          total: (timesheetEntry.allowance || 0) + 
+                 (employee.accAllowance || 0) + 
+                 (employee.foodAllowance || 0) + 
+                 (employee.telephoneAllowance || 0) + 
+                 (employee.transportAllowance || 0)
+        },
+        deductions: {
+          numberOfLeave: 0,
+          dedFines: 0,
+          dedDoc: 0,
+          dedOthers: 0,
+          total: timesheetEntry.deduction || 0
+        },
+        otherEarnings: {
+          advRecovery: 0,
+          arrearPayments: 0,
+          currentBalance: 0,
+          total: 0
+        },
+        netSalary: (employee.hourlyRate * timesheetEntry.totalHours) +
+                  ((employee.overTimeHours || 0) * employee.hourlyRate * 1.25) +
+                  (timesheetEntry.allowance || 0) + 
+                  (employee.accAllowance || 0) + 
+                  (employee.foodAllowance || 0) + 
+                  (employee.telephoneAllowance || 0) + 
+                  (employee.transportAllowance || 0) -
+                  (timesheetEntry.deduction || 0)
+      };
+
+      await postSalaryData(salaryData);
+      
+      const updatedEmployees = processedEmployees.map(emp => 
+        emp.employeeID === employee.employeeID ? 
+        { ...emp, ...calculateNetSalary([timesheetEntry], [employee])[0] } : 
+        emp
+      );
+      setProcessedEmployees(updatedEmployees);
+      
+      alert("Salary successfully generated and saved!");
+    } catch (error) {
+      console.error("Error generating salary:", error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Reset Function (Refresh)
+  const handleReset = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setSearchQuery("");
+      setFilterDepartment("");
+      setCurrentPage(1);
+      setProcessedEmployees(employees);
+      setHasTimesheetData(false);
+      setIsRefreshing(false);
+    }, 1000);
   };
 
   // Pagination logic
@@ -113,18 +291,6 @@ const EmployeeSalaryTable = ({ employees }) => {
   const handleRowsPerPageChange = (e) => {
     setRowsPerPage(Number(e.target.value));
     setCurrentPage(1);
-  };
-
-  // Reset Function (Refresh)
-  const handleReset = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setSearchQuery("");
-      setFilterDepartment("");
-      setCurrentPage(1);
-      setProcessedEmployees(employees);
-      setIsRefreshing(false);
-    }, 1000);
   };
 
   // Download PDF Function
@@ -186,6 +352,7 @@ const EmployeeSalaryTable = ({ employees }) => {
               accept=".xlsx,.xls"
               onChange={handleTimesheetUpload}
               className="mt-2 block w-full border px-4 py-2 rounded-lg shadow-sm focus:ring focus:ring-blue-200"
+              disabled={isGenerating}
             />
           </div>
 
@@ -252,21 +419,28 @@ const EmployeeSalaryTable = ({ employees }) => {
         </div>
       </div>
 
+      {/* Timesheet Status Indicator */}
+      {hasTimesheetData && (
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+          <p>Timesheet data loaded. You can now generate individual salaries.</p>
+        </div>
+      )}
+
       {/* Employee Table */}
-      <div className="bg-white p-6 rounded-lg shadow mt-10">
+      <div className="bg-white p-6 rounded-lg shadow mt-4">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse bg-white rounded-lg">
             <thead>
               <tr className="bg-blue-100 text-gray-800 text-sm">
                 <th className="py-2 px-4">S/N</th>
-                <th className="py-2 px-4">Name</th>
                 <th className="py-2 px-4">Employee ID</th>
+                <th className="py-2 px-4">Name</th>
                 <th className="py-2 px-4">Month</th>
                 <th className="py-2 px-4">Hourly Rate</th>
                 <th className="py-2 px-4">Total Hours</th>
-                <th className="py-2 px-4">Basic Salary</th>
                 <th className="py-2 px-4">Allowance</th>
                 <th className="py-2 px-4">Deduction</th>
+                <th className="py-2 px-4">Basic Salary</th>
                 <th className="py-2 px-4">Net Payable</th>
                 <th className="py-2 px-4">Actions</th>
               </tr>
@@ -279,34 +453,53 @@ const EmployeeSalaryTable = ({ employees }) => {
                     className="border-t hover:bg-gray-100"
                   >
                     <td className="py-2 px-4">{startRow + index + 1}</td>
-                    <td className="py-2 px-4">
-                      {`${employee?.firstName || ""} ${employee?.lastName || ""
-                        }`}
-                    </td>
                     <td className="py-2 px-4">{employee?.employeeID || ""}</td>
+                    <td className="py-2 px-4">
+                      {`${employee?.firstName || ""} ${employee?.lastName || ""}`}
+                    </td>
                     <td className="py-2 px-4">{employee?.timesheet?.month || ""}</td>
                     <td className="py-2 px-4">{employee?.hourlyRate || "0.00"}</td>
                     <td className="py-2 px-4">
                       {employee?.timesheet?.totalHours || "0.00"}
                     </td>
-                    <td className="py-2 px-4">{employee?.salary || "0.00"}</td>
                     <td className="py-2 px-4">
                       {employee?.timesheet?.allowance || "0.00"}
                     </td>
                     <td className="py-2 px-4">
                       {employee?.timesheet?.deduction || "0.00"}
                     </td>
+                    <td className="py-2 px-4">{employee?.salary || "0.00"}</td>
                     <td className="py-2 px-4">
                       {employee?.netPayable || "0.00"}
                     </td>
                     <td className="py-2 px-4">
                       <div className="flex justify-center gap-2">
                         {data?.permissions?.payroll?.create && (
-                          <Link href={`/dashboard/payroll/${employee._id}`}>
-                            <button className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600">
-                              <FaMoneyCheckDollar />
+                          hasTimesheetData ? (
+                            <button
+                              onClick={() => handleGenerateSalary(employee._id)}
+                              disabled={isGenerating}
+                              className={`bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600 ${
+                                isGenerating ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
+                              title="Generate Salary from Timesheet"
+                            >
+                              {isGenerating ? (
+                                <ImSpinner9 className="animate-spin" />
+                              ) : (
+                                <FaMoneyCheckDollar />
+                              )}
                             </button>
-                          </Link>
+                          ) : (
+                            <Link href={`/dashboard/payroll/${employee._id}`}>
+                              <button 
+                                className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600"
+                                title="Go to Payroll Details"
+                              >
+                                <FaMoneyCheckDollar />
+                              </button>
+                            </Link>
+                          )
                         )}
                       </div>
                     </td>
