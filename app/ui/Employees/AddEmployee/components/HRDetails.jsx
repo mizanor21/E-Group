@@ -5,21 +5,15 @@ import { useEmployeeRequiredFieldData } from "@/app/data/DataFetch"
 
 const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
-    {/* Label */}
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {label} {isRequired && <span className="text-red-500">*</span>}
     </label>
-
-    {/* Input Wrapper */}
     <div className="relative">
-      {/* Icon */}
       {Icon && (
         <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
       )}
-      
-      {/* Input Field */}
       <input
         id={id}
         type={type}
@@ -30,29 +24,37 @@ const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired
         placeholder={`Enter ${label.toLowerCase()}...`}
       />
     </div>
-
-    {/* Error Message */}
     {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
 );
 
 const HRDetails = () => {
-  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([]) // Fetch required field data
+  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([])
   const {
     register,
     formState: { errors },
   } = useFormContext()
 
-  // Extract field requirements from API data
+  // Extract field requirements from API data - now correctly handles boolean values
   const getFieldRequirement = (fieldId) => {
     if (!requiredFieldData || requiredFieldData.length === 0) return false
-    return requiredFieldData[0][fieldId] === "true"
+    return requiredFieldData[0][fieldId] === true // Changed from "true" to true
   }
 
   // Create dynamic validation based on field requirements
   const createValidation = (fieldId) => {
     const isRequired = getFieldRequirement(fieldId)
-    return register(fieldId, isRequired ? { required: `${fieldId} is required` } : {})
+    // Improved error message with proper field name formatting
+    const fieldName = labelCase(fieldId)
+    return register(fieldId, isRequired ? { required: `${fieldName} is required` } : {})
+  }
+
+  // Helper function to convert field IDs to proper labels
+  const labelCase = (str) => {
+    return str
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, firstChar => firstChar.toUpperCase())
+      .trim()
   }
 
   if (isLoading) {
@@ -150,6 +152,7 @@ const HRDetails = () => {
           />
         </div>
       </div>
+      
       {/* License Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">License Information</h3>
@@ -237,6 +240,7 @@ const HRDetails = () => {
           />
         </div>
       </div>
+      
       {/* Other Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Other Information</h3>
@@ -289,4 +293,4 @@ const HRDetails = () => {
   );
 }
 
-export default HRDetails
+export default HRDetails;

@@ -98,8 +98,8 @@ const SelectField = ({ id, label, options, validation, error, onChange, isRequir
 )
 
 const EmployeeBasicInfo = () => {
-  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([]) // Fetch required field data
-  const { data } = useProjectData([]) // Fetch project data
+  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([])
+  const { data } = useProjectData([])
   const {
     register,
     formState: { errors },
@@ -116,10 +116,10 @@ const EmployeeBasicInfo = () => {
   const watchPresentPostOrZipCode = watch("presentPostOrZipCode")
   const selectedProject = watch("project")
 
-  // Extract field requirements from API data
+  // Extract field requirements from API data - updated to handle boolean values
   const getFieldRequirement = (fieldId) => {
     if (!requiredFieldData || requiredFieldData.length === 0) return false
-    return requiredFieldData[0][fieldId] === "true"
+    return requiredFieldData[0][fieldId] === true // Changed from "true" to true
   }
 
   // Extract unique project names from the data
@@ -127,7 +127,7 @@ const EmployeeBasicInfo = () => {
 
   // Create options for the SelectField
   const projectOptions = [
-    { value: "", label: "Select Project" }, // Default option
+    { value: "", label: "Select Project" },
     ...uniqueProjects.map((project) => ({
       value: project,
       label: project,
@@ -137,22 +137,13 @@ const EmployeeBasicInfo = () => {
   // Generate employee ID when project changes
   useEffect(() => {
     if (selectedProject) {
-      // Get project prefix (use the project name if no mapping exists)
       const prefix = PROJECT_PREFIXES[selectedProject] || selectedProject.substring(0, 2).toUpperCase()
-
-      // Generate a timestamp component (last 2 digits of current year + month)
       const date = new Date()
       const year = date.getFullYear().toString().slice(-2)
       const month = (date.getMonth() + 1).toString().padStart(2, "0")
       const timeComponent = year + month
-
-      // Generate unique ID
       const uid = generateUID()
-
-      // Combine to create employee ID: PREFIX-YYMM-UID
       const employeeId = `${prefix}-${timeComponent}-${uid}`
-
-      // Set the value in the form
       setValue("employeeID", employeeId)
       setEmployeeIdGenerated(true)
     }
@@ -180,7 +171,7 @@ const EmployeeBasicInfo = () => {
   // Create dynamic validation based on field requirements
   const createValidation = (fieldId) => {
     const isRequired = getFieldRequirement(fieldId)
-    return register(fieldId, isRequired ? { required: `${fieldId} is required` } : {})
+    return register(fieldId, isRequired ? { required: `${fieldId.replace(/([A-Z])/g, ' $1').trim()} is required` } : {})
   }
 
   if (isLoading) {
@@ -217,7 +208,7 @@ const EmployeeBasicInfo = () => {
           <InputField
             id="eEmail"
             label="Email"
-            type="text"
+            type="email"
             icon={EnvelopeIcon}
             validation={createValidation("eEmail")}
             error={errors.eEmail}
@@ -237,8 +228,9 @@ const EmployeeBasicInfo = () => {
             label="Date of Birth"
             type="date"
             icon={CalendarIcon}
-            validation={register("dob")}
+            validation={createValidation("dob")}
             error={errors.dob}
+            isRequired={getFieldRequirement("dob")}
           />
           <SelectField
             id="project"
@@ -256,6 +248,7 @@ const EmployeeBasicInfo = () => {
             validation={createValidation("employeeID")}
             error={errors.employeeID}
             isRequired={getFieldRequirement("employeeID")}
+            disabled={employeeIdGenerated}
           />
           <SelectField
             id="gender"
@@ -308,6 +301,7 @@ const EmployeeBasicInfo = () => {
           />
         </div>
       </div>
+
       <div>
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Address Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -504,6 +498,7 @@ const EmployeeBasicInfo = () => {
           {errors.remarks && <p className="mt-1 text-sm text-red-600">{errors.remarks.message}</p>}
         </div>
       </div>
+      
     </div>
   )
 }

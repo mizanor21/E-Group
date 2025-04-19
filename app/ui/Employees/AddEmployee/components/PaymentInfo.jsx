@@ -14,21 +14,15 @@ import { useEmployeeRequiredFieldData } from "@/app/data/DataFetch"
 
 const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
-    {/* Label */}
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {label} {isRequired && <span className="text-red-500">*</span>}
     </label>
-
-    {/* Input Wrapper */}
     <div className="relative">
-      {/* Icon */}
       {Icon && (
         <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
       )}
-      
-      {/* Input Field */}
       <input
         id={id}
         type={type}
@@ -39,12 +33,9 @@ const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired
         placeholder={`Enter ${label.toLowerCase()}...`}
       />
     </div>
-
-    {/* Error Message */}
     {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
 );
-
 
 const PaymentInfo = () => {
   const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([]);
@@ -61,17 +52,22 @@ const PaymentInfo = () => {
     defaultValue: "hourly",
   })
 
-  // Extract field requirements from API data
+  // Fixed: Now correctly checks for boolean true values
   const getFieldRequirement = (fieldId) => {
     if (!requiredFieldData || requiredFieldData.length === 0) return false;
-    return requiredFieldData[0][fieldId] === "true";
+    return requiredFieldData[0][fieldId] === true; // Changed from "true" to true
   };
 
-  // Create dynamic validation based on field requirements
+  // Improved validation with better error messages
   const createValidation = (fieldId, additionalValidation = {}) => {
     const isRequired = getFieldRequirement(fieldId);
+    const fieldName = fieldId
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, firstChar => firstChar.toUpperCase())
+      .trim();
+    
     const validation = isRequired 
-      ? { required: `${fieldId} is required`, ...additionalValidation } 
+      ? { required: `${fieldName} is required`, ...additionalValidation } 
       : { ...additionalValidation };
     
     return register(fieldId, validation);
@@ -86,7 +82,7 @@ const PaymentInfo = () => {
   }
 
   return (
-    (<div className="space-y-8">
+    <div className="space-y-8">
       {/* Employee Work Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">Employee Work Information</h3>
@@ -119,7 +115,7 @@ const PaymentInfo = () => {
               label="Hourly Rate"
               type="number"
               icon={CurrencyDollarIcon}
-              validation={createValidation("hourlyRate")}
+              validation={createValidation("hourlyRate", { min: 0 })}
               error={errors.hourlyRate}
               isRequired={getFieldRequirement("hourlyRate")}
             />
@@ -131,7 +127,7 @@ const PaymentInfo = () => {
               label="Daily Rate"
               type="number"
               icon={CurrencyDollarIcon}
-              validation={createValidation("dailyRate")}
+              validation={createValidation("dailyRate", { min: 0 })}
               error={errors.dailyRate}
               isRequired={getFieldRequirement("dailyRate")}
             />
@@ -143,7 +139,7 @@ const PaymentInfo = () => {
               label="Basic Pay"
               type="number"
               icon={CurrencyDollarIcon}
-              validation={createValidation("basicPay")}
+              validation={createValidation("basicPay", { min: 0 })}
               error={errors.basicPay}
               isRequired={getFieldRequirement("basicPay")}
             />
@@ -167,7 +163,7 @@ const PaymentInfo = () => {
                   label="ACC Allowance"
                   type="number"
                   icon={BanknotesIcon}
-                  validation={createValidation("accAllowance")}
+                  validation={createValidation("accAllowance", { min: 0 })}
                   error={errors.accAllowance}
                   isRequired={getFieldRequirement("accAllowance")}
                 />
@@ -176,7 +172,7 @@ const PaymentInfo = () => {
                   label="Food Allowance"
                   type="number"
                   icon={BanknotesIcon}
-                  validation={createValidation("foodAllowance")}
+                  validation={createValidation("foodAllowance", { min: 0 })}
                   error={errors.foodAllowance}
                   isRequired={getFieldRequirement("foodAllowance")}
                 />
@@ -185,7 +181,7 @@ const PaymentInfo = () => {
                   label="Telephone Allowance"
                   type="number"
                   icon={PhoneIcon}
-                  validation={createValidation("telephoneAllowance")}
+                  validation={createValidation("telephoneAllowance", { min: 0 })}
                   error={errors.telephoneAllowance}
                   isRequired={getFieldRequirement("telephoneAllowance")}
                 />
@@ -194,7 +190,7 @@ const PaymentInfo = () => {
                   label="Transport Allowance"
                   type="number"
                   icon={TruckIcon}
-                  validation={createValidation("transportAllowance")}
+                  validation={createValidation("transportAllowance", { min: 0 })}
                   error={errors.transportAllowance}
                   isRequired={getFieldRequirement("transportAllowance")}
                 />
@@ -203,11 +199,10 @@ const PaymentInfo = () => {
           </div>
         </div>
       </div>
+      
       {/* Vendor Billing Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-6">
-          Vendor Billing Information
-        </h3>
+        <h3 className="text-lg font-semibold mb-6">Vendor Billing Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="vendorName"
@@ -223,7 +218,7 @@ const PaymentInfo = () => {
             label="Working Hours"
             type="number"
             icon={ClockIcon}
-            validation={createValidation("vendorWorkingHours")}
+            validation={createValidation("vendorWorkingHours", { min: 0 })}
             error={errors.vendorWorkingHours}
             isRequired={getFieldRequirement("vendorWorkingHours")}
           />
@@ -232,17 +227,16 @@ const PaymentInfo = () => {
             label="Rate"
             type="number"
             icon={CurrencyDollarIcon}
-            validation={createValidation("vendorRate")}
+            validation={createValidation("vendorRate", { min: 0 })}
             error={errors.vendorRate}
             isRequired={getFieldRequirement("vendorRate")}
           />
         </div>
       </div>
+      
       {/* Customer Billing Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-6">
-          Customer Billing Information
-        </h3>
+        <h3 className="text-lg font-semibold mb-6">Customer Billing Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InputField
             id="customerName"
@@ -258,7 +252,7 @@ const PaymentInfo = () => {
             label="Working Hours"
             type="number"
             icon={ClockIcon}
-            validation={createValidation("customerWorkingHours")}
+            validation={createValidation("customerWorkingHours", { min: 0 })}
             error={errors.customerWorkingHours}
             isRequired={getFieldRequirement("customerWorkingHours")}
           />
@@ -267,14 +261,14 @@ const PaymentInfo = () => {
             label="Rate"
             type="number"
             icon={CurrencyDollarIcon}
-            validation={createValidation("customerRate")}
+            validation={createValidation("customerRate", { min: 0 })}
             error={errors.customerRate}
             isRequired={getFieldRequirement("customerRate")}
           />
         </div>
       </div>
-    </div>)
+    </div>
   );
 }
 
-export default PaymentInfo
+export default PaymentInfo;

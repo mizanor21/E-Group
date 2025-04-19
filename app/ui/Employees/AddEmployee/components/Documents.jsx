@@ -12,40 +12,25 @@ import { useEmployeeRequiredFieldData } from "@/app/data/DataFetch";
 
 const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
-    {/* Label */}
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-    >
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {label} {isRequired && <span className="text-red-500">*</span>}
     </label>
-
-    {/* Input Wrapper */}
     <div className="relative">
-      {/* Icon */}
       {Icon && (
         <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
       )}
-
-      {/* Input Field */}
       <input
         id={id}
         type={type}
         {...validation}
         className={`w-full px-4 py-2 ${Icon ? 'pl-10' : 'pl-4'} border rounded-lg shadow-sm bg-white dark:bg-gray-800 dark:text-white transition-all duration-300 
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-          ${
-            error
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-300 dark:border-gray-600"
-          }`}
+          ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 dark:border-gray-600"}`}
         placeholder={`Enter ${label.toLowerCase()}...`}
       />
     </div>
-
-    {/* Error Message */}
     {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
   </div>
 );
@@ -60,13 +45,12 @@ const FileUpload = ({ id, label, validation, error, setValue, isRequired }) => {
       const file = e.target.files[0];
       setPreview(URL.createObjectURL(file));
       
-      // Begin upload to Cloudinary
       setUploading(true);
       
       try {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "habson"); // Replace with your Cloudinary upload preset
+        formData.append("upload_preset", "habson");
 
         const response = await fetch(
           "https://api.cloudinary.com/v1_1/dov6k7xdk/image/upload",
@@ -76,16 +60,11 @@ const FileUpload = ({ id, label, validation, error, setValue, isRequired }) => {
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Upload failed");
-        }
+        if (!response.ok) throw new Error("Upload failed");
 
         const data = await response.json();
         setFileUrl(data.secure_url);
-        
-        // Update the form value with the Cloudinary URL
         setValue(id, data.secure_url);
-        
         toast.success(`${label} uploaded successfully`);
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -159,16 +138,20 @@ const Documents = () => {
     setValue,
   } = useFormContext();
 
-  // Extract field requirements from API data
+  // Fixed: Now correctly checks for boolean true values
   const getFieldRequirement = (fieldId) => {
     if (!requiredFieldData || requiredFieldData.length === 0) return false;
-    return requiredFieldData[0][fieldId] === "true";
+    return requiredFieldData[0][fieldId] === true; // Changed from "true" to true
   };
 
-  // Create dynamic validation based on field requirements
+  // Improved validation with better error messages
   const createValidation = (fieldId) => {
     const isRequired = getFieldRequirement(fieldId);
-    return register(fieldId, isRequired ? { required: `${fieldId} is required` } : {});
+    const fieldName = fieldId
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, firstChar => firstChar.toUpperCase())
+      .trim();
+    return register(fieldId, isRequired ? { required: `${fieldName} is required` } : {});
   };
 
   if (isLoading) {
@@ -181,16 +164,12 @@ const Documents = () => {
 
   return (
     <div className="space-y-8">
-      
       {/* VISA Information */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-6">VISA Information</h3>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-1">
-            <label
-              htmlFor="visaType"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="visaType" className="block text-sm font-medium text-gray-700">
               VISA Type {getFieldRequirement("visaType") && <span className="text-red-500">*</span>}
             </label>
             <select
