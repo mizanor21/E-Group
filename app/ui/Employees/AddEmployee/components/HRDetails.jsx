@@ -1,7 +1,7 @@
 "use client";
 import { useFormContext } from "react-hook-form"
 import { CalendarIcon, IdentificationIcon, DocumentTextIcon, CreditCardIcon } from "@heroicons/react/24/outline"
-import { useEmployeeFieldData } from "@/app/data/DataFetch"
+import { useEmployeeRequiredFieldData } from "@/app/data/DataFetch"
 
 const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
@@ -37,7 +37,7 @@ const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired
 );
 
 const HRDetails = () => {
-  const { data: requiredFieldData, isLoading } = useEmployeeFieldData([]) // Fetch required field data
+  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([]) // Fetch required field data
   const {
     register,
     formState: { errors },

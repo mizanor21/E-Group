@@ -10,7 +10,7 @@ import {
   CurrencyDollarIcon,
 } from "@heroicons/react/24/outline"
 import { useState } from "react"
-import { useEmployeeFieldData } from "@/app/data/DataFetch"
+import { useEmployeeRequiredFieldData } from "@/app/data/DataFetch"
 
 const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
@@ -47,7 +47,7 @@ const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired
 
 
 const PaymentInfo = () => {
-  const { data: requiredFieldData, isLoading } = useEmployeeFieldData([]);
+  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([]);
   const {
     register,
     formState: { errors },

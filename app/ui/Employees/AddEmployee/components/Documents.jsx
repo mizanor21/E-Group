@@ -8,7 +8,7 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
-import { useEmployeeFieldData } from "@/app/data/DataFetch";
+import { useEmployeeRequiredFieldData } from "@/app/data/DataFetch";
 
 const InputField = ({ id, label, type, icon: Icon, validation, error, isRequired }) => (
   <div className="w-full">
@@ -152,7 +152,7 @@ const FileUpload = ({ id, label, validation, error, setValue, isRequired }) => {
 };
 
 const Documents = () => {
-  const { data: requiredFieldData, isLoading } = useEmployeeFieldData([]);
+  const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([]);
   const {
     register,
     formState: { errors },

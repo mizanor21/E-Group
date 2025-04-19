@@ -1,34 +1,23 @@
 import { connectToDB } from "@/app/lib/connectToDB";
 import { EmployeeField } from "@/app/lib/Employee/required-field";
-import { NextResponse } from "next/server";
 
-export async function PATCH(req, { params }) {
-  const { id } = params;
-  const updateData = await req.json();
 
-  await connectToDB();
-
+export async function PATCH(request) {
   try {
-    const data = await EmployeeField.findByIdAndUpdate(id, updateData, {
-      new: true, // Returns the updated document
-      runValidators: true, // Ensures model validation
-    });
+    await connectToDB();
 
-    if (!data) {
-      return NextResponse.json(
-        { message: "data not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(
-      { message: "Data Successfully Updated", data },
-      { status: 200 }
+    const data = await request.json();
+    
+    const updatedFields = await EmployeeField.findOneAndUpdate(
+      {}, 
+      { $set: data },
+      { new: true, upsert: true }
     );
+
+    return Response.json(updatedFields, { status: 200 });
   } catch (error) {
-    console.error("Failed to Updated data:", error);
-    return NextResponse.json(
-      { message: "Failed to update Updated data" },
+    return Response.json(
+      { error: "Failed to update required fields" },
       { status: 500 }
     );
   }

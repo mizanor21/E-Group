@@ -1,259 +1,182 @@
-'use client';
-import { useEmployeeRequiredFieldData } from '@/app/data/DataFetch';
-import { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
+import { FaSave, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 
-export default function EmployeeDataManager() {
-    const {data} = useEmployeeRequiredFieldData([]);
-  const [employeeData, setEmployeeData] = useState({
-    firstName: false,
-    lastName: false,
-    eEmail: false,
-    phoneNumber: false,
-    employeeID: false,
-    gender: false,
-    nationality: false,
-    bloodGroup: false,
-    religion: false,
-    presentAddress1: false,
-    presentAddress2: false,
-    presentCity: false,
-    presentDivision: false,
-    presentPostOrZipCode: false,
-    permanentAddress1: false,
-    permanentAddress2: false,
-    permanentCity: false,
-    permanentDivision: false,
-    permanentPostOrZipCode: false,
-    isSameAddress: false,
-    department: false,
-    actualJob: false,
-    currentJob: false,
-    project: false,
-    employeeType: false,
-    experience: false,
-    qualification: false,
-    role: false,
-    basicPay: false,
-    hourlyRate: false,
-    dailyRate: false,
-    commission: false,
-    accAllowance: false,
-    foodAllowance: false,
-    telephoneAllowance: false,
-    transportAllowance: false,
-    overTimeHours: false,
-    holidayOT: false,
-    annualLeave: false,
-    customerName: false,
-    customerWorkingHours: false,
-    customerRate: false,
-    vendorName: false,
-    vendorWorkingHours: false,
-    vendorRate: false,
-    passportProof: false,
-    rpIdProof: false,
-    visaProof: false,
-    hiredFromDocuments: false,
-    hiredByDocuments: false,
-    passportNumber: false,
-    passportWith: false,
-    rpIdNumber: false,
-    licenseNumber: false,
-    medicalCardNumber: false,
-    insuranceNumber: false,
-    healthCardNumber: false,
-    contractNumber: false,
-    hiredFrom: false,
-    contactFullName: false,
-    contactNumber: false,
-    hiredBy: false,
-    hiredByContactName: false,
-    hiredByContactNumber: false,
-    sponsor: false,
-    sponsorIdNumber: false,
-    visaType: false,
-    offDay: false,
-    remarks: false,
-    accommodation: false,
-    ticketDuration: false,
-  });
+const RequiredFieldsManager = () => {
+  const [requiredFields, setRequiredFields] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Toggle a boolean field
-  const toggleBooleanField = (field) => {
-    setEmployeeData(prev => ({
+  // Fetch current required fields configuration
+  useEffect(() => {
+    const fetchRequiredFields = async () => {
+      try {
+        const response = await fetch('/api/required-field');
+        if (!response.ok) {
+          throw new Error('Failed to fetch required fields');
+        }
+        const data = await response.json();
+        setRequiredFields(data[0]); // Assuming the API returns an array with one object
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching required fields:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchRequiredFields();
+  }, []);
+
+  // Toggle a field's required status
+  const toggleField = (fieldName) => {
+    setRequiredFields(prev => ({
       ...prev,
-      [field]: !prev[field]
+      [fieldName]: !prev[fieldName]
     }));
   };
 
-  // Handle numeric field changes
-  const handleNumericChange = (field, value) => {
-    setEmployeeData(prev => ({
-      ...prev,
-      [field]: Number(value)
-    }));
-  };
+  // Save the updated required fields
+  const saveRequiredFields = async () => {
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/required-field', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requiredFields),
+      });
 
-  // Handle text field changes
-  const handleTextChange = (field, value) => {
-    setEmployeeData(prev => ({
-      ...prev,
-      [field]: value === 'true' ? true : value === 'false' ? false : value
-    }));
-  };
+      if (!response.ok) {
+        throw new Error('Failed to update required fields');
+      }
 
-  // Group fields by category
-  const fieldCategories = {
-    "Personal Information": [
-      "firstName", "lastName", "eEmail", "phoneNumber", "employeeID", 
-      "gender", "nationality", "bloodGroup", "religion"
-    ],
-    "Address": [
-      "presentAddress1", "presentAddress2", "presentCity", "presentDivision", 
-      "presentPostOrZipCode", "permanentAddress1", "permanentAddress2", 
-      "permanentCity", "permanentDivision", "permanentPostOrZipCode", "isSameAddress"
-    ],
-    "Job Details": [
-      "department", "actualJob", "currentJob", "project", "employeeType", 
-      "experience", "qualification", "role"
-    ],
-    "Compensation": [
-      "basicPay", "hourlyRate", "dailyRate", "commission", "accAllowance",
-      "foodAllowance", "telephoneAllowance", "transportAllowance", 
-      "overTimeHours", "holidayOT", "annualLeave"
-    ],
-    "Client & Vendor": [
-      "customerName", "customerWorkingHours", "customerRate", "vendorName", 
-      "vendorWorkingHours", "vendorRate"
-    ],
-    "Documents": [
-      "passportProof", "rpIdProof", "visaProof", "hiredFromDocuments", 
-      "hiredByDocuments", "passportNumber", "passportWith", "rpIdNumber", "licenseNumber", 
-      "medicalCardNumber", "insuranceNumber", "healthCardNumber", "contractNumber"
-    ],
-    "Employment": [
-      "hiredFrom", "contactFullName", "contactNumber", "hiredBy", 
-      "hiredByContactName", "hiredByContactNumber", "sponsor", "sponsorIdNumber", 
-      "visaType", "offDay", "remarks", "accommodation", "ticketDuration"
-    ]
-  };
-
-  // Determine if a field is numeric
-  const isNumericField = (field) => {
-    return typeof employeeData[field] === 'number';
-  };
-
-  // Function to render field inputs based on their type
-  const renderFieldInput = (field) => {
-    if (isNumericField(field)) {
-      return (
-        <div key={field} className="flex items-center mb-2 p-2 border rounded bg-gray-50">
-          <label className="w-64 text-sm font-medium text-gray-700">{formatFieldName(field)}</label>
-          <input 
-            type="number"
-            value={employeeData[field]}
-            onChange={(e) => handleNumericChange(field, e.target.value)}
-            className="ml-2 p-1 border rounded w-24 text-sm"
-          />
-        </div>
-      );
-    } else {
-      return (
-        <div key={field} className="flex items-center mb-2 p-2 border rounded bg-gray-50">
-          <label className="w-64 text-sm font-medium text-gray-700">{formatFieldName(field)}</label>
-          <select
-            value={String(employeeData[field])}
-            onChange={(e) => handleTextChange(field, e.target.value)}
-            className="ml-2 p-1 border rounded text-sm"
-          >
-            <option value="true">True</option>
-            <option value="false">False</option>
-          </select>
-        </div>
-      );
+      alert('Required fields updated successfully!');
+    } catch (error) {
+      console.error('Error updating required fields:', error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // Format field name for display
-  const formatFieldName = (field) => {
-    return field
-      .replace(/([A-Z])/g, ' $1') // Insert space before capital letters
-      .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
+  // Group fields by category for better organization
+  const fieldCategories = {
+    "Personal Information": [
+      'firstName', 'lastName', 'eEmail', 'phoneNumber', 'dob', 
+      'employeeID', 'gender', 'nationality', 'bloodGroup', 'religion'
+    ],
+    "Address Information": [
+      'presentAddress1', 'presentAddress2', 'presentCity', 
+      'presentDivision', 'presentPostOrZipCode', 'permanentAddress1', 
+      'permanentAddress2', 'permanentCity', 'permanentDivision', 
+      'permanentPostOrZipCode', 'isSameAddress'
+    ],
+    "Employment Details": [
+      'department', 'actualJob', 'currentJob', 'project', 
+      'employeeType', 'experience', 'qualification', 'role'
+    ],
+    "Compensation": [
+      'basicPay', 'hourlyRate', 'dailyRate', 'commission', 
+      'accAllowance', 'foodAllowance', 'telephoneAllowance', 
+      'transportAllowance', 'overTimeHours', 'holidayOT', 'annualLeave'
+    ],
+    "Customer/Vendor Info": [
+      'customerName', 'customerWorkingHours', 'customerRate', 
+      'vendorName', 'vendorWorkingHours', 'vendorRate'
+    ],
+    "Documents": [
+      'passportProof', 'rpIdProof', 'visaProof', 
+      'hiredFromDocuments', 'hiredByDocuments'
+    ],
+    "Passport Details": [
+      'passportNumber', 'passportWith', 'passportIssueDate', 
+      'passportExpiryDate'
+    ],
+    "ID Details": [
+      'rpIdNumber', 'rpIdIssueDate', 'rpIdExpiryDate'
+    ],
+    "License & Cards": [
+      'licenseNumber', 'licenseExpiryDate', 'medicalCardNumber', 
+      'medicalCardExpiryDate', 'insuranceNumber', 'insuranceExpiryDate', 
+      'healthCardNumber', 'healthCardExpiryDate'
+    ],
+    "Contract Details": [
+      'contractNumber', 'nocExpiryDate'
+    ],
+    "Hiring Information": [
+      'hiredFrom', 'contactFullName', 'contactNumber', 
+      'hiredFromDate', 'hiredFromExpiryDate', 'hiredBy', 
+      'hiredByContactName', 'hiredByContactNumber', 
+      'hiredByDate', 'hiredByExpiryDate'
+    ],
+    "Visa & Sponsorship": [
+      'sponsor', 'sponsorIdNumber', 'visaType', 
+      'visaEntryDate', 'visaExpiryDate'
+    ],
+    "Other Dates": [
+      'fingerprintDate', 'medicalDate', 'settlementDate'
+    ],
+    "Miscellaneous": [
+      'offDay', 'remarks', 'accommodation', 
+      'ticketDuration', 'lastTicket'
+    ]
   };
 
-  // Toggle all fields in a category
-  const toggleCategory = (category, value) => {
-    const updatedData = { ...employeeData };
-    fieldCategories[category].forEach(field => {
-      if (typeof updatedData[field] === 'boolean') {
-        updatedData[field] = value;
-      }
-    });
-    setEmployeeData(updatedData);
-  };
+  if (isLoading) {
+    return <div className="text-center py-8">Loading required fields configuration...</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 bg-white shadow rounded">
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6">Manage Required Fields</h1>
       
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-blue-700">Manage Required Field</h1>
-        
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => {
-              const allTrue = { ...employeeData };
-              Object.keys(allTrue).forEach(key => {
-                if (typeof allTrue[key] === 'boolean') allTrue[key] = true;
-              });
-              setEmployeeData(allTrue);
-            }}
-            className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-          >
-            Enable All
-          </button>
-          
-          <button 
-            onClick={() => {
-              const allFalse = { ...employeeData };
-              Object.keys(allFalse).forEach(key => {
-                if (typeof allFalse[key] === 'boolean') allFalse[key] = false;
-              });
-              setEmployeeData(allFalse);
-            }}
-            className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-          >
-            Disable All
-          </button>
-        </div>
+        <p className="text-gray-600">
+          Toggle which fields should be required in employee forms
+        </p>
+        <button
+          onClick={saveRequiredFields}
+          disabled={isSaving}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'} <FaSave />
+        </button>
       </div>
 
-      <div className="space-y-6">
-        {Object.entries(fieldCategories).map(([category, fields]) => (
-          <div key={category} className="border rounded-lg p-4">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold text-gray-800">{category}</h2>
-              <div className="flex space-x-2">
-                <button 
-                  onClick={() => toggleCategory(category, true)}
-                  className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs border border-green-300 hover:bg-green-200"
+      {Object.entries(fieldCategories).map(([category, fields]) => (
+        <div key={category} className="mb-8 bg-white rounded-lg shadow p-4">
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">{category}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {fields.map(field => (
+              <div key={field} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                <label className="text-gray-700 capitalize">
+                  {field.replace(/([A-Z])/g, ' $1').trim()}
+                </label>
+                <button
+                  onClick={() => toggleField(field)}
+                  className={`p-2 rounded-full ${requiredFields[field] ? 'text-green-500' : 'text-gray-400'}`}
+                  title={requiredFields[field] ? 'Required - Click to make optional' : 'Optional - Click to make required'}
                 >
-                  Enable All
-                </button>
-                <button 
-                  onClick={() => toggleCategory(category, false)}
-                  className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs border border-red-300 hover:bg-red-200"
-                >
-                  Disable All
+                  {requiredFields[field] ? <FaToggleOn size={24} /> : <FaToggleOff size={24} />}
                 </button>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {fields.map(field => renderFieldInput(field))}
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
+      ))}
+
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={saveRequiredFields}
+          disabled={isSaving}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2"
+        >
+          {isSaving ? 'Saving...' : 'Save All Changes'} <FaSave />
+        </button>
       </div>
     </div>
   );
-}
+};
+
+export default RequiredFieldsManager;
