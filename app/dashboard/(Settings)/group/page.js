@@ -1,9 +1,8 @@
 'use client'
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useState } from 'react';
-import { BackwardIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { ArrowLeft, Backpack, BackpackIcon } from 'lucide-react';
+import { ArrowLeft} from 'lucide-react';
 
 export default function GroupForm() {
   const { register, control, handleSubmit } = useForm({
