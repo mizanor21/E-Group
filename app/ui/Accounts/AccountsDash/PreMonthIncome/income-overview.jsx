@@ -30,7 +30,6 @@ import autoTable from "jspdf-autotable";
 const SmartIncomeManagement = ({
   data = [],
   title = "Income Overview",
-  selectedYear = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -537,7 +536,6 @@ const SmartIncomeManagement = ({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-          <p className="text-gray-500">Financial Year: {selectedYear}</p>
         </div>
         
         <div className="flex items-center gap-2">
