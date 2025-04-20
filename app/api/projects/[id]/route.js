@@ -2,35 +2,65 @@ import { connectToDB } from "@/app/lib/connectToDB";
 import { Project } from "@/app/lib/Project/model";
 import { NextResponse } from "next/server";
 
-export async function PATCH(req, { params }) {
-  const { id } = params;
-  const updateData = await req.json();
-
-  await connectToDB();
-
+// PATCH - Update group, company or project
+export async function PATCH(req) {
   try {
-    const updatedProject = await Project.findByIdAndUpdate(id, updateData, {
-      new: true, // Returns the updated document
-      runValidators: true, // Ensures model validation
-    });
+    const { type, groupId, companyId, projectId, ...data } = await req.json();
+    await connectToDB();
 
-    if (!updatedProject) {
+    let update = {};
+    let result;
+
+    switch (type) {
+      case 'group':
+        result = await Project.findByIdAndUpdate(
+          groupId,
+          { groupName: data.groupName },
+          { new: true }
+        );
+        break;
+      case 'company':
+        result = await Project.findOneAndUpdate(
+          { _id: groupId, 'companies._id': companyId },
+          { 
+            $set: { 
+              'companies.$.companyName': data.companyName,
+              'companies.$.companyShortName': data.companyShortName
+            } 
+          },
+          { new: true }
+        );
+        break;
+      case 'project':
+        result = await Project.findOneAndUpdate(
+          { _id: groupId, 'companies._id': companyId, 'companies.projects._id': projectId },
+          { $set: { 'companies.$[company].projects.$[project].projectName': data.projectName } },
+          { 
+            new: true,
+            arrayFilters: [
+              { 'company._id': companyId },
+              { 'project._id': projectId }
+            ]
+          }
+        );
+        break;
+      default:
+        return NextResponse.json(
+          { message: "Invalid type specified" },
+          { status: 400 }
+        );
+    }
+
+    if (!result) {
       return NextResponse.json(
-        { message: "Project data not found" },
+        { message: "Item not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(
-      { message: "Data Successfully Updated", data: updatedProject },
-      { status: 200 }
-    );
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Failed to update Updated Project data:", error);
-    return NextResponse.json(
-      { message: "Failed to update Updated Project data" },
-      { status: 500 }
-    );
+    return handleError(error, "Failed to update item");
   }
 }
 
