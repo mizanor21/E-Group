@@ -74,146 +74,200 @@ const ExpensesOverview = ({ data, selectedYear }) => {
     doc.save(`expenses-overview-${selectedYear}.pdf`);
   };
 
-  const downloadMemoPDF = (item) => {
+  const downloadMemoPDF = (invoiceData) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const centerX = pageWidth / 2;
+    const margin = 20;
 
-    // Modern header with dark background
-    doc.setFillColor(33, 37, 41);
-    doc.rect(0, 0, pageWidth, 30, "F");
+    // Add header image (same as invoice)
+    const imgHeight = 37;
+    const imgWidth = pageWidth;
+    doc.addImage('https://i.postimg.cc/pL8JPH0b/Screenshot-from-2025-04-20-10-23-28.png', 'PNG', 0, 0, imgWidth, imgHeight);
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("E-Group", 14, 20);
+    // EXPENSE VOUCHER header
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.text("EXPENSE VOUCHER", centerX, 50, { align: "center" });
 
-    // Expense title
-    doc.setTextColor(33, 37, 41);
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text("Expense Voucher", centerX, 45, { align: "center" });
-
-    // Format dates for display
+    // Format date (same as invoice)
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       return date.toLocaleDateString("en-GB", {
         day: "2-digit",
-        month: "short",
+        month: "2-digit",
         year: "numeric",
-      });
+      }).replace(/\//g, '.');
     };
 
-    const expenseDate = formatDate(item.date);
-    const issueDate = formatDate(item.issueDate);
-    const submissionDate = formatDate(item.submissionDate);
-    const dueDate = formatDate(item.dueDate);
+    // Expense info section
+    const expenseInfo = [
+      ["PAID TO:", invoiceData.customerName || "N/A"],
+      ["VOUCHER NUMBER:", invoiceData.voucherNo || "N/A"],
+      ["DATE:", formatDate(invoiceData.submissionDate || new Date())],
+      ["CATEGORY:", invoiceData.expenseCategory || "General"],
+      ["PAYMENT METHOD:", invoiceData.mode || "N/A"],
+    ];
 
-    // Key information section - expense details
-    doc.roundedRect(14, 55, pageWidth - 28, 110, 3, 3);
+    let yPos = 70;
+    expenseInfo.forEach(([label, value]) => {
+      doc.setFontSize(10);
+      if (label) {
+        doc.setFont("helvetica", "bold");
+        doc.text(label, margin, yPos);
+        doc.setFont("helvetica", "normal");
+        doc.text(value, margin + 45, yPos);
+      } else {
+        doc.text(value, margin + 45, yPos);
+      }
+      yPos += 5;
+    });
 
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Expense Details", 20, 70);
+    yPos += 10;
 
-    // Main expense info
-    const expenseData = [
-      ["Customer", item.customerName],
-      ["Voucher No", item.voucherNo],
-      ["Category", item.expenseCategory || "General"],
-      ["Payment Method", item.mode],
-      ["Issue Date", issueDate],
-      ["Submission Date", submissionDate],
-      ["Due Date", dueDate],
-      ["Status", item.status],
+    // Expense items table
+    const items = invoiceData.items || [
+      {
+        item: 1,
+        description: invoiceData.description || "General Expense",
+        value: invoiceData.amount || 0
+      }
+    ];
+
+    const tableColumns = [
+      { header: 'Item', dataKey: 'item', width: 15 },
+      { header: 'Description', dataKey: 'description', width: 60 },
+      { header: 'Value', dataKey: 'value', width: 25 }
     ];
 
     autoTable(doc, {
-      startY: 75,
-      margin: { left: 20, right: 20 },
-      tableWidth: pageWidth - 40,
-      theme: "grid",
-      headStyles: {
-        fillColor: [240, 240, 240],
-        textColor: [33, 37, 41],
-        fontStyle: "bold",
-      },
-      styles: {
-        fontSize: 10,
-        cellPadding: 6,
-        lineColor: [200, 200, 200],
-      },
-      body: expenseData,
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 80 },
-        1: { cellWidth: pageWidth - 120 },
-      },
+      startY: yPos,
+      head: [tableColumns.map(col => col.header)],
+      body: items.map(item => tableColumns.map(col => item[col.dataKey.toLowerCase()])),
+      columnStyles: tableColumns.reduce((acc, col) => {
+        acc[col.header] = { cellWidth: col.width };
+        return acc;
+      }, {}),
+      margin: { left: margin, right: margin },
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' }
     });
 
-    // Amount section with highlight - using red for expenses
-    doc.setFillColor(220, 53, 69); // Bootstrap danger red
-    doc.roundedRect(14, 175, pageWidth - 28, 45, 3, 3, "F");
+    // Calculate totals
+    const subTotal = items.reduce((sum, item) => sum + item.value, 0);
+    const taxPercent = invoiceData.taxPercent || 0;
+    const tax = subTotal * (taxPercent / 100);
+    const total = subTotal + tax;
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "normal");
-    doc.text("Total Expense:", 25, 200);
+    // Add totals below the table
+    yPos = doc.lastAutoTable.finalY + 10;
 
-    doc.setFontSize(20);
+    // Subtotal row
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text(`$${item.amount.toFixed(2)}`, pageWidth - 25, 200, {
-      align: "right",
-    });
+    doc.text("Sub Total Amount", pageWidth - margin - 60, yPos, { align: "right" });
+    doc.text(subTotal.toFixed(2), pageWidth - margin, yPos, { align: "right" });
+    yPos += 5;
 
-    // Reference information section
-    doc.setTextColor(33, 37, 41);
+    // Tax row (if applicable)
+    if (taxPercent > 0) {
+      doc.text(`Tax @${taxPercent}%`, pageWidth - margin - 60, yPos, { align: "right" });
+      doc.text(tax.toFixed(2), pageWidth - margin, yPos, { align: "right" });
+      yPos += 5;
+    }
+
+    // Total row
     doc.setFontSize(12);
+    doc.text("Total Amount:", pageWidth - margin - 60, yPos, { align: "right" });
+    doc.text(total.toFixed(2), pageWidth - margin, yPos, { align: "right" });
+    doc.text("QR", pageWidth - margin + 30, yPos);
+    yPos += 10;
+
+    // Amount in words
+    const amountInWords = numberToWords(total) + " RIAL & " + 
+                          Math.round((total % 1) * 100) + " DIRHAMS";
+    doc.setFontSize(10);
+    doc.text(`AMOUNT IN WORD : ${amountInWords.toUpperCase()}`, margin, yPos);
+    yPos += 15;
+
+    // Notes section
+    doc.text("NOTE:", margin, yPos);
+    yPos += 5;
     doc.setFont("helvetica", "normal");
-    doc.text("Additional Information", 20, 240);
+    doc.text("1. THIS DOCUMENT SERVES AS AN OFFICIAL EXPENSE RECORD.", margin + 5, yPos);
+    yPos += 5;
+    doc.text("2. PLEASE RETAIN THIS VOUCHER FOR YOUR RECORDS.", margin + 5, yPos);
+    yPos += 10;
 
-    doc.setDrawColor(220, 220, 220);
-    doc.line(20, 245, pageWidth - 20, 245);
-
-    const referenceData = [
-      ["Transaction ID:", `TXN-${item.voucherNo}`],
-      ["Created:", new Date(item.createdAt || Date.now()).toLocaleString()],
+    // Payment details
+    doc.setFont("helvetica", "bold");
+    doc.text("PAYMENT DETAILS", margin, yPos);
+    yPos += 5;
+    doc.setFont("helvetica", "normal");
+    const paymentDetails = [
+      `PAYMENT METHOD: ${invoiceData.mode || "N/A"}`,
+      `REFERENCE NUMBER: ${invoiceData.referenceNo || "N/A"}`,
+      `PAYMENT DATE: ${formatDate(invoiceData.paymentDate || new Date())}`,
+      `PAID BY: ${invoiceData.paidBy || "N/A"}`
     ];
 
-    autoTable(doc, {
-      startY: 250,
-      margin: { left: 20, right: 20 },
-      tableWidth: pageWidth - 40,
-      theme: "plain",
-      styles: { fontSize: 9, cellPadding: 3 },
-      body: referenceData,
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 80 },
-        1: { cellWidth: pageWidth - 120 },
-      },
+    paymentDetails.forEach(detail => {
+      doc.text(detail, margin, yPos);
+      yPos += 5;
     });
 
-    // Footer
-    doc.setFillColor(240, 240, 240);
-    doc.rect(0, doc.internal.pageSize.getHeight() - 25, pageWidth, 25, "F");
+    // Footer with signature
+    yPos += 45;
+    doc.line(pageWidth - margin - 50, yPos - 4, pageWidth - margin, yPos - 4); // Add underline
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text("Authorised Signature", pageWidth - margin - 10, yPos, { align: "right" });
 
-    doc.setTextColor(100, 100, 100);
+    // Footer note
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
     doc.text(
-      "This document serves as an official expense record.",
-      centerX,
-      doc.internal.pageSize.getHeight() - 15,
-      { align: "center" }
-    );
-    doc.text(
-      `Generated: ${new Date().toLocaleString()}`,
+      "This is an electronically generated expense voucher. No signature required",
       centerX,
       doc.internal.pageSize.getHeight() - 10,
       { align: "center" }
     );
 
-    doc.save(`Ex-Memo-${item.voucherNo}.pdf`);
-  };
+    doc.save(`EAGLE_EX_Expense-${invoiceData.voucherNo}.pdf`);
+};
+
+const numberToWords = (num) => {
+  const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+  const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  
+  function convertLessThanOneThousand(num) {
+    if (num === 0) return '';
+    if (num < 10) return ones[num];
+    if (num < 20) return teens[num - 10];
+    if (num < 100) {
+      return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
+    }
+    return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + convertLessThanOneThousand(num % 100) : '');
+  }
+  
+  if (num === 0) return 'Zero';
+  let result = '';
+  const billion = Math.floor(num / 1000000000);
+  num %= 1000000000;
+  const million = Math.floor(num / 1000000);
+  num %= 1000000;
+  const thousand = Math.floor(num / 1000);
+  num %= 1000;
+  
+  if (billion > 0) result += convertLessThanOneThousand(billion) + ' Billion ';
+  if (million > 0) result += convertLessThanOneThousand(million) + ' Million ';
+  if (thousand > 0) result += convertLessThanOneThousand(thousand) + ' Thousand ';
+  result += convertLessThanOneThousand(num);
+  
+  return result.trim();
+};
+
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
