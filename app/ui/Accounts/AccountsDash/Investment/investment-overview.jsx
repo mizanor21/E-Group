@@ -254,127 +254,165 @@ const EnhancedInvestmentOverview = ({ data, selectedYear }) => {
 
   // Download individual memo PDF
   const downloadMemoPDF = (item) => {
-    const doc = new jsPDF()
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const centerX = pageWidth / 2
-    
-    // Modern header with bank name
-    doc.setFillColor(33, 37, 41)
-    doc.rect(0, 0, pageWidth, 30, 'F')
-    
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(16)
-    doc.setFont('helvetica', 'bold')
-    doc.text("E-Group", 14, 20)
-    
-    // Transaction memo title
-    doc.setTextColor(33, 37, 41)
-    doc.setFontSize(18)
-    doc.setFont('helvetica', 'bold')
-    doc.text("Transaction Memo", centerX, 45, { align: 'center' })
-    
-    // Format dates for display
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const centerX = pageWidth / 2;
+    const margin = 20;
+
+    // Add header image (consistent with other documents)
+    const imgHeight = 37;
+    const imgWidth = pageWidth;
+    doc.addImage('https://i.postimg.cc/pL8JPH0b/Screenshot-from-2025-04-20-10-23-28.png', 'PNG', 0, 0, imgWidth, imgHeight);
+
+    // TRANSACTION MEMO header
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.text("INVESTMENT INVOICE", centerX, 50, { align: "center" });
+
+    // Format date (consistent with other documents)
     const formatDate = (dateString) => {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      })
-    }
-    
-    const transactionDate = formatDate(item.date)
-    const submissionDate = formatDate(item.submissionDate)
-    
-    // Key information section - transaction details
-    doc.roundedRect(14, 55, pageWidth - 28, 90, 3, 3)
-    
-    doc.setFontSize(14)
-    doc.setFont('helvetica', 'bold')
-    doc.text("Transaction Details", 20, 70)
-    
-    // Main transaction info
-    const transactionData = [
-      ["Investor", item.investorName],
-      ["Voucher No", item.voucherNo],
-      ["Transaction Date", transactionDate],
-      ["Submission Date", submissionDate],
-      ["Payment Mode", item.mode],
-      ["Status", item.status]
-    ]
-    
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }).replace(/\//g, '.');
+    };
+
+    // Transaction info section
+    const transactionInfo = [
+      ["INVESTOR:", item.investorName || "N/A"],
+      ["VOUCHER NO:", item.voucherNo || "N/A"],
+      ["DATE:", formatDate(item.date || new Date())],
+      ["PAYMENT MODE:", item.mode || "N/A"],
+      ["STATUS:", item.status || "N/A"],
+    ];
+
+    let yPos = 70;
+    transactionInfo.forEach(([label, value]) => {
+      doc.setFontSize(10);
+      if (label) {
+        doc.setFont("helvetica", "bold");
+        doc.text(label, margin, yPos);
+        doc.setFont("helvetica", "normal");
+        doc.text(value, margin + 45, yPos);
+      } else {
+        doc.text(value, margin + 45, yPos);
+      }
+      yPos += 5;
+    });
+
+    yPos += 10;
+
+    // Transaction details table
+    const transactionDetails = [
+      {
+        description: item.description || "General Transaction",
+        amount: item.amount || 0
+      }
+    ];
+
+    const tableColumns = [
+      { header: 'Description', dataKey: 'description', width: 80 },
+      { header: 'Amount', dataKey: 'amount', width: 30 }
+    ];
+
     autoTable(doc, {
-      startY: 75,
-      margin: { left: 20, right: 20 },
-      tableWidth: pageWidth - 40,
-      theme: 'grid',
-      headStyles: { fillColor: [240, 240, 240], textColor: [33, 37, 41], fontStyle: 'bold' },
-      styles: { 
-        fontSize: 10,
-        cellPadding: 6,
-        lineColor: [200, 200, 200]
+      startY: yPos,
+      head: [tableColumns.map(col => col.header)],
+      body: transactionDetails.map(detail => [detail.description, detail.amount]),
+      columnStyles: {
+        'Description': { cellWidth: 80 },
+        'Amount': { cellWidth: 30 }
       },
-      body: transactionData,
-      columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 80 },
-        1: { cellWidth: pageWidth - 120 }
-      }
-    })
-    
-    // Amount section with highlight
-    doc.setFillColor(13, 110, 253) // Bootstrap primary blue
-    doc.roundedRect(14, 155, pageWidth - 28, 45, 3, 3, 'F')
-    
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(14)
-    doc.setFont('helvetica', 'normal')
-    doc.text("Total Amount:", 25, 180)
-    
-    doc.setFontSize(20)
-    doc.setFont('helvetica', 'bold')
-    doc.text(`$${item.amount.toFixed(2)}`, pageWidth - 25, 180, { align: 'right' })
-    
+      margin: { left: margin, right: margin },
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' }
+    });
+
+    // Calculate totals
+    const total = transactionDetails.reduce((sum, detail) => sum + detail.amount, 0);
+
+    // Add totals below the table
+    yPos = doc.lastAutoTable.finalY + 10;
+
+    // Total row
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Total Amount:", pageWidth - margin - 60, yPos, { align: "right" });
+    doc.text(total.toFixed(2), pageWidth - margin, yPos, { align: "right" });
+    doc.text("USD", pageWidth - margin + 30, yPos);
+    yPos += 10;
+
+    // Amount in words
+    const amountInWords = numberToWords(total) + " US DOLLARS";
+    doc.setFontSize(10);
+    doc.text(`AMOUNT IN WORDS: ${amountInWords.toUpperCase()}`, margin, yPos);
+    yPos += 15;
+
     // Reference information section
-    doc.setTextColor(33, 37, 41)
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'normal')
-    doc.text("Reference Information", 20, 220)
+    doc.setFont("helvetica", "bold");
+    doc.text("REFERENCE INFORMATION", margin, yPos);
+    yPos += 5;
+    doc.setFont("helvetica", "normal");
     
-    doc.setDrawColor(220, 220, 220)
-    doc.line(20, 225, pageWidth - 20, 225)
-    
-    const referenceData = [
-      ["Transaction ID:", `TXN-${item.voucherNo}`],
-      ["Creation Date:", new Date(item.createdAt).toLocaleString()],
-    ]
-    
-    autoTable(doc, {
-      startY: 230,
-      margin: { left: 20, right: 20 },
-      tableWidth: pageWidth - 40,
-      theme: 'plain',
-      styles: { fontSize: 9, cellPadding: 3 },
-      body: referenceData,
-      columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 80 },
-        1: { cellWidth: pageWidth - 120 }
-      }
-    })
-    
-    // Footer
-    doc.setFillColor(240, 240, 240)
-    doc.rect(0, doc.internal.pageSize.getHeight() - 25, pageWidth, 25, 'F')
-    
-    doc.setTextColor(100, 100, 100)
-    doc.setFontSize(8)
-    doc.setFont('helvetica', 'italic')
-    doc.text("This is an electronically generated receipt. No signature required.", centerX, 
-             doc.internal.pageSize.getHeight() - 15, { align: 'center' })
-    doc.text(`Generated: ${new Date().toLocaleString()}`, centerX, 
-             doc.internal.pageSize.getHeight() - 10, { align: 'center' })
-    
-    doc.save(`IV-Memo-${item.voucherNo}.pdf`)
+    const referenceInfo = [
+      `TRANSACTION ID: TXN-${item.voucherNo || "N/A"}`,
+      `CREATED: ${new Date(item.createdAt || Date.now()).toLocaleString()}`,
+      `SUBMITTED: ${formatDate(item.submissionDate || new Date())}`
+    ];
+
+    referenceInfo.forEach(info => {
+      doc.text(info, margin, yPos);
+      yPos += 5;
+    });
+
+    // Footer with signature
+    yPos += 25;
+    doc.line(pageWidth - margin - 50, yPos - 4, pageWidth - margin, yPos - 4);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text("Authorised Signature", pageWidth - margin - 10, yPos, { align: "right" });
+
+    // Footer note
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "italic");
+    doc.text(
+      "This is an electronically generated transaction memo. No signature required",
+      centerX,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: "center" }
+    );
+
+    doc.save(`EAGLE_Invest-${item.voucherNo}.pdf`);
+};
+
+function numberToWords(num) {
+  const units = ["", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"];
+  const teens = ["TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN"];
+  const tens = ["", "TEN", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"];
+  
+  const integerPart = Math.floor(num);
+  const decimalPart = Math.round((num % 1) * 100);
+  
+  if (integerPart === 0) return "ZERO";
+  if (integerPart < 10) return units[integerPart];
+  if (integerPart < 20) return teens[integerPart - 10];
+  if (integerPart < 100) {
+    return tens[Math.floor(integerPart / 10)] + 
+           (integerPart % 10 !== 0 ? " " + units[integerPart % 10] : "");
   }
+  if (integerPart < 1000) {
+    return units[Math.floor(integerPart / 100)] + " HUNDRED" + 
+           (integerPart % 100 !== 0 ? " AND " + numberToWords(integerPart % 100) : "");
+  }
+  if (integerPart < 100000) {
+    return numberToWords(Math.floor(integerPart / 1000)) + " THOUSAND" + 
+           (integerPart % 1000 !== 0 ? " " + numberToWords(integerPart % 1000) : "");
+  }
+  
+  return "NUMBER TOO LARGE";
+}
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">

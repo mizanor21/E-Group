@@ -88,7 +88,7 @@ const ExpensesOverview = ({ data, selectedYear }) => {
     // EXPENSE VOUCHER header
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(14);
-    doc.text("EXPENSE VOUCHER", centerX, 50, { align: "center" });
+    doc.text("EXPENSE INVOICE", centerX, 50, { align: "center" });
 
     // Format date (same as invoice)
     const formatDate = (dateString) => {
@@ -233,7 +233,7 @@ const ExpensesOverview = ({ data, selectedYear }) => {
       { align: "center" }
     );
 
-    doc.save(`EAGLE_EX_Expense-${invoiceData.voucherNo}.pdf`);
+    doc.save(`EAGLE_Expense-${invoiceData.voucherNo}.pdf`);
 };
 
 const numberToWords = (num) => {
