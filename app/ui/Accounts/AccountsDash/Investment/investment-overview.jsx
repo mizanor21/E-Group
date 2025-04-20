@@ -341,11 +341,12 @@ const EnhancedInvestmentOverview = ({ data, selectedYear }) => {
     doc.setFont("helvetica", "bold");
     doc.text("Total Amount:", pageWidth - margin - 60, yPos, { align: "right" });
     doc.text(total.toFixed(2), pageWidth - margin, yPos, { align: "right" });
-    doc.text("USD", pageWidth - margin + 30, yPos);
+    doc.text("QR", pageWidth - margin + 30, yPos);
     yPos += 10;
 
     // Amount in words
-    const amountInWords = numberToWords(total) + " US DOLLARS";
+    const amountInWords = numberToWords(total) + " RIAL & " + 
+                          Math.round((total % 1) * 100) + " DIRHAMS";
     doc.setFontSize(10);
     doc.text(`AMOUNT IN WORDS: ${amountInWords.toUpperCase()}`, margin, yPos);
     yPos += 15;
