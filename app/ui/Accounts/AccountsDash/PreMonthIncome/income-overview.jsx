@@ -29,7 +29,7 @@ import autoTable from "jspdf-autotable";
 
 const SmartIncomeManagement = ({
   data = [],
-  title = "Smart Income Management",
+  title = "Income Overview",
   selectedYear = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -345,148 +345,327 @@ const SmartIncomeManagement = ({
   };
 
   // Generate individual voucher PDF
-  const downloadMemoPDF = (item) => {
+  // const downloadMemoPDF = (item) => {
+  //   const doc = new jsPDF();
+  //   const pageWidth = doc.internal.pageSize.getWidth();
+  //   const centerX = pageWidth / 2;
+  //   const margin = 20;
+
+  //   const imgHeight = 37; // Adjust height as needed
+  //   const imgWidth = pageWidth; // Full width
+  //   doc.addImage('https://i.postimg.cc/pL8JPH0b/Screenshot-from-2025-04-20-10-23-28.png', 'PNG', 0, 0, imgWidth, imgHeight);
+  
+  // // INVOICE header in black
+  // doc.setTextColor(0, 0, 0);
+  // doc.setFontSize(14);
+  // doc.text("INVOICE", pageWidth / 2, 50, { align: "center" });
+
+  //   // Format dates for display
+  //   const formatDate = (dateString) => {
+  //     const date = new Date(dateString);
+  //     return date.toLocaleDateString("en-GB", {
+  //       day: "2-digit",
+  //       month: "short",
+  //       year: "numeric",
+  //     });
+  //   };
+
+  //   const expenseDate = formatDate(item.date);
+  //   const issueDate = formatDate(item.issueDate);
+  //   const submissionDate = formatDate(item.submissionDate);
+  //   const dueDate = formatDate(item.dueDate);
+
+  //   doc.setFontSize(14);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Income Details", 20, 70);
+
+  //   // Main expense info
+  //   const expenseData = [
+  //     ["Customer", item.customerName],
+  //     ["Voucher No", item.voucherNo],
+  //     ["Category", item.expenseCategory || "General"],
+  //     ["Payment Method", item.mode],
+  //     ["Issue Date", issueDate],
+  //     ["Submission Date", submissionDate],
+  //     ["Due Date", dueDate],
+  //     ["Status", item.status],
+  //   ];
+
+  //   autoTable(doc, {
+  //     startY: 75,
+  //     margin: { left: 20, right: 20 },
+  //     tableWidth: pageWidth - 40,
+  //     theme: "grid",
+  //     headStyles: {
+  //       fillColor: [240, 240, 240],
+  //       textColor: [33, 37, 41],
+  //       fontStyle: "bold",
+  //     },
+  //     styles: {
+  //       fontSize: 10,
+  //       cellPadding: 6,
+  //       lineColor: [200, 200, 200],
+  //     },
+  //     body: expenseData,
+  //     columnStyles: {
+  //       0: { fontStyle: "bold", cellWidth: 80 },
+  //       1: { cellWidth: pageWidth - 120 },
+  //     },
+  //   });
+
+  //   // Amount section with highlight - using blue for income
+  //   doc.setFillColor(13, 110, 253); // Bootstrap primary blue
+  //   doc.roundedRect(14, 175, pageWidth - 28, 45, 3, 3, "F");
+
+  //   doc.setTextColor(255, 255, 255);
+  //   doc.setFontSize(14);
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text("Total Income:", 25, 200);
+
+  //   doc.setFontSize(20);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text(`$${item.amount.toFixed(2)}`, pageWidth - 25, 200, {
+  //     align: "right",
+  //   });
+
+  //   // Reference information section
+  //   doc.setTextColor(33, 37, 41);
+  //   doc.setFontSize(12);
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text("Additional Information", 20, 240);
+
+  //   doc.setDrawColor(220, 220, 220);
+  //   doc.line(20, 245, pageWidth - 20, 245);
+
+  //   const referenceData = [
+  //     ["Transaction ID:", `TXN-${item.voucherNo}`],
+  //     ["Created:", new Date(item.createdAt || Date.now()).toLocaleString()],
+  //   ];
+
+  //   autoTable(doc, {
+  //     startY: 250,
+  //     margin: { left: 20, right: 20 },
+  //     tableWidth: pageWidth - 40,
+  //     theme: "plain",
+  //     styles: { fontSize: 9, cellPadding: 3 },
+  //     body: referenceData,
+  //     columnStyles: {
+  //       0: { fontStyle: "bold", cellWidth: 80 },
+  //       1: { cellWidth: pageWidth - 120 },
+  //     },
+  //   });
+
+
+  //   // Footer
+  //   doc.setFillColor(240, 240, 240);
+  //   doc.rect(0, doc.internal.pageSize.getHeight() - 25, pageWidth, 25, "F");
+
+  //   doc.setTextColor(100, 100, 100);
+  //   doc.setFontSize(8);
+  //   doc.setFont("helvetica", "italic");
+  //   doc.text(
+  //     "This is an electronically generated receipt. No signature required",
+  //     centerX,
+  //     doc.internal.pageSize.getHeight() - 15,
+  //     { align: "center" }
+  //   );
+  //   doc.text(
+  //     `Generated: ${new Date().toLocaleString()}`,
+  //     centerX,
+  //     doc.internal.pageSize.getHeight() - 10,
+  //     { align: "center" }
+  //   );
+
+  //   doc.save(`IN-Memo-${item.voucherNo}.pdf`);
+  // };
+
+  const downloadInvoicePDF = (invoiceData) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const centerX = pageWidth / 2;
     const margin = 20;
-
-    doc.addImage('https://i.postimg.cc/B68xshJ4/file2.png', 'PNG', margin, 15, 30, 30); // Logo (replace with actual path)
   
-  // Company name in Arabic and English (blue color)
-  doc.setTextColor(0, 0, 255);
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("EAGLE ARABIA CONTRACTING EST.", pageWidth - 30, 25, { align: "right" });
-  doc.text("NEW EAGLE ARABIA CONTRACTING EST.", pageWidth - 30, 32, { align: "right" });
+    // Add header image
+    const imgHeight = 37;
+    const imgWidth = pageWidth;
+    doc.addImage('https://i.postimg.cc/pL8JPH0b/Screenshot-from-2025-04-20-10-23-28.png', 'PNG', 0, 0, imgWidth, imgHeight);
   
-  // INVOICE header in black
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(14);
-  doc.text("INVOICE", pageWidth / 2, 50, { align: "center" });
-
-    // Format dates for display
+    // INVOICE header
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.text("INVOICE", centerX, 50, { align: "center" });
+  
+    // Format date
     const formatDate = (dateString) => {
       const date = new Date(dateString);
       return date.toLocaleDateString("en-GB", {
         day: "2-digit",
-        month: "short",
+        month: "2-digit",
         year: "numeric",
-      });
+      }).replace(/\//g, '.');
     };
-
-    const expenseDate = formatDate(item.date);
-    const issueDate = formatDate(item.issueDate);
-    const submissionDate = formatDate(item.submissionDate);
-    const dueDate = formatDate(item.dueDate);
-
-    // Key information section - expense details
-    doc.roundedRect(14, 55, pageWidth - 28, 110, 3, 3);
-
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Income Details", 20, 70);
-
-    // Main expense info
-    const expenseData = [
-      ["Customer", item.customerName],
-      ["Voucher No", item.voucherNo],
-      ["Category", item.expenseCategory || "General"],
-      ["Payment Method", item.mode],
-      ["Issue Date", issueDate],
-      ["Submission Date", submissionDate],
-      ["Due Date", dueDate],
-      ["Status", item.status],
+  
+    // Invoice info section
+    const invoiceInfo = [
+      ["TO:", invoiceData.customerName || "N/A"],
+      ["INVOICE NUMBER:", invoiceData.voucherNo || "N/A"],
+      ["INVOICE DATE:", formatDate(invoiceData.submissionDate || new Date())],
     ];
-
+  
+    let yPos = 70;
+    invoiceInfo.forEach(([label, value]) => {
+      doc.setFontSize(10);
+      if (label) {
+        doc.setFont("helvetica", "bold");
+        doc.text(label, margin, yPos);
+        doc.setFont("helvetica", "normal");
+        doc.text(value, margin + 35, yPos);
+      } else {
+        doc.text(value, margin + 35, yPos);
+      }
+      yPos += 5;
+    });
+  
+    yPos += 10;
+  
+    // Invoice items table
+    const items = invoiceData.items || [
+      {
+        item: 1,
+        description: invoiceData.description || "Genaral",
+        value: invoiceData.amount || 0
+      }
+    ];
+  
+    const tableColumns = [
+      { header: 'Item', dataKey: 'item', width: 15 },
+      { header: 'Description', dataKey: 'description', width: 60 },
+      { header: 'Value', dataKey: 'value', width: 25 }
+    ];
+  
     autoTable(doc, {
-      startY: 75,
-      margin: { left: 20, right: 20 },
-      tableWidth: pageWidth - 40,
-      theme: "grid",
-      headStyles: {
-        fillColor: [240, 240, 240],
-        textColor: [33, 37, 41],
-        fontStyle: "bold",
-      },
-      styles: {
-        fontSize: 10,
-        cellPadding: 6,
-        lineColor: [200, 200, 200],
-      },
-      body: expenseData,
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 80 },
-        1: { cellWidth: pageWidth - 120 },
-      },
+      startY: yPos,
+      head: [tableColumns.map(col => col.header)],
+      body: items.map(item => tableColumns.map(col => item[col.dataKey.toLowerCase()])),
+      columnStyles: tableColumns.reduce((acc, col) => {
+        acc[col.header] = { cellWidth: col.width };
+        return acc;
+      }, {}),
+      margin: { left: margin, right: margin },
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' }
     });
-
-    // Amount section with highlight - using blue for income
-    doc.setFillColor(13, 110, 253); // Bootstrap primary blue
-    doc.roundedRect(14, 175, pageWidth - 28, 45, 3, 3, "F");
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "normal");
-    doc.text("Total Income:", 25, 200);
-
-    doc.setFontSize(20);
+  
+    // Calculate totals
+    const subTotal = items.reduce((sum, item) => sum + item.value, 0);
+    const discountPercent = invoiceData.discountPercent || 3;
+    const discount = subTotal * (discountPercent / 100);
+    const total = subTotal - discount;
+  
+    // Add totals below the table
+    yPos = doc.lastAutoTable.finalY + 10;
+  
+    // Subtotal row
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text(`$${item.amount.toFixed(2)}`, pageWidth - 25, 200, {
-      align: "right",
-    });
-
-    // Reference information section
-    doc.setTextColor(33, 37, 41);
+    doc.text("Sub Total Amount", pageWidth - margin - 60, yPos, { align: "right" });
+    doc.text(subTotal.toFixed(2), pageWidth - margin, yPos, { align: "right" });
+    yPos += 5;
+  
+    // Discount row
+    doc.text(`Special Discount for Quick Pay @${discountPercent}% of Invoice Value`, 
+             pageWidth - margin - 60, yPos, { align: "right" });
+    doc.text(discount.toFixed(2), pageWidth - margin, yPos, { align: "right" });
+    yPos += 5;
+  
+    // Total row
     doc.setFontSize(12);
+    doc.text("Total Amount:", pageWidth - margin - 60, yPos, { align: "right" });
+    doc.text(total.toFixed(2), pageWidth - margin, yPos, { align: "right" });
+    doc.text("QR", pageWidth - margin + 30, yPos);
+    yPos += 10;
+  
+    // Amount in words
+    const amountInWords = numberToWords(total) + " RIAL & " + 
+                          Math.round((total % 1) * 100) + " DIRHAMS";
+    doc.setFontSize(10);
+    doc.text(`AMOUNT IN WORD : ${amountInWords.toUpperCase()}`, margin, yPos);
+    yPos += 15;
+  
+    // Notes section
+    doc.text("NOTE:", margin, yPos);
+    yPos += 5;
     doc.setFont("helvetica", "normal");
-    doc.text("Additional Information", 20, 240);
-
-    doc.setDrawColor(220, 220, 220);
-    doc.line(20, 245, pageWidth - 20, 245);
-
-    const referenceData = [
-      ["Transaction ID:", `TXN-${item.voucherNo}`],
-      ["Created:", new Date(item.createdAt || Date.now()).toLocaleString()],
+    doc.text("1. PLEASE MAKE PAYMENT BY TT WITHIN 3 (THREE) DAYS UPON ISSUED THE INVOICE.", margin + 5, yPos);
+    yPos += 5;
+    doc.text("2. DETAILS OF THE MANPOWER IS GIVEN IN ENCLOSED FILE.", margin + 5, yPos);
+    yPos += 10;
+  
+    // Bank details
+    doc.setFont("helvetica", "bold");
+    doc.text("BANK ACCOUNT DETAILS", margin, yPos);
+    yPos += 5;
+    doc.setFont("helvetica", "normal");
+    const bankDetails = [
+      `BANK NAME: ${invoiceData.bankName || "QATAR NATIONAL BANK"}`,
+      `A/C NAME: ${invoiceData.accountName || "EAGLE FOR TRADING AND EMPLOYMENT"}`,
+      `SWIFT BOX: ${invoiceData.swiftCode || "QMBQ0QA000"}`,
+      `BANK A/C NO: ${invoiceData.accountNumber || "Q25205720001"}`,
+      `IBAN NO: ${invoiceData.iban || "QABBQ0BA00000000252057320001"}`
     ];
-
-    autoTable(doc, {
-      startY: 250,
-      margin: { left: 20, right: 20 },
-      tableWidth: pageWidth - 40,
-      theme: "plain",
-      styles: { fontSize: 9, cellPadding: 3 },
-      body: referenceData,
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 80 },
-        1: { cellWidth: pageWidth - 120 },
-      },
+  
+    bankDetails.forEach(detail => {
+      doc.text(detail, margin, yPos);
+      yPos += 5;
     });
-
-
-    // Footer
-    doc.setFillColor(240, 240, 240);
-    doc.rect(0, doc.internal.pageSize.getHeight() - 25, pageWidth, 25, "F");
-
-    doc.setTextColor(100, 100, 100);
+  
+    // Footer with signature
+    yPos += 45;
+    doc.line(pageWidth - margin - 50, yPos - 4, pageWidth - margin, yPos - 4); // Add underline
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text("Authorised Signature", pageWidth - margin - 10, yPos, { align: "right" });
+  
+    // Footer note
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
     doc.text(
-      "This is an electronically generated receipt. No signature required",
-      centerX,
-      doc.internal.pageSize.getHeight() - 15,
-      { align: "center" }
-    );
-    doc.text(
-      `Generated: ${new Date().toLocaleString()}`,
+      "This is an electronically generated invoice. No signature required",
       centerX,
       doc.internal.pageSize.getHeight() - 10,
       { align: "center" }
     );
-
-    doc.save(`IN-Memo-${item.voucherNo}.pdf`);
+  
+    doc.save(`EAGLE_IN_Invoice-${invoiceData.voucherNo}.pdf`);
   };
-
+  
+  // Helper function to convert numbers to words (you may need a more comprehensive implementation)
+  function numberToWords(num) {
+    const units = ["", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"];
+    const teens = ["TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN"];
+    const tens = ["", "TEN", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"];
+    
+    const integerPart = Math.floor(num);
+    const decimalPart = Math.round((num % 1) * 100);
+    
+    if (integerPart === 0) return "ZERO";
+    if (integerPart < 10) return units[integerPart];
+    if (integerPart < 20) return teens[integerPart - 10];
+    if (integerPart < 100) {
+      return tens[Math.floor(integerPart / 10)] + 
+             (integerPart % 10 !== 0 ? " " + units[integerPart % 10] : "");
+    }
+    if (integerPart < 1000) {
+      return units[Math.floor(integerPart / 100)] + " HUNDRED" + 
+             (integerPart % 100 !== 0 ? " AND " + numberToWords(integerPart % 100) : "");
+    }
+    if (integerPart < 100000) {
+      return numberToWords(Math.floor(integerPart / 1000)) + " THOUSAND" + 
+             (integerPart % 1000 !== 0 ? " " + numberToWords(integerPart % 1000) : "");
+    }
+    
+    return "NUMBER TOO LARGE";
+  }
   return (
     <div className="space-y-6 p-6 bg-white rounded-lg shadow-sm">
       {/* Header section */}
@@ -792,7 +971,7 @@ const SmartIncomeManagement = ({
                     ${item.amount.toFixed(2)}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => downloadMemoPDF(item)}>
+                    <Button variant="ghost" size="icon" onClick={() => downloadInvoicePDF(item)}>
                       <IoCloudDownloadOutline className="w-4 h-4" />
                     </Button>
                   </TableCell>
