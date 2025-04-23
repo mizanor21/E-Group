@@ -107,6 +107,7 @@ const EmployeeBasicInfo = () => {
   const watchPresentPostOrZipCode = watch("presentPostOrZipCode")
   const selectedGroup = watch("group")
   const selectedCompany = watch("company")
+  const selectedProject = watch("project"); // Add this line
 
   // Extract field requirements from API data
   const getFieldRequirement = (fieldId) => {
@@ -163,23 +164,36 @@ const EmployeeBasicInfo = () => {
     }
   }, [selectedCompany, setValue])
 
-  // Generate employee ID when company changes
+  // State to track the sequential ID
+  const [sequentialId, setSequentialId] = useState(1000); // Starting from 01000
+
+  // Function to get the first 3 letters in uppercase
+  const getFirstThreeLetters = (str) => {
+    return str ? str.substring(0, 3).toUpperCase() : 'EMP';
+  }
+
+  // Generate employee ID when all required fields are selected
   useEffect(() => {
-    if (selectedCompany) {
-      const selectedCompanyData = companiesForSelectedGroup.find(
-        company => company.companyName === selectedCompany
-      )
-      const prefix = selectedCompanyData?.companyShortName || "EMP"
-      const date = new Date()
-      const year = date.getFullYear().toString().slice(-2)
-      const month = (date.getMonth() + 1).toString().padStart(2, "0")
-      const timeComponent = year + month
-      const uid = generateUID()
-      const employeeId = `${prefix}-${timeComponent}-${uid}`
-      setValue("employeeID", employeeId)
-      setEmployeeIdGenerated(true)
+    if (selectedGroup && selectedCompany && selectedProject) {
+      const groupPrefix = getFirstThreeLetters(selectedGroup);
+      const companyPrefix = companiesForSelectedGroup.find(
+        c => c.companyName === selectedCompany
+      )?.companyShortName || 'COM';
+
+      const projectPrefix = getFirstThreeLetters(selectedProject);
+
+      // Format sequential ID to 5 digits with leading zeros
+      const formattedSequentialId = sequentialId.toString().padStart(5, '0');
+
+      const employeeId = `${groupPrefix}-${companyPrefix}-${projectPrefix}-${formattedSequentialId}`;
+
+      setValue("employeeID", employeeId);
+      setEmployeeIdGenerated(true);
+
+      // Increment the sequential ID for next employee
+      // setSequentialId(prev => prev + 1);
     }
-  }, [selectedCompany, setValue, companiesForSelectedGroup])
+  }, [selectedGroup, selectedCompany, selectedProject, sequentialId, setValue, companiesForSelectedGroup]);
 
   // Handle permanent address same as present address
   useEffect(() => {
@@ -296,7 +310,7 @@ const EmployeeBasicInfo = () => {
             validation={createValidation("employeeID")}
             error={errors.employeeID}
             isRequired={getFieldRequirement("employeeID")}
-            disabled={employeeIdGenerated}
+            // disabled={employeeIdGenerated}
           />
           <SelectField
             id="gender"
