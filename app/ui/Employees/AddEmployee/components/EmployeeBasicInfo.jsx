@@ -15,15 +15,6 @@ import {
 } from "@heroicons/react/24/outline"
 import { useEmployeeRequiredFieldData, useProjectData } from "@/app/data/DataFetch"
 
-// Project prefix mapping
-const PROJECT_PREFIXES = {
-  "Project A": "PA",
-  "Project B": "PB",
-  "Project C": "PC",
-  // Add more projects and their prefixes as needed
-}
-
-// Function to generate a unique ID
 const generateUID = () => {
   return Math.floor(1000 + Math.random() * 9000) // 4-digit number
 }
@@ -114,30 +105,71 @@ const EmployeeBasicInfo = () => {
   const watchPresentCity = watch("presentCity")
   const watchPresentDivision = watch("presentDivision")
   const watchPresentPostOrZipCode = watch("presentPostOrZipCode")
-  const selectedProject = watch("project")
+  const selectedGroup = watch("group")
+  const selectedCompany = watch("company")
 
-  // Extract field requirements from API data - updated to handle boolean values
+  // Extract field requirements from API data
   const getFieldRequirement = (fieldId) => {
     if (!requiredFieldData || requiredFieldData.length === 0) return false
-    return requiredFieldData[0][fieldId] === true // Changed from "true" to true
+    return requiredFieldData[0][fieldId] === true
   }
 
-  // Extract unique project names from the data
-  const uniqueProjects = [...new Set(data?.map((item) => item.project))]
-
-  // Create options for the SelectField
-  const projectOptions = [
-    { value: "", label: "Select Project" },
-    ...uniqueProjects.map((project) => ({
-      value: project,
-      label: project,
-    })),
+  // Extract unique group names from the data
+  const groupOptions = [
+    { value: "", label: "Select Group" },
+    ...(data?.map((group) => ({
+      value: group.groupName,
+      label: group.groupName,
+    })) || []),
   ]
 
-  // Generate employee ID when project changes
+  // Get companies for selected group
+  const companiesForSelectedGroup = data?.find(group => group.groupName === selectedGroup)?.companies || []
+
+  // Create company options
+  const companyOptions = [
+    { value: "", label: "Select Company" },
+    ...companiesForSelectedGroup.map(company => ({
+      value: company.companyName,
+      label: company.companyName,
+      shortName: company.companyShortName
+    }))
+  ]
+
+  // Get projects for selected company
+  const projectsForSelectedCompany = companiesForSelectedGroup
+    .find(company => company.companyName === selectedCompany)?.projects || []
+
+  // Create project options
+  const projectOptions = [
+    { value: "", label: "Select Project" },
+    ...projectsForSelectedCompany.map(project => ({
+      value: project.projectName,
+      label: project.projectName
+    }))
+  ]
+
+  // Clear dependent fields when parent changes
   useEffect(() => {
-    if (selectedProject) {
-      const prefix = PROJECT_PREFIXES[selectedProject] || selectedProject.substring(0, 2).toUpperCase()
+    if (selectedGroup) {
+      setValue("company", "")
+      setValue("project", "")
+    }
+  }, [selectedGroup, setValue])
+
+  useEffect(() => {
+    if (selectedCompany) {
+      setValue("project", "")
+    }
+  }, [selectedCompany, setValue])
+
+  // Generate employee ID when company changes
+  useEffect(() => {
+    if (selectedCompany) {
+      const selectedCompanyData = companiesForSelectedGroup.find(
+        company => company.companyName === selectedCompany
+      )
+      const prefix = selectedCompanyData?.companyShortName || "EMP"
       const date = new Date()
       const year = date.getFullYear().toString().slice(-2)
       const month = (date.getMonth() + 1).toString().padStart(2, "0")
@@ -147,7 +179,7 @@ const EmployeeBasicInfo = () => {
       setValue("employeeID", employeeId)
       setEmployeeIdGenerated(true)
     }
-  }, [selectedProject, setValue])
+  }, [selectedCompany, setValue, companiesForSelectedGroup])
 
   // Handle permanent address same as present address
   useEffect(() => {
@@ -231,6 +263,22 @@ const EmployeeBasicInfo = () => {
             validation={createValidation("dob")}
             error={errors.dob}
             isRequired={getFieldRequirement("dob")}
+          />
+          <SelectField
+            id="group"
+            label="Group"
+            options={groupOptions}
+            validation={createValidation("group")}
+            error={errors.group}
+            isRequired={getFieldRequirement("group")}
+          />
+          <SelectField
+            id="company"
+            label="Company"
+            options={companyOptions}
+            validation={createValidation("company")}
+            error={errors.company}
+            isRequired={getFieldRequirement("company")}
           />
           <SelectField
             id="project"
@@ -498,7 +546,6 @@ const EmployeeBasicInfo = () => {
           {errors.remarks && <p className="mt-1 text-sm text-red-600">{errors.remarks.message}</p>}
         </div>
       </div>
-      
     </div>
   )
 }

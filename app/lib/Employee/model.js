@@ -12,6 +12,10 @@ const employeeSchema = new mongoose.Schema({
   nationality: { type: String },
   bloodGroup: { type: String },
   religion: { type: String },
+  
+  group: { type: String },
+  company: { type: String },
+  project: { type: String },
 
   // Address Information
   presentAddress1: { type: String },
@@ -30,7 +34,6 @@ const employeeSchema = new mongoose.Schema({
   department: { type: String },
   actualJob: { type: String },
   currentJob: { type: String},
-  project: { type: String },
   employeeType: { type: String, required: true, enum: ["hourly", "daily", "monthly", "others"] },
   experience: { type: String },
   qualification: { type: String },
