@@ -58,9 +58,9 @@ const Sidebar = () => {
   };
 
   return (
-    <div className=" w-72 bg-gradient-to-r from-green-900 to-green-700 flex flex-col shadow-lg rounded-lg m-5">
+    <div className="w-72 bg-gradient-to-b from-green-900 via-green-700 to-green-800 flex flex-col shadow-lg rounded-lg m-5">
       {/* Logo and Title */}
-      <div className="flex flex-col items-center text-center p-6  text-white">
+      <div className="flex flex-col items-center text-center p-6 text-white">
         <Image
           src={logo}
           width={500}
@@ -97,7 +97,7 @@ const Sidebar = () => {
               onClick={toggleAccounts}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 ${
                 pathname.includes('/dashboard/accounts')
-                  ? "bg-gradient-to-r from-emerald-600 to-green-500 text-white shadow-md"
+                  ? "bg-gradient-to-r from-emerald-600 via-green-500 to-green-400 text-white shadow-md"
                   : "text-white hover:bg-green-50 hover:text-green-600"
               }`}
             >
@@ -120,7 +120,7 @@ const Sidebar = () => {
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-300 ${
                       pathname === item.href
-                        ? "bg-gradient-to-r from-green-100 to-green-200 text-green-800 shadow-sm"
+                        ? "bg-gradient-to-r from-green-100 via-green-200 to-green-300 text-green-800 shadow-sm"
                         : "text-white hover:bg-green-50 hover:text-green-600"
                     }`}
                   >
@@ -145,7 +145,7 @@ const Sidebar = () => {
       {/* User Profile Section */}
       <div className="p-4 border-t border-gray-200 text-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-white">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-cyan-300 flex items-center justify-center text-white">
             {data?.fullName?.charAt(0) || "U"}
           </div>
           <div className="flex-1 overflow-hidden">
