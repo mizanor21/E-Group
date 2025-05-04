@@ -27,12 +27,12 @@ const Sidebar = () => {
 
   // Account submenu items
   const accountSubMenuItems = [
-    { href: "/dashboard/accounts/chart", icon: <BsJournalBookmark className="text-emerald-600" />, title: "Chart of Account" },
-    { href: "/dashboard/accounts/voucher-entry", icon: <MdReceiptLong className="text-amber-500" />, title: "Voucher Entry" },
-    { href: "/dashboard/accounts/voucher-approval", icon: <MdApproval className="text-blue-500" />, title: "Voucher Approval" },
-    { href: "/dashboard/accounts/budget", icon: <MdAttachMoney className="text-green-600" />, title: "Accounts Budget" },
-    { href: "/dashboard/accounts/bank-create", icon: <BsBank2 className="text-purple-600" />, title: "Bank Account Create" },
-    { href: "/dashboard/accounts/cheque-book", icon: <MdAccountBox className="text-red-500" />, title: "Cheque Book Create" },
+    { href: "/dashboard/accounts-new/chart-of-accounts", icon: <BsJournalBookmark className="text-emerald-600" />, title: "Chart of Account" },
+    { href: "/dashboard/accounts-new/voucher-entry", icon: <MdReceiptLong className="text-amber-500" />, title: "Voucher Entry" },
+    { href: "/dashboard/accounts-new/voucher-approval", icon: <MdApproval className="text-blue-500" />, title: "Voucher Approval" },
+    { href: "/dashboard/accounts-new/budget", icon: <MdAttachMoney className="text-green-600" />, title: "Accounts Budget" },
+    { href: "/dashboard/accounts-new/bank-create", icon: <BsBank2 className="text-purple-600" />, title: "Bank Account Create" },
+    { href: "/dashboard/accounts-new/cheque-book", icon: <MdAccountBox className="text-red-500" />, title: "Cheque Book Create" },
   ];
 
   const MenuLink = ({ href, icon, title, className = "" }) => {
