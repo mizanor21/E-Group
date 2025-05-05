@@ -442,12 +442,6 @@ const VoucherManagementUI = () => {
             <div className="flex justify-end mt-4 space-x-2">
               <button
                 type="button"
-                className="bg-red-600 text-white px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
                 className="bg-cyan-500 text-white px-4 py-2 rounded"
                 onClick={() => {
                   // Clear the form
