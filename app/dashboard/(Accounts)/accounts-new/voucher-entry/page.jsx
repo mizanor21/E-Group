@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { ChevronDown, Plus, Trash2, Edit, Eye, Check, Printer } from "lucide-react";
 import toast from "react-hot-toast";
@@ -8,8 +8,27 @@ const VoucherManagementUI = () => {
   // Tab state management
   const [activeTab, setActiveTab] = useState("Voucher Entry");
   
+  // Sample expense head options
+  const expenseHeadOptions = [
+    { value: "Mobile Bill-HO", label: "Mobile Bill-HO" },
+    { value: "Internet Bill", label: "Internet Bill" },
+    { value: "Office Rent", label: "Office Rent" },
+    { value: "Utility Bills", label: "Utility Bills" },
+    { value: "Travel Expenses", label: "Travel Expenses" },
+    { value: "Office Supplies", label: "Office Supplies" },
+  ];
+  
+  // Sample cost center options
+  const costCenterOptions = [
+    { value: "Project-001", label: "Project-001" },
+    { value: "Project-002", label: "Project-002" },
+    { value: "Head Office", label: "Head Office" },
+    { value: "Branch-Dhaka", label: "Branch-Dhaka" },
+    { value: "Branch-Chittagong", label: "Branch-Chittagong" },
+  ];
+  
   // Form handling with React Hook Form
-  const { register, control, watch, setValue, handleSubmit } = useForm({
+  const { register, control, watch, setValue, handleSubmit, getValues } = useForm({
     defaultValues: {
       branch: "Mirpur DOHS",
       transitionType: "Bank Payment",
@@ -19,11 +38,9 @@ const VoucherManagementUI = () => {
       date: "20-Aug-2024",
       paidFromBank: "Petty Cash",
       cashCurrentBalance: "BDT: 1,45,723.00",
-      showAccountCode: "Yes / No",
       voucherRows: [
         {
           expenseHead: "Mobile Bill-HO",
-          accountHead: "Mobile Bill Allowance (520000123)",
           costCenter: "Project-001",
           ref: "",
           amountFC: "",
@@ -57,7 +74,6 @@ const VoucherManagementUI = () => {
   const addNewRow = () => {
     append({
       expenseHead: "",
-      accountHead: "",
       costCenter: "",
       ref: "",
       amountFC: "",
@@ -77,6 +93,20 @@ const VoucherManagementUI = () => {
     }, 0).toFixed(2);
   };
 
+  // Function to calculate BDT amount based on FC amount and conversion rate
+  const calculateBDTAmount = (index) => {
+    if (selectedCurrency !== "BDT") {
+      const amountFC = parseFloat(watch(`voucherRows.${index}.amountFC`) || 0);
+      const convRate = parseFloat(watch(`voucherRows.${index}.convRate`) || 0);
+      
+      if (amountFC && convRate) {
+        const amountBDT = (amountFC * convRate).toFixed(2);
+        console.log(`Amount in BDT: ${amountBDT}`);
+        setValue(`voucherRows.${index}.amountBDT`, amountBDT);
+      }
+    }
+  };
+
   // Tabs configuration
   const tabs = [
     "Voucher Entry",
@@ -89,11 +119,11 @@ const VoucherManagementUI = () => {
   return (
     <div className="bg-slate-50 min-h-screen p-4">
       {/* Tabs Navigation */}
-      <div className="flex border-b">
+      <div className="flex border-b overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab}
-            className={`px-4 py-2 font-medium ${
+            className={`px-4 py-2 font-medium whitespace-nowrap ${
               activeTab === tab
                 ? "border-b-2 border-green-500 text-green-500"
                 : "text-gray-600"
@@ -274,32 +304,6 @@ const VoucherManagementUI = () => {
               </div>
             </div>
             
-            {/* Form Header - Row 3 */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="space-y-1">
-                <label className="block text-sm">
-                  Show Account Code
-                </label>
-                <div className="relative">
-                  <Controller
-                    name="showAccountCode"
-                    control={control}
-                    render={({ field }) => (
-                      <select
-                        {...field}
-                        className="w-full p-2 border rounded-md appearance-none border-green-300 focus:outline-none focus:ring-1 focus:ring-green-500"
-                      >
-                        <option value="Yes / No">Yes / No</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                      </select>
-                    )}
-                  />
-                  <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
-                </div>
-              </div>
-            </div>
-            
             {/* Voucher Table */}
             <div className="overflow-x-auto">
               <table className="min-w-full border border-gray-200">
@@ -307,9 +311,6 @@ const VoucherManagementUI = () => {
                   <tr className="bg-gray-50">
                     <th className="p-2 border text-left text-sm">
                       Expense Head <span className="text-red-500">*</span>
-                    </th>
-                    <th className="p-2 border text-left text-sm">
-                      Account Head <span className="text-red-500">*</span>
                     </th>
                     <th className="p-2 border text-left text-sm">Cost Center</th>
                     <th className="p-2 border text-left text-sm">Ref.</th>
@@ -320,7 +321,7 @@ const VoucherManagementUI = () => {
                       Con. Rate
                     </th>
                     <th className="p-2 border text-left text-sm">
-                      Amount (BDT)
+                      Amount (BDT) <span className="text-red-500">*</span>
                     </th>
                     <th className="p-2 border text-left text-sm">Narration</th>
                     <th className="p-2 border text-left text-sm">Cheq/RTGS</th>
@@ -333,22 +334,48 @@ const VoucherManagementUI = () => {
                   {fields.map((field, index) => (
                     <tr key={field.id}>
                       <td className="p-2 border">
-                        <input
-                          {...register(`voucherRows.${index}.expenseHead`)}
-                          className="w-full p-1 border border-gray-200 rounded"
-                        />
+                        <div className="relative">
+                          <Controller
+                            name={`voucherRows.${index}.expenseHead`}
+                            control={control}
+                            render={({ field }) => (
+                              <select
+                                {...field}
+                                className="w-full p-1 border border-gray-200 rounded appearance-none pr-8"
+                              >
+                                <option value="">Select Expense Head</option>
+                                {expenseHeadOptions.map(option => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                          <ChevronDown className="absolute right-2 top-1.5 h-4 w-4 text-gray-500" />
+                        </div>
                       </td>
                       <td className="p-2 border">
-                        <input
-                          {...register(`voucherRows.${index}.accountHead`)}
-                          className="w-full p-1 border border-gray-200 rounded"
-                        />
-                      </td>
-                      <td className="p-2 border">
-                        <input
-                          {...register(`voucherRows.${index}.costCenter`)}
-                          className="w-full p-1 border border-gray-200 rounded"
-                        />
+                        <div className="relative">
+                          <Controller
+                            name={`voucherRows.${index}.costCenter`}
+                            control={control}
+                            render={({ field }) => (
+                              <select
+                                {...field}
+                                className="w-full p-1 border border-gray-200 rounded appearance-none pr-8"
+                              >
+                                <option value="">Select Cost Center</option>
+                                {costCenterOptions.map(option => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                          <ChevronDown className="absolute right-2 top-1.5 h-4 w-4 text-gray-500" />
+                        </div>
                       </td>
                       <td className="p-2 border">
                         <input
@@ -360,24 +387,29 @@ const VoucherManagementUI = () => {
                         <input
                           {...register(`voucherRows.${index}.amountFC`)}
                           disabled={selectedCurrency === "BDT"}
+                          onChange={() => calculateBDTAmount(index)}
                           className={`w-full p-1 border border-gray-200 rounded ${
                             selectedCurrency === "BDT" ? "bg-gray-100" : ""
                           }`}
+                          placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter amount"}
                         />
                       </td>
                       <td className="p-2 border">
                         <input
                           {...register(`voucherRows.${index}.convRate`)}
                           disabled={selectedCurrency === "BDT"}
+                          onChange={() => calculateBDTAmount(index)}
                           className={`w-full p-1 border border-gray-200 rounded ${
                             selectedCurrency === "BDT" ? "bg-gray-100" : ""
                           }`}
+                          placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter rate"}
                         />
                       </td>
                       <td className="p-2 border">
                         <input
                           {...register(`voucherRows.${index}.amountBDT`)}
                           className="w-full p-1 border border-gray-200 rounded"
+                          readOnly={selectedCurrency !== "BDT"}
                         />
                       </td>
                       <td className="p-2 border">
@@ -399,7 +431,10 @@ const VoucherManagementUI = () => {
                         />
                       </td>
                       <td className="p-2 border text-center">
-                        {/* File attachment would be implemented here */}
+                        {/* File attachment button would be implemented here */}
+                        <button type="button" className="bg-gray-200 p-1 rounded-full">
+                          <Plus size={16} />
+                        </button>
                       </td>
                       <td className="p-2 border">
                         <div className="flex space-x-1">
@@ -426,10 +461,10 @@ const VoucherManagementUI = () => {
                   
                   {/* Total Row */}
                   <tr>
-                    <td className="p-2 border font-medium text-right" colSpan={6}>
+                    <td className="p-2 border font-medium text-right" colSpan={5}>
                       TOTAL
                     </td>
-                    <td className="p-2 border">
+                    <td className="p-2 border font-bold">
                       {calculateTotal()}
                     </td>
                     <td colSpan={5}></td>
@@ -497,35 +532,91 @@ const VoucherManagementUI = () => {
               </tr>
             </thead>
             <tbody>
-              {/* Empty rows for demo */}
-              {[1, 2, 3].map((_, i) => (
-                <tr key={i}>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border"></td>
-                  <td className="p-2 border">
-                    <div className="flex space-x-1">
-                      <button className="bg-blue-500 text-white p-1 rounded-full">
-                        <Edit size={16} />
-                      </button>
-                      <button className="bg-cyan-500 text-white p-1 rounded-full">
-                        <Eye size={16} />
-                      </button>
-                      <button className="bg-green-500 text-white p-1 rounded-full">
-                        <Check size={16} />
-                      </button>
-                      <button className="bg-red-500 text-white p-1 rounded-full">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {/* Sample data for demo */}
+              <tr>
+                <td className="p-2 border">20-Aug-2024</td>
+                <td className="p-2 border">TR-001</td>
+                <td className="p-2 border">Bank Payment</td>
+                <td className="p-2 border">Mirpur DOHS</td>
+                <td className="p-2 border">DV-01-00001101</td>
+                <td className="p-2 border">-</td>
+                <td className="p-2 border">500.00</td>
+                <td className="p-2 border">
+                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">Approved</span>
+                </td>
+                <td className="p-2 border">
+                  <div className="flex space-x-1">
+                    <button className="bg-blue-500 text-white p-1 rounded-full">
+                      <Edit size={16} />
+                    </button>
+                    <button className="bg-cyan-500 text-white p-1 rounded-full">
+                      <Eye size={16} />
+                    </button>
+                    <button className="bg-green-500 text-white p-1 rounded-full">
+                      <Check size={16} />
+                    </button>
+                    <button className="bg-red-500 text-white p-1 rounded-full">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="p-2 border">20-Aug-2024</td>
+                <td className="p-2 border">TR-002</td>
+                <td className="p-2 border">Cash Payment</td>
+                <td className="p-2 border">Mirpur DOHS</td>
+                <td className="p-2 border">DV-01-00001102</td>
+                <td className="p-2 border">-</td>
+                <td className="p-2 border">1,250.00</td>
+                <td className="p-2 border">
+                  <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded">Pending</span>
+                </td>
+                <td className="p-2 border">
+                  <div className="flex space-x-1">
+                    <button className="bg-blue-500 text-white p-1 rounded-full">
+                      <Edit size={16} />
+                    </button>
+                    <button className="bg-cyan-500 text-white p-1 rounded-full">
+                      <Eye size={16} />
+                    </button>
+                    <button className="bg-green-500 text-white p-1 rounded-full">
+                      <Check size={16} />
+                    </button>
+                    <button className="bg-red-500 text-white p-1 rounded-full">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="p-2 border">21-Aug-2024</td>
+                <td className="p-2 border">TR-003</td>
+                <td className="p-2 border">Transfer</td>
+                <td className="p-2 border">Mirpur DOHS</td>
+                <td className="p-2 border">DV-01-00001103</td>
+                <td className="p-2 border">50.00 USD</td>
+                <td className="p-2 border">5,500.00</td>
+                <td className="p-2 border">
+                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">Approved</span>
+                </td>
+                <td className="p-2 border">
+                  <div className="flex space-x-1">
+                    <button className="bg-blue-500 text-white p-1 rounded-full">
+                      <Edit size={16} />
+                    </button>
+                    <button className="bg-cyan-500 text-white p-1 rounded-full">
+                      <Eye size={16} />
+                    </button>
+                    <button className="bg-green-500 text-white p-1 rounded-full">
+                      <Check size={16} />
+                    </button>
+                    <button className="bg-red-500 text-white p-1 rounded-full">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
