@@ -45,7 +45,7 @@ const VoucherManagementUI = () => {
           ref: "",
           amountFC: "",
           convRate: "",
-          amountBDT: "500.00",
+          amountBDT: "0.00",
           narration: "Paid fro aug'24.",
           cheqRTGS: "",
           paidTo: "Mr. Rahim"
@@ -63,12 +63,29 @@ const VoucherManagementUI = () => {
   // Watch the currency field to conditionally enable/disable fields
   const selectedCurrency = watch("currency");
   
-  // Handle form submission
-  const onSubmit = (data) => {
-    toast.success("Form submitted successfully!");
-    console.log(data);
-    // Implementation for form submission would go here
+  const onSubmit = async (data) => {
+    try {
+      const response = await fetch('/api/vouchers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        toast.success("Voucher submitted successfully!");
+      } else {
+        toast.error(result.message || "Something went wrong.");
+      }
+    } catch (error) {
+      toast.error("Network error.");
+      console.error("Submission error:", error);
+    }
   };
+  
   
   // Add a new row
   const addNewRow = () => {
