@@ -8,31 +8,35 @@ import { VoucherFormHeader } from "./VoucherFormControls";
 
 const VoucherEntryForm = () => {
   // Form handling with React Hook Form
-  const { register, control, watch, setValue, handleSubmit } = useForm({
+const { register, control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
-      branch: "Mirpur DOHS",
-      transitionType: "Bank Payment",
-      accountingPeriod: "2024-2025",
-      currency: "BDT",
-      lastVoucher: "DV-01-00001101",
-      date: "20-Aug-2024",
-      paidFromBank: "Petty Cash",
-      cashCurrentBalance: "BDT: 1,45,723.00",
-      voucherRows: [
-        {
-          expenseHead: "Mobile Bill-HO",
-          costCenter: "Project-001",
-          ref: "",
-          amountFC: "",
-          convRate: "",
-          amountBDT: "0.00",
-          narration: "Paid fro aug'24.",
-          cheqRTGS: "",
-          paidTo: ""
-        }
-      ]
+        branch: "Mirpur DOHS",
+        transitionType: "Bank Payment",
+        accountingPeriod: "2024-2025",
+        currency: "BDT",
+        lastVoucher: "DV-01-00001101",
+        date: new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }),
+        paidFromBank: "Petty Cash",
+        cashCurrentBalance: "BDT: 1,45,723.00",
+        voucherRows: [
+            {
+                expenseHead: "Mobile Bill-HO",
+                costCenter: "Project-001",
+                ref: "",
+                amountFC: "",
+                convRate: "",
+                amountBDT: "0.00",
+                narration: "Paid fro aug'24.",
+                cheqRTGS: "",
+                paidTo: ""
+            }
+        ]
     }
-  });
+});
   
   // Field array for dynamic voucher rows
   const { fields, append, remove } = useFieldArray({
