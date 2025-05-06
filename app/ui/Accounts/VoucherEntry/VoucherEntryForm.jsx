@@ -28,7 +28,7 @@ const VoucherEntryForm = () => {
           amountBDT: "0.00",
           narration: "Paid fro aug'24.",
           cheqRTGS: "",
-          paidTo: "Mr. Rahim"
+          paidTo: ""
         }
       ]
     }
@@ -115,7 +115,7 @@ const VoucherEntryForm = () => {
         />
         
         {/* Voucher Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto pt-5">
           <table className="min-w-full border border-gray-200">
             <thead>
               <tr className="bg-gray-50">
