@@ -4,7 +4,7 @@ import Sidebar from "../ui/Shared/Sidebar/Sidebar";
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex h-screen ">
+    <div className="flex h-screen">
       <Sidebar />
 
       {/* Main Content Area */}
