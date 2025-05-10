@@ -26,7 +26,6 @@ const VoucherEntryForm = () => {
       voucherRows: [
         {
           expenseHead: "Mobile Bill-HO",
-          costCenter: "Project-001",
           ref: "",
           amountFC: "",
           convRate: "",
@@ -77,7 +76,6 @@ const VoucherEntryForm = () => {
   const addNewRow = () => {
     append({
       expenseHead: "",
-      costCenter: "",
       ref: "",
       amountFC: "",
       convRate: "",
@@ -130,7 +128,6 @@ const VoucherEntryForm = () => {
                 <th className="p-2 border text-left text-sm">
                   Expense Head <span className="text-red-500">*</span>
                 </th>
-                <th className="p-2 border text-left text-sm">Cost Center</th>
                 <th className="p-2 border text-left text-sm">Ref.</th>
                 <th className="p-2 border text-left text-sm">
                   Amount (FC)
@@ -163,28 +160,6 @@ const VoucherEntryForm = () => {
                           >
                             <option value="">Select Expense Head</option>
                             {expenseHeadOptions.map(option => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      />
-                      <ChevronDown className="absolute right-2 top-1.5 h-4 w-4 text-gray-500" />
-                    </div>
-                  </td>
-                  <td className="p-2 border">
-                    <div className="relative">
-                      <Controller
-                        name={`voucherRows.${index}.costCenter`}
-                        control={control}
-                        render={({ field }) => (
-                          <select
-                            {...field}
-                            className="w-full p-1 border border-gray-200 rounded appearance-none pr-8"
-                          >
-                            <option value="">Select Cost Center</option>
-                            {costCenterOptions.map(option => (
                               <option key={option.value} value={option.value}>
                                 {option.label}
                               </option>
@@ -300,7 +275,6 @@ const VoucherEntryForm = () => {
               setValue("voucherRows.0", {
                 expenseHead: "",
                 accountHead: "",
-                costCenter: "",
                 ref: "",
                 amountFC: "",
                 convRate: "",
