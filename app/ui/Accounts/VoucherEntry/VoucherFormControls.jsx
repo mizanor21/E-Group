@@ -6,7 +6,7 @@ import DateSelector from "../../component/DateSelector/DateSelector";
 export const VoucherFormHeader = ({ control, register, watch }) => {
     return (
         <>
-            {/* Form Header - Row 1 */}
+            {/* /* Form Header - Row 1  */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div className="space-y-1">
                     <label className="block text-sm">
@@ -67,8 +67,11 @@ export const VoucherFormHeader = ({ control, register, watch }) => {
                                     {...field}
                                     className="w-full p-2 border rounded-md appearance-none border-green-300 focus:outline-none focus:ring-1 focus:ring-green-500"
                                 >
-                                    <option value="2024-2025">2024-2025</option>
-                                    <option value="2023-2024">2023-2024</option>
+                                    {Array.from({ length: 2075 - 2023 + 1 }, (_, i) => (
+                                        <option key={i} value={`${2023 + i}-${2024 + i}`}>
+                                            {2023 + i}-{2024 + i}
+                                        </option>
+                                    ))}
                                 </select>
                             )}
                         />
@@ -102,11 +105,11 @@ export const VoucherFormHeader = ({ control, register, watch }) => {
 
             {/* Form Header - Row 2 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <DateSelector
-                        control={control}
-                        name="date"
-                        label="Select Date"
-                    />
+                <DateSelector
+                    control={control}
+                    name="date"
+                    label="Select Date"
+                />
                 {/* <div className="p-4 max-w-md mx-auto bg-white rounded-lg shadow">
                 </div> */}
 

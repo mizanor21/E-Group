@@ -109,7 +109,7 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
   return (
     <div className="bg-white rounded-md shadow-sm mt-4 p-4">
       <div>
-        <h2 className="text-xl font-bold mb-4">Voucher</h2>
+        <h2 className="text-xl font-bold mb-4">Payment Voucher</h2>
         
         {/* Form Header */}
         <VoucherFormHeader 
