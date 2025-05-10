@@ -6,7 +6,6 @@ import { costCenterOptions, expenseHeadOptions } from "./constants";
 import { VoucherFormHeader } from "./VoucherFormControls";
 
 const VoucherEntryForm = () => {
-  // Form handling with React Hook Form
   const { register, control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
       group: '',
@@ -38,17 +37,15 @@ const VoucherEntryForm = () => {
     }
   });
 
-  // Field array for dynamic voucher rows
   const { fields, append, remove } = useFieldArray({
     control,
     name: "voucherRows"
   });
 
-  // Watch the currency field to conditionally enable/disable fields
   const selectedCurrency = watch("currency");
+  const transitionType = watch("transitionType");
 
   const onSubmit = async (data) => {
-    console.log("Form data:", data);
     try {
       const response = await fetch('/api/vouchers', {
         method: 'POST',
@@ -61,7 +58,6 @@ const VoucherEntryForm = () => {
       const result = await response.json();
 
       if (response.ok) {
-        console.log("Voucher submitted successfully:", result.data);
         toast.success("Voucher submitted successfully!");
       } else {
         toast.error(result.message || "Something went wrong.");
@@ -72,7 +68,6 @@ const VoucherEntryForm = () => {
     }
   };
 
-  // Add a new row
   const addNewRow = () => {
     append({
       expenseHead: "",
@@ -86,7 +81,6 @@ const VoucherEntryForm = () => {
     });
   };
 
-  // Calculate total amount
   const calculateTotal = () => {
     return fields.reduce((sum, _, index) => {
       const amount = parseFloat(watch(`voucherRows.${index}.amountBDT`) || 0);
@@ -94,7 +88,6 @@ const VoucherEntryForm = () => {
     }, 0).toFixed(2);
   };
 
-  // Function to calculate BDT amount based on FC amount and conversion rate
   const calculateBDTAmount = (index) => {
     if (selectedCurrency !== "BDT") {
       const amountFC = parseFloat(watch(`voucherRows.${index}.amountFC`) || 0);
@@ -112,7 +105,6 @@ const VoucherEntryForm = () => {
       <div>
         <h2 className="text-xl font-bold mb-4">Payment Voucher</h2>
 
-        {/* Form Header */}
         <VoucherFormHeader
           control={control}
           register={register}
@@ -120,7 +112,6 @@ const VoucherEntryForm = () => {
           setValue={setValue}
         />
 
-        {/* Voucher Table */}
         <div className="overflow-x-auto pt-5">
           <table className="min-w-full border border-gray-200">
             <thead>
@@ -139,7 +130,9 @@ const VoucherEntryForm = () => {
                   Amount (BDT) <span className="text-red-500">*</span>
                 </th>
                 <th className="p-2 border text-left text-sm">Narration</th>
-                <th className="p-2 border text-left text-sm">Cheq/RTGS</th>
+                {transitionType === "Bank Payment" && (
+                  <th className="p-2 border text-left text-sm">Cheq/RTGS</th>
+                )}
                 <th className="p-2 border text-left text-sm">Paid To</th>
                 <th className="p-2 border text-left text-sm">Attac.</th>
                 <th className="p-2 border text-left text-sm">Action</th>
@@ -209,12 +202,14 @@ const VoucherEntryForm = () => {
                       className="w-full p-1 border border-gray-200 rounded"
                     />
                   </td>
-                  <td className="p-2 border">
-                    <input
-                      {...register(`voucherRows.${index}.cheqRTGS`)}
-                      className="w-full p-1 border border-gray-200 rounded"
-                    />
-                  </td>
+                  {transitionType === "Bank Payment" && (
+                    <td className="p-2 border">
+                      <input
+                        {...register(`voucherRows.${index}.cheqRTGS`)}
+                        className="w-full p-1 border border-gray-200 rounded"
+                      />
+                    </td>
+                  )}
                   <td className="p-2 border">
                     <input
                       {...register(`voucherRows.${index}.paidTo`)}
@@ -249,21 +244,19 @@ const VoucherEntryForm = () => {
                 </tr>
               ))}
 
-              {/* Total Row */}
               <tr>
-                <td className="p-2 border font-medium text-right" colSpan={5}>
+                <td className="p-2 border font-medium text-right" colSpan={4}>
                   TOTAL
                 </td>
                 <td className="p-2 border font-bold">
                   {calculateTotal()}
                 </td>
-                <td colSpan={5}></td>
+                <td colSpan={transitionType === "Bank Payment" ? 6 : 5}></td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-end mt-4 space-x-2">
           <button
             type="button"
