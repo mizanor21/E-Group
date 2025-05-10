@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -8,46 +8,49 @@ import { VoucherFormHeader } from "./VoucherFormControls";
 
 const VoucherEntryForm = () => {
   // Form handling with React Hook Form
-const { register, control, watch, setValue, handleSubmit } = useForm({
+  const { register, control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
-        branch: "Mirpur DOHS",
-        transitionType: "Bank Payment",
-        accountingPeriod: "2024-2025",
-        currency: "BDT",
-        lastVoucher: "DV-01-00001101",
-        date: new Date().toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        }),
-        paidFromBank: "Petty Cash",
-        cashCurrentBalance: "BDT: 1,45,723.00",
-        voucherRows: [
-            {
-                expenseHead: "Mobile Bill-HO",
-                costCenter: "Project-001",
-                ref: "",
-                amountFC: "",
-                convRate: "",
-                amountBDT: "0.00",
-                narration: "Paid fro aug'24.",
-                cheqRTGS: "",
-                paidTo: ""
-            }
-        ]
+      group: '',
+      company: '',
+      project: '',
+      transitionType: "Bank Payment",
+      accountingPeriod: "2024-2025",
+      currency: "BDT",
+      lastVoucher: "DV-01-00001101",
+      date: new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }),
+      paidFromBank: "Petty Cash",
+      cashCurrentBalance: "BDT: 1,45,723.00",
+      voucherRows: [
+        {
+          expenseHead: "Mobile Bill-HO",
+          costCenter: "Project-001",
+          ref: "",
+          amountFC: "",
+          convRate: "",
+          amountBDT: "0.00",
+          narration: "Paid fro aug'24.",
+          cheqRTGS: "",
+          paidTo: ""
+        }
+      ]
     }
-});
-  
+  });
+
   // Field array for dynamic voucher rows
   const { fields, append, remove } = useFieldArray({
     control,
     name: "voucherRows"
   });
-  
+
   // Watch the currency field to conditionally enable/disable fields
   const selectedCurrency = watch("currency");
-  
+
   const onSubmit = async (data) => {
+    console.log("Form data:", data);
     try {
       const response = await fetch('/api/vouchers', {
         method: 'POST',
@@ -56,10 +59,11 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
         },
         body: JSON.stringify(data),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
+        console.log("Voucher submitted successfully:", result.data);
         toast.success("Voucher submitted successfully!");
       } else {
         toast.error(result.message || "Something went wrong.");
@@ -69,7 +73,7 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
       console.error("Submission error:", error);
     }
   };
-  
+
   // Add a new row
   const addNewRow = () => {
     append({
@@ -84,7 +88,7 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
       paidTo: ""
     });
   };
-  
+
   // Calculate total amount
   const calculateTotal = () => {
     return fields.reduce((sum, _, index) => {
@@ -98,7 +102,7 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
     if (selectedCurrency !== "BDT") {
       const amountFC = parseFloat(watch(`voucherRows.${index}.amountFC`) || 0);
       const convRate = parseFloat(watch(`voucherRows.${index}.convRate`) || 0);
-      
+
       if (amountFC && convRate) {
         const amountBDT = (amountFC * convRate).toFixed(2);
         setValue(`voucherRows.${index}.amountBDT`, amountBDT);
@@ -110,14 +114,15 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
     <div className="bg-white rounded-md shadow-sm mt-4 p-4">
       <div>
         <h2 className="text-xl font-bold mb-4">Payment Voucher</h2>
-        
+
         {/* Form Header */}
-        <VoucherFormHeader 
-          control={control} 
-          register={register} 
+        <VoucherFormHeader
+          control={control}
+          register={register}
           watch={watch}
+          setValue={setValue}
         />
-        
+
         {/* Voucher Table */}
         <div className="overflow-x-auto pt-5">
           <table className="min-w-full border border-gray-200">
@@ -202,9 +207,8 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
                       {...register(`voucherRows.${index}.amountFC`)}
                       disabled={selectedCurrency === "BDT"}
                       onChange={() => calculateBDTAmount(index)}
-                      className={`w-full p-1 border border-gray-200 rounded ${
-                        selectedCurrency === "BDT" ? "bg-gray-100" : ""
-                      }`}
+                      className={`w-full p-1 border border-gray-200 rounded ${selectedCurrency === "BDT" ? "bg-gray-100" : ""
+                        }`}
                       placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter amount"}
                     />
                   </td>
@@ -213,9 +217,8 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
                       {...register(`voucherRows.${index}.convRate`)}
                       disabled={selectedCurrency === "BDT"}
                       onChange={() => calculateBDTAmount(index)}
-                      className={`w-full p-1 border border-gray-200 rounded ${
-                        selectedCurrency === "BDT" ? "bg-gray-100" : ""
-                      }`}
+                      className={`w-full p-1 border border-gray-200 rounded ${selectedCurrency === "BDT" ? "bg-gray-100" : ""
+                        }`}
                       placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter rate"}
                     />
                   </td>
@@ -271,7 +274,7 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
                   </td>
                 </tr>
               ))}
-              
+
               {/* Total Row */}
               <tr>
                 <td className="p-2 border font-medium text-right" colSpan={5}>
@@ -285,7 +288,7 @@ const { register, control, watch, setValue, handleSubmit } = useForm({
             </tbody>
           </table>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex justify-end mt-4 space-x-2">
           <button

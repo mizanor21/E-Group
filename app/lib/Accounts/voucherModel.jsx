@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 
 const voucherSchema = new mongoose.Schema({
-  branch: String,
+  group: String,
+  company: String,
+  project: String,
   transitionType: String,
   accountingPeriod: String,
   currency: String,
