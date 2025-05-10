@@ -6,39 +6,6 @@ import { useEffect } from "react";
 import { useProjectData } from "@/app/data/DataFetch";
 
 
-const SelectField = ({ id, label, options, control, name, isRequired = false, error }) => (
-    <div className="w-full space-y-1">
-        <label className="block text-sm">
-            {label} {isRequired && <span className="text-red-500">*</span>}
-        </label>
-        <div className="relative">
-            <Controller
-                name={name}
-                control={control}
-                render={({ field, fieldState: { error: controllerError } }) => (
-                    <>
-                        <select
-                            {...field}
-                            id={id}
-                            className={`w-full p-2 border rounded-md appearance-none ${controllerError ? 'border-red-300' : 'border-green-300'
-                                } focus:outline-none focus:ring-1 focus:ring-green-500`}
-                        >
-                            {options.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
-                        {controllerError && <p className="mt-1 text-sm text-red-600">{controllerError.message}</p>}
-                    </>
-                )}
-            />
-        </div>
-    </div>
-);
-
-
 export const VoucherFormHeader = ({ control, register, watch, setValue }) => {
     const { data } = useProjectData([]);
 
