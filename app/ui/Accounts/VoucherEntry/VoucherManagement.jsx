@@ -3,7 +3,6 @@ import { useState } from "react";
 import TodayVouchersTable from "./TodayVouchersTable";
 import VoucherEntryForm from "./VoucherEntryForm";
 import ReceivedVoucher from "./ReceivedVoucher";
-import VoucherApproval from "./VoucherApproval";
 import FundTransfer from "./FundTransfer";
 import VoucherList from "./VoucherList";
 
@@ -15,7 +14,6 @@ const VoucherManagementUI = () => {
   const tabs = [
     "Voucher Entry",
     "Received Voucher",
-    "Voucher Approval",
     "Fund Transfer",
     "Voucher List"
   ];
@@ -26,8 +24,6 @@ const VoucherManagementUI = () => {
         return <VoucherEntryForm />;
       case "Received Voucher":
         return <ReceivedVoucher />;
-      case "Voucher Approval":
-        return <VoucherApproval />;
       case "Fund Transfer":
         return <FundTransfer />;
       case "Voucher List":
