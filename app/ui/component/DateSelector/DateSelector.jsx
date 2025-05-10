@@ -1,16 +1,34 @@
-
 import { useState, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { Calendar, ChevronDown } from 'lucide-react';
 
-const DateSelector = ({ control, name = "date", label = "Date" }) => {
+const DateSelector = ({ control, name = "date", label = "Date", watch }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   
-  // Generate years (current year and 50 years into future)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 50 }, (_, i) => currentYear + i);
+  // Watch the accountingPeriod value from the form
+  const accountingPeriod = watch('accountingPeriod');
   
+  // Extract start and end years from accountingPeriod (format: "2024-2025")
+  const getPeriodYears = () => {
+    if (!accountingPeriod) return { startYear: null, endYear: null };
+    const [startYear, endYear] = accountingPeriod.split('-').map(Number);
+    return { startYear, endYear };
+  };
+
+  const { startYear, endYear } = getPeriodYears();
+  
+  // Generate years based on accounting period
+  const years = [];
+  if (startYear && endYear) {
+    // Only allow the two years in the accounting period
+    years.push(startYear, endYear);
+  } else {
+    // Fallback: current year and next year if no period selected
+    const currentYear = new Date().getFullYear();
+    years.push(currentYear, currentYear + 1);
+  }
+
   // Months array
   const months = [
     { value: 0, label: "January" },
@@ -39,6 +57,13 @@ const DateSelector = ({ control, name = "date", label = "Date" }) => {
   const [selectedDay, setSelectedDay] = useState(selectedDate.getDate());
   
   useEffect(() => {
+    // Reset to first year of accounting period when it changes
+    if (startYear && selectedYear !== startYear && selectedYear !== endYear) {
+      setSelectedYear(startYear);
+    }
+  }, [accountingPeriod]);
+
+  useEffect(() => {
     const daysInMonth = getDaysInMonth(selectedYear, selectedMonth);
     const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
     setDays(daysArray);
@@ -61,6 +86,26 @@ const DateSelector = ({ control, name = "date", label = "Date" }) => {
     return `${day}-${month}-${year}`;
   };
   
+  // Check if a year is within the accounting period
+  const isYearValid = (year) => {
+    if (!startYear || !endYear) return true;
+    return year === startYear || year === endYear;
+  };
+
+  // Check if a month is valid for the selected year
+  const isMonthValid = (monthValue, year) => {
+    if (!startYear || !endYear) return true;
+    
+    // For the first year (startYear), all months are valid
+    if (year === startYear) return true;
+    
+    // For the second year (endYear), only months up to June (5) are valid
+    // Assuming fiscal year is July-June (adjust if different)
+    if (year === endYear) return monthValue <= 5; // January-June
+    
+    return false;
+  };
+
   return (
     <div className="space-y-1 relative">
       <label className="block text-sm font-medium text-gray-700">
@@ -95,8 +140,11 @@ const DateSelector = ({ control, name = "date", label = "Date" }) => {
                       {years.map(year => (
                         <div 
                           key={year}
-                          className={`px-2 py-1 rounded cursor-pointer text-sm ${selectedYear === year ? 'bg-green-100 text-green-800' : 'hover:bg-gray-100'}`}
-                          onClick={() => setSelectedYear(year)}
+                          className={`px-2 py-1 rounded cursor-pointer text-sm ${
+                            selectedYear === year ? 'bg-green-100 text-green-800' : 
+                            isYearValid(year) ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'
+                          }`}
+                          onClick={() => isYearValid(year) && setSelectedYear(year)}
                         >
                           {year}
                         </div>
@@ -108,15 +156,21 @@ const DateSelector = ({ control, name = "date", label = "Date" }) => {
                   <div>
                     <label className="block text-xs font-medium text-gray-500 mb-1 px-2">Month</label>
                     <div className="max-h-48 overflow-y-auto px-1">
-                      {months.map(month => (
-                        <div 
-                          key={month.value}
-                          className={`px-2 py-1 rounded cursor-pointer text-sm ${selectedMonth === month.value ? 'bg-green-100 text-green-800' : 'hover:bg-gray-100'}`}
-                          onClick={() => setSelectedMonth(month.value)}
-                        >
-                          {month.label}
-                        </div>
-                      ))}
+                      {months.map(month => {
+                        const isValid = isMonthValid(month.value, selectedYear);
+                        return (
+                          <div 
+                            key={month.value}
+                            className={`px-2 py-1 rounded cursor-pointer text-sm ${
+                              selectedMonth === month.value ? 'bg-green-100 text-green-800' : 
+                              isValid ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'
+                            }`}
+                            onClick={() => isValid && setSelectedMonth(month.value)}
+                          >
+                            {month.label}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                   
@@ -127,7 +181,9 @@ const DateSelector = ({ control, name = "date", label = "Date" }) => {
                       {days.map(day => (
                         <div 
                           key={day}
-                          className={`px-2 py-1 rounded cursor-pointer text-sm ${selectedDay === day ? 'bg-green-100 text-green-800' : 'hover:bg-gray-100'}`}
+                          className={`px-2 py-1 rounded cursor-pointer text-sm ${
+                            selectedDay === day ? 'bg-green-100 text-green-800' : 'hover:bg-gray-100'
+                          }`}
                           onClick={() => setSelectedDay(day)}
                         >
                           {day.toString().padStart(2, '0')}

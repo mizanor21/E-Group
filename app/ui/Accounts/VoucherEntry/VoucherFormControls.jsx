@@ -105,11 +105,12 @@ export const VoucherFormHeader = ({ control, register, watch }) => {
 
             {/* Form Header - Row 2 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <DateSelector
-                    control={control}
-                    name="date"
-                    label="Select Date"
-                />
+            <DateSelector
+                control={control}
+                name="date"
+                label="Select Date"
+                watch={watch}  // Pass the watch function
+            />
                 {/* <div className="p-4 max-w-md mx-auto bg-white rounded-lg shadow">
                 </div> */}
 
