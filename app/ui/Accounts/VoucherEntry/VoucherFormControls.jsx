@@ -303,7 +303,7 @@ export const VoucherFormHeader = ({ control, register, watch, setValue }) => {
 
         <div className="space-y-1">
           <label className="block text-sm">
-            Your Last Vouch
+            Transaction No
           </label>
           <input
             {...register("lastVoucher")}
