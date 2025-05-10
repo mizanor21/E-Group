@@ -154,31 +154,6 @@ export const VoucherFormHeader = ({ control, register, watch, setValue }) => {
           )}
         />
 
-        <Controller
-          name="branch"
-          control={control}
-          render={({ field, fieldState: { error } }) => (
-            <div className="w-full space-y-1">
-              <label className="block text-sm">
-                Branch <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  {...field}
-                  className={`w-full p-2 border rounded-md appearance-none ${
-                    error ? 'border-red-300' : 'border-green-300'
-                  } focus:outline-none focus:ring-1 focus:ring-green-500`}
-                >
-                  <option value="Mirpur DOHS">Mirpur DOHS</option>
-                  <option value="Dhanmondi">Dhanmondi</option>
-                  <option value="Gulshan">Gulshan</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
-              </div>
-              {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
-            </div>
-          )}
-        />
 
         <Controller
           name="transitionType"
