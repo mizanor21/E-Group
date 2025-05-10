@@ -21,7 +21,6 @@ const VoucherEntryForm = () => {
         year: "numeric"
       }),
       paidFromBank: "Petty Cash",
-      cashCurrentBalance: "BDT: 1,45,723.00",
       voucherRows: [
         {
           expenseHead: "Mobile Bill-HO",

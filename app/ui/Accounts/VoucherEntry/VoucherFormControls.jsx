@@ -294,13 +294,11 @@ export const VoucherFormHeader = ({ control, register, watch, setValue }) => {
 
         <div className="space-y-1">
           <label className="block text-sm">
-            Cash Current Balance
+            Balance
           </label>
-          <input
-            {...register("cashCurrentBalance")}
-            readOnly
-            className="w-full p-2 border rounded-md border-green-300 bg-gray-50"
-          />
+          <p className="w-full p-2 border rounded-md border-green-300 bg-gray-50">
+            {watch("paidFromBank") === "Petty Cash" ? "100,000 BDT" : "3,000,000 BDT"}
+          </p>
         </div>
 
         <div className="space-y-1">
