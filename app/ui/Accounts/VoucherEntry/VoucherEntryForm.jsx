@@ -195,12 +195,45 @@ const VoucherEntryForm = () => {
                       readOnly={selectedCurrency !== "BDT"}
                     />
                   </td>
-                  <td className="p-2 border">
-                    <input
-                      {...register(`voucherRows.${index}.narration`)}
-                      className="w-full p-1 border border-gray-200 rounded"
-                    />
+
+                  <td className="p-2 border max-w-xs">
+                    <div className="flex items-center">
+                      <span className="flex-1 truncate">
+                        {watch(`voucherRows.${index}.narration`) || "Click to add narration"}
+                      </span>
+                      <label
+                        htmlFor={`narration-modal-${index}`}
+                        className="ml-2 bg-gray-200 p-1 rounded-full cursor-pointer"
+                      >
+                        <Plus size={16} />
+                      </label>
+
+                      <input
+                        type="checkbox"
+                        id={`narration-modal-${index}`}
+                        className="modal-toggle"
+                      />
+                      <div className="modal" role="dialog">
+                        <div className="modal-box">
+                          <h3 className="text-lg font-bold">Narration</h3>
+                          <textarea
+                            {...register(`voucherRows.${index}.narration`)}
+                            className="w-full p-2 mt-4 border border-gray-300 rounded-lg h-40"
+                            autoFocus
+                          />
+                          <div className="modal-action">
+                            <label
+                              htmlFor={`narration-modal-${index}`}
+                              className="btn"
+                            >
+                              Save
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </td>
+
                   {transitionType === "Bank Payment" && (
                     <td className="p-2 border">
                       <input
