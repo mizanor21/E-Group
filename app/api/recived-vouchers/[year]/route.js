@@ -10,7 +10,7 @@ export async function GET(req, { params }) {
     const Voucher = getRecivedVoucher(year);
     const data = await Voucher.find().sort({ date: -1 }).limit(100);
 
-    return Response.json({ success: true, data });
+    return Response.json(data);
   } catch (error) {
     return Response.json({ success: false, message: error.message }, { status: 500 });
   }
