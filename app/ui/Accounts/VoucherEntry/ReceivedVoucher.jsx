@@ -57,7 +57,7 @@ const ReceivedVoucher = () => {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success("Voucher submitted successfully!");
+        toast.success("Received Voucher submitted successfully!");
       } else {
         toast.error(result.message || "Something went wrong.");
       }
