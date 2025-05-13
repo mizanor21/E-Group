@@ -4,8 +4,8 @@ import { connectToDB } from '@/app/lib/connectToDB';
 
 export async function GET() {
   try {
-    const vouchers = await getTodayCreatedVouchersFromAllYears();
-    return Response.json({ success: true, data: vouchers });
+    const data = await getTodayCreatedVouchersFromAllYears();
+    return Response.json(data);
   } catch (error) {
     return Response.json({ success: false, message: error.message }, { status: 500 });
   }
