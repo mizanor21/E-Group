@@ -54,9 +54,6 @@ const VoucherManagementUI = () => {
 
       {/* Active Tab Content */}
       {renderActiveTab()}
-
-      {/* Your voucher today section - shown for all tabs */}
-      <TodayVouchersTable />
     </div>
   );
 };
