@@ -8,7 +8,7 @@ const voucherSchema = new mongoose.Schema({
   accountingPeriod: String,
   currency: String,
   lastVoucher: String,
-  date: String,
+  date: Date,
   paidFromBank: String,
   cashCurrentBalance: String,
   voucherRows: [

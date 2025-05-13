@@ -1,221 +1,406 @@
-import { useState, useEffect } from 'react';
-import { Controller } from 'react-hook-form';
-import { Calendar, ChevronDown } from 'lucide-react';
+'use client'
+import { useState, useEffect, useRef } from "react";
+import { Controller } from "react-hook-form";
+import { Calendar } from "lucide-react";
+import { format, isValid, parse, isWithinInterval, startOfYear, endOfYear } from "date-fns";
 
-const DateSelector = ({ control, name = "date", label = "Date", watch }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+const DateSelector = ({ control, name, label, watch, required = true }) => {
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [error, setError] = useState("");
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const inputRef = useRef(null);
+  const calendarRef = useRef(null);
   
-  // Watch the accountingPeriod value from the form
-  const accountingPeriod = watch('accountingPeriod');
-  
-  // Extract start and end years from accountingPeriod (format: "2024-2025")
-  const getPeriodYears = () => {
-    if (!accountingPeriod) return { startYear: null, endYear: null };
-    const [startYear, endYear] = accountingPeriod.split('-').map(Number);
+  // Watch for accounting period changes to validate date
+  const accountingPeriod = watch("accountingPeriod");
+  const watchedDate = watch(name);
+
+  // Extract start and end years from accounting period (format: "2023-2024")
+  const getAccountingYearRange = (period) => {
+    if (!period) return { startYear: new Date().getFullYear(), endYear: new Date().getFullYear() + 1 };
+    
+    const [startYear, endYear] = period.split("-").map(year => parseInt(year));
     return { startYear, endYear };
   };
 
-  const { startYear, endYear } = getPeriodYears();
-  
-  // Generate years based on accounting period
-  const years = [];
-  if (startYear && endYear) {
-    // Only allow the two years in the accounting period
-    years.push(startYear, endYear);
-  } else {
-    // Fallback: current year and next year if no period selected
-    const currentYear = new Date().getFullYear();
-    years.push(currentYear, currentYear + 1);
-  }
-
-  // Months array
-  const months = [
-    { value: 0, label: "January" },
-    { value: 1, label: "February" },
-    { value: 2, label: "March" },
-    { value: 3, label: "April" },
-    { value: 4, label: "May" },
-    { value: 5, label: "June" },
-    { value: 6, label: "July" },
-    { value: 7, label: "August" },
-    { value: 8, label: "September" },
-    { value: 9, label: "October" },
-    { value: 10, label: "November" },
-    { value: 11, label: "December" }
-  ];
-  
-  // Function to get days in month
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate();
+  // Check if date is within accounting period
+  const isDateWithinAccountingPeriod = (date) => {
+    if (!isValid(date) || !accountingPeriod) return false;
+    
+    const { startYear, endYear } = getAccountingYearRange(accountingPeriod);
+    const startDate = startOfYear(new Date(startYear, 0, 1));
+    const endDate = endOfYear(new Date(endYear, 0, 1));
+    
+    return isWithinInterval(date, { start: startDate, end: endDate });
   };
-  
-  // Generate days based on selected month and year
-  const [days, setDays] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(selectedDate.getMonth());
-  const [selectedYear, setSelectedYear] = useState(selectedDate.getFullYear());
-  const [selectedDay, setSelectedDay] = useState(selectedDate.getDate());
-  
-  useEffect(() => {
-    // Reset to first year of accounting period when it changes
-    if (startYear && selectedYear !== startYear && selectedYear !== endYear) {
-      setSelectedYear(startYear);
-    }
-  }, [accountingPeriod]);
 
+  // Update input value when form value changes
   useEffect(() => {
-    const daysInMonth = getDaysInMonth(selectedYear, selectedMonth);
-    const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    setDays(daysArray);
-    
-    // Adjust day if current selection exceeds days in new month
-    if (selectedDay > daysInMonth) {
-      setSelectedDay(daysInMonth);
+    if (watchedDate && isValid(new Date(watchedDate))) {
+      setInputValue(format(new Date(watchedDate), "dd/MM/yyyy"));
     }
-    
-    // Update the full date
-    const newDate = new Date(selectedYear, selectedMonth, selectedDay);
-    setSelectedDate(newDate);
-  }, [selectedMonth, selectedYear, selectedDay]);
-  
-  // Format the date for display
-  const formatDate = (date) => {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  }, [watchedDate]);
+
+  // Handle outside click to close calendar
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showCalendar && 
+        calendarRef.current && 
+        !calendarRef.current.contains(event.target) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target)
+      ) {
+        setShowCalendar(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showCalendar]);
+
+  // Set cursor position after auto-formatting
+  useEffect(() => {
+    if (inputRef.current && document.activeElement === inputRef.current) {
+      inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+    }
+  }, [inputValue, cursorPosition]);
+
+  // Generate days for the calendar
+  const generateCalendarDays = (date) => {
     const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-  
-  // Check if a year is within the accounting period
-  const isYearValid = (year) => {
-    if (!startYear || !endYear) return true;
-    return year === startYear || year === endYear;
-  };
-
-  // Check if a month is valid for the selected year
-  const isMonthValid = (monthValue, year) => {
-    if (!startYear || !endYear) return true;
+    const month = date.getMonth();
     
-    // For the first year (startYear), all months are valid
-    if (year === startYear) return true;
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
     
-    // For the second year (endYear), only months up to June (5) are valid
-    // Assuming fiscal year is July-June (adjust if different)
-    if (year === endYear) return monthValue <= 5; // January-June
+    const startDay = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const daysInMonth = lastDayOfMonth.getDate();
     
-    return false;
+    const days = [];
+    
+    // Add empty cells for days before the first day of month
+    for (let i = 0; i < startDay; i++) {
+      days.push(null);
+    }
+    
+    // Add days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(year, month, i);
+      days.push({
+        date: currentDate,
+        disabled: !isDateWithinAccountingPeriod(currentDate)
+      });
+    }
+    
+    return days;
   };
 
   return (
-    <div className="space-y-1 relative">
-      <label className="block text-sm font-medium text-gray-700">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      
-      <Controller
-        name={name}
-        control={control}
-        defaultValue={formatDate(selectedDate)}
-        render={({ field }) => (
-          <>
-            <div 
-              className="w-full p-2 border rounded-md flex items-center justify-between cursor-pointer bg-white border-gray-300 hover:border-green-400 transition-colors"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 text-gray-500 mr-2" />
-                <span>{formatDate(selectedDate)}</span>
-              </div>
-              <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-              <input type="hidden" {...field} value={formatDate(selectedDate)} />
+    <Controller
+      name={name}
+      control={control}
+      rules={{ 
+        required: required ? "Date is required" : false,
+        validate: value => {
+          if (required && !value) return "Date is required";
+          
+          if (value) {
+            const date = new Date(value);
+            if (!isValid(date)) return "Invalid date format";
+            if (!isDateWithinAccountingPeriod(date)) return "Date must be within accounting period";
+          }
+          return true;
+        }
+      }}
+      render={({ field, fieldState: { error: fieldError } }) => {
+        const [calendarDate, setCalendarDate] = useState(field.value ? new Date(field.value) : new Date());
+        const daysInCalendar = generateCalendarDays(calendarDate);
+        
+        const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        // Format and validate input as user types
+        const handleInputChange = (e) => {
+          let value = e.target.value;
+          const prevValue = inputValue;
+          const selectionStart = e.target.selectionStart;
+          
+          // Only allow numbers and slashes
+          value = value.replace(/[^\d/]/g, '');
+          
+          // Auto-format as DD/MM/YYYY
+          if (value.length > 0) {
+            // Handle deleting a slash
+            if (value.length < prevValue.length && 
+                (prevValue[selectionStart] === '/' || prevValue[selectionStart-1] === '/')) {
+              // Just remove the character and don't try to format
+              setInputValue(value);
+              setCursorPosition(selectionStart);
+              return;
+            }
+            
+            // Format day (first 2 digits)
+            if (value.length <= 2) {
+              // No formatting yet
+            } 
+            // Add first slash after day
+            else if (value.length > 2) {
+              if (value.charAt(2) !== '/') {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+              }
+              
+              // Format month (next 2 digits)
+              if (value.length > 5) {
+                if (value.charAt(5) !== '/') {
+                  value = value.slice(0, 5) + '/' + value.slice(5);
+                }
+                
+                // Limit year to 4 digits
+                if (value.length > 10) {
+                  value = value.slice(0, 10);
+                }
+              }
+            }
+          }
+          
+          setInputValue(value);
+          
+          // Calculate new cursor position after formatting
+          let newPosition = selectionStart;
+          if (value.length > prevValue.length) {
+            // If we added a slash automatically, move cursor position forward
+            if ((selectionStart === 2 && value.charAt(2) === '/') || 
+                (selectionStart === 5 && value.charAt(5) === '/')) {
+              newPosition++;
+            }
+          }
+          setCursorPosition(newPosition);
+          
+          // Auto-advance cursor for day/month completion
+          if (value.length === 2 && prevValue.length === 1) {
+            // Day completed, move to month
+            setCursorPosition(3);
+          } else if (value.length === 5 && prevValue.length === 4) {
+            // Month completed, move to year
+            setCursorPosition(6);
+          }
+          
+          // Try to parse the date
+          if (value.length >= 8) {
+            try {
+              // Parse date in DD/MM/YYYY format
+              const parsedDate = parse(value, "dd/MM/yyyy", new Date());
+              
+              if (isValid(parsedDate)) {
+                if (isDateWithinAccountingPeriod(parsedDate)) {
+                  field.onChange(format(parsedDate, "yyyy-MM-dd"));
+                  setCalendarDate(parsedDate);
+                  setError("");
+                } else {
+                  setError("Date must be within accounting period");
+                }
+              } else {
+                setError("Invalid date");
+              }
+            } catch {
+              setError("Invalid date format");
+            }
+          } else if (value.length > 0) {
+            setError(""); // Clear error while typing
+          }
+        };
+        
+        // Handle keyboard navigation
+        const handleKeyDown = (e) => {
+          // Enter key: validate and close calendar if open
+          if (e.key === 'Enter') {
+            if (showCalendar) {
+              setShowCalendar(false);
+            }
+            
+            // Try to validate and parse the date
+            if (inputValue.length >= 8) {
+              try {
+                const parsedDate = parse(inputValue, "dd/MM/yyyy", new Date());
+                if (isValid(parsedDate)) {
+                  field.onChange(format(parsedDate, "yyyy-MM-dd"));
+                }
+              } catch {
+                // Invalid date, ignore
+              }
+            }
+          }
+          
+          // Escape key: close calendar
+          else if (e.key === 'Escape') {
+            setShowCalendar(false);
+          }
+          
+          // Tab key: format date if valid
+          else if (e.key === 'Tab' && !e.shiftKey) {
+            if (inputValue.length >= 8) {
+              try {
+                const parsedDate = parse(inputValue, "dd/MM/yyyy", new Date());
+                if (isValid(parsedDate)) {
+                  field.onChange(format(parsedDate, "yyyy-MM-dd"));
+                }
+              } catch {
+                // Invalid date, ignore
+              }
+            }
+          }
+        };
+        
+        const handleDateSelect = (day) => {
+          if (day && !day.disabled) {
+            field.onChange(format(day.date, "yyyy-MM-dd"));
+            setInputValue(format(day.date, "dd/MM/yyyy"));
+            setShowCalendar(false);
+            setError("");
+          }
+        };
+        
+        const handlePrevMonth = () => {
+          setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1));
+        };
+        
+        const handleNextMonth = () => {
+          setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1));
+        };
+        
+        const today = new Date();
+        const { startYear, endYear } = getAccountingYearRange(accountingPeriod);
+        
+        return (
+          <div className="w-full space-y-1 relative">
+            <label className="block text-sm">
+              {label} {required && <span className="text-red-500">*</span>}
+            </label>
+            
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="DD/MM/YYYY"
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setShowCalendar(true)}
+                className={`w-full p-2 border rounded-md pr-10 ${
+                  error || fieldError ? 'border-red-300' : 'border-green-300'
+                } focus:outline-none focus:ring-1 focus:ring-green-500`}
+                maxLength={10}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+              >
+                <Calendar className="h-4 w-4" />
+              </button>
             </div>
             
-            {isOpen && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg py-2 px-1">
-                <div className="grid grid-cols-3 gap-2">
-                  {/* Year selector */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1 px-2">Year</label>
-                    <div className="max-h-48 overflow-y-auto px-1">
-                      {years.map(year => (
-                        <div 
-                          key={year}
-                          className={`px-2 py-1 rounded cursor-pointer text-sm ${
-                            selectedYear === year ? 'bg-green-100 text-green-800' : 
-                            isYearValid(year) ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'
-                          }`}
-                          onClick={() => isYearValid(year) && setSelectedYear(year)}
-                        >
-                          {year}
-                        </div>
-                      ))}
-                    </div>
+            {(error || fieldError) && (
+              <p className="mt-1 text-sm text-red-600">{error || fieldError.message}</p>
+            )}
+            
+            {accountingPeriod && (
+              <p className="mt-1 text-xs text-gray-500">
+                Valid range: 01/01/{startYear} - 31/12/{endYear}
+              </p>
+            )}
+            
+            {showCalendar && (
+              <div 
+                ref={calendarRef}
+                className="absolute z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg w-64 p-2"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <button 
+                    type="button" 
+                    onClick={handlePrevMonth}
+                    className="text-gray-500 hover:bg-gray-100 rounded-full w-6 h-6 flex items-center justify-center"
+                  >
+                    &lt;
+                  </button>
+                  <div className="font-medium">
+                    {months[calendarDate.getMonth()]} {calendarDate.getFullYear()}
                   </div>
-                  
-                  {/* Month selector */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1 px-2">Month</label>
-                    <div className="max-h-48 overflow-y-auto px-1">
-                      {months.map(month => {
-                        const isValid = isMonthValid(month.value, selectedYear);
-                        return (
-                          <div 
-                            key={month.value}
-                            className={`px-2 py-1 rounded cursor-pointer text-sm ${
-                              selectedMonth === month.value ? 'bg-green-100 text-green-800' : 
-                              isValid ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'
-                            }`}
-                            onClick={() => isValid && setSelectedMonth(month.value)}
-                          >
-                            {month.label}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  
-                  {/* Day selector */}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1 px-2">Day</label>
-                    <div className="max-h-48 overflow-y-auto px-1">
-                      {days.map(day => (
-                        <div 
-                          key={day}
-                          className={`px-2 py-1 rounded cursor-pointer text-sm ${
-                            selectedDay === day ? 'bg-green-100 text-green-800' : 'hover:bg-gray-100'
-                          }`}
-                          onClick={() => setSelectedDay(day)}
-                        >
-                          {day.toString().padStart(2, '0')}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <button 
+                    type="button" 
+                    onClick={handleNextMonth}
+                    className="text-gray-500 hover:bg-gray-100 rounded-full w-6 h-6 flex items-center justify-center"
+                  >
+                    &gt;
+                  </button>
                 </div>
                 
-                <div className="mt-3 flex justify-end space-x-2 px-2 border-t pt-2">
-                  <button 
-                    className="px-3 py-1 text-sm rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    className="px-3 py-1 text-sm rounded-md bg-green-500 hover:bg-green-600 text-white transition-colors"
+                <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                  {weekdays.map(day => (
+                    <div key={day} className="font-semibold text-gray-500 py-1">
+                      {day}
+                    </div>
+                  ))}
+                  
+                  {daysInCalendar.map((day, index) => (
+                    <div key={index} className="py-1">
+                      {day && (
+                        <button
+                          type="button"
+                          onClick={() => handleDateSelect(day)}
+                          disabled={day.disabled}
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${
+                            day.disabled
+                              ? 'text-gray-300 cursor-not-allowed'
+                              : field.value && format(new Date(field.value), "yyyy-MM-dd") === format(day.date, "yyyy-MM-dd")
+                              ? 'bg-green-500 text-white font-semibold'
+                              : format(day.date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")
+                              ? 'border border-green-400 font-medium hover:bg-green-100'
+                              : 'hover:bg-green-100'
+                          }`}
+                        >
+                          {day.date.getDate()}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-2 flex justify-between items-center border-t pt-2">
+                  <button
+                    type="button"
                     onClick={() => {
-                      field.onChange(formatDate(selectedDate));
-                      setIsOpen(false);
+                      const now = new Date();
+                      if (isDateWithinAccountingPeriod(now)) {
+                        field.onChange(format(now, "yyyy-MM-dd"));
+                        setInputValue(format(now, "dd/MM/yyyy"));
+                        setCalendarDate(now);
+                        setShowCalendar(false);
+                      }
                     }}
+                    className="text-xs text-green-600 hover:text-green-800 px-2 py-1 hover:bg-green-50 rounded"
+                    disabled={!isDateWithinAccountingPeriod(today)}
                   >
-                    Apply
+                    Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCalendar(false)}
+                    className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded hover:bg-green-100"
+                  >
+                    Close
                   </button>
                 </div>
               </div>
             )}
-          </>
-        )}
-      />
-    </div>
+          </div>
+        );
+      }}
+    />
   );
 };
 

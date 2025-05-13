@@ -238,7 +238,7 @@ export const VoucherFormHeader = ({ control, register, watch, setValue }) => {
         <DateSelector
           control={control}
           name="date"
-          label="Select Date"
+          label="Transection Date"
           watch={watch}
         />
 
