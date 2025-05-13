@@ -1,5 +1,15 @@
+import { getTodayCreatedVouchersFromAllYears } from '@/app/lib/Accounts/fetchVouchersTodayByCreatedAt';
 import { getVoucherModelByYear } from '@/app/lib/Accounts/voucherModel';
 import { connectToDB } from '@/app/lib/connectToDB';
+
+export async function GET() {
+  try {
+    const vouchers = await getTodayCreatedVouchersFromAllYears();
+    return Response.json({ success: true, data: vouchers });
+  } catch (error) {
+    return Response.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
 
 export async function POST(req) {
   try {
