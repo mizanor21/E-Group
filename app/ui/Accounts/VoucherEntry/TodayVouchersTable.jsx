@@ -12,7 +12,7 @@ const TodayVouchersTable = () => {
     transitionType: true,
     project: true,
     expenseHead: true,
-    paidTo: true,
+    paidTo: false,
     amount: false,
     rowStatus: false,
     total: true,
