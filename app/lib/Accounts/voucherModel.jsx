@@ -11,6 +11,7 @@ const voucherSchema = new mongoose.Schema({
   date: Date,
   paidFromBank: String,
   cashCurrentBalance: String,
+  status: { type: Boolean, default: false },
   voucherRows: [
     {
       expenseHead: String,
@@ -22,6 +23,7 @@ const voucherSchema = new mongoose.Schema({
       narration: String,
       cheqRTGS: String,
       paidTo: String,
+      status: { type: Boolean, default: false }
     },
   ],
 }, { timestamps: true });
