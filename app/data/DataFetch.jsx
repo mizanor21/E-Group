@@ -78,7 +78,12 @@ export const useLoginUserData = () => {
   return { data, error, isLoading: !data && !error };
 };
 
-export const useVouchersData = () => {
-  const { data, error } = useSWR(`${API_URL}/api/vouchers`, fetcher);
-  return { data, error, isLoading: !data && !error };
+export const usePaymentVouchersData = () => {
+  const { data, error, mutate } = useSWR(`${API_URL}/api/vouchers`, fetcher);
+  return { data, error, isLoading: !data && !error, mutate };
 };
+
+export const useReceivedVouchersData = () => {
+  const { data, error, mutate } = useSWR(`${API_URL}/api/recived-vouchers`, fetcher);
+  return { data, error, isLoading: !data && !error, mutate };
+}

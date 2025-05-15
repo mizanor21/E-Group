@@ -4,9 +4,11 @@ import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { costCenterOptions, expenseHeadOptions } from "./constants";
 import { VoucherFormHeader } from "./VoucherFormControls";
-import TodayVouchersTable from "./TodayVouchersTable";
+import TodayReceivedVouchersTable from "./TodayReceivedVouchersTable";
+import { useReceivedVouchersData } from "@/app/data/DataFetch";
 
 const ReceivedVoucher = () => {
+  const {mutate} = useReceivedVouchersData([])
   const { register, control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
       group: '',
@@ -59,6 +61,7 @@ const ReceivedVoucher = () => {
 
       if (response.ok) {
         toast.success("Received Voucher submitted successfully!");
+        mutate();
       } else {
         toast.error(result.message || "Something went wrong.");
       }
@@ -324,7 +327,7 @@ const ReceivedVoucher = () => {
           </div>
         </div>
       </div>
-      <TodayVouchersTable/>
+      <TodayReceivedVouchersTable/>
     </div>
   );
 };

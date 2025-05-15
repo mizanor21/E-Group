@@ -5,8 +5,10 @@ import toast from "react-hot-toast";
 import { costCenterOptions, expenseHeadOptions } from "./constants";
 import { VoucherFormHeader } from "./VoucherFormControls";
 import TodayVouchersTable from "./TodayVouchersTable";
+import { usePaymentVouchersData } from "@/app/data/DataFetch";
 
 const VoucherEntryForm = () => {
+  const {mutate} = usePaymentVouchersData([])
   const { register, control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
       group: '',
@@ -59,6 +61,7 @@ const VoucherEntryForm = () => {
 
       if (response.ok) {
         toast.success("Voucher submitted successfully!");
+        mutate();
       } else {
         toast.error(result.message || "Something went wrong.");
       }

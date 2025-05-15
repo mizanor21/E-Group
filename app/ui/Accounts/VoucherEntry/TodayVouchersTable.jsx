@@ -1,10 +1,10 @@
 'use client'
-import { useVouchersData } from "@/app/data/DataFetch";
+import { usePaymentVouchersData } from "@/app/data/DataFetch";
 import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, DollarSign } from "lucide-react";
 import { useState } from "react";
 
 const TodayVouchersTable = () => {
-  const { data } = useVouchersData([]);
+  const { data, mutate } = usePaymentVouchersData([]);
   const [expandedVoucher, setExpandedVoucher] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({
     date: true,
