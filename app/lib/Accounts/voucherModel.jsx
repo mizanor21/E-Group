@@ -9,7 +9,7 @@ const voucherSchema = new mongoose.Schema({
   currency: String,
   lastVoucher: String,
   date: Date,
-  paidFromBank: String,
+  paidFrom: String,
   cashCurrentBalance: String,
   status: { type: Boolean, default: false },
   voucherRows: [

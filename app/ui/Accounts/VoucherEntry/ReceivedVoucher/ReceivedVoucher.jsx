@@ -8,13 +8,13 @@ import { useReceivedVouchersData } from "@/app/data/DataFetch";
 import { ReceivedVoucherHeader } from "./ReceivedVoucherHeader";
 
 const ReceivedVoucher = () => {
-  const {mutate} = useReceivedVouchersData([])
+  const { mutate } = useReceivedVouchersData([])
   const { register, control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
       group: '',
       company: '',
       project: '',
-      transitionType: "Bank Payment",
+      transitionType: "Cash Payment",
       accountingPeriod: "2024-2025",
       currency: "BDT",
       lastVoucher: "DV-01-00001101",
@@ -23,7 +23,7 @@ const ReceivedVoucher = () => {
         month: "short",
         year: "numeric"
       }),
-      paidFromBank: "Petty Cash",
+      receivedFrom: "Petty Cash",
       voucherRows: [
         {
           expenseHead: "Mobile Bill-HO",
@@ -124,12 +124,16 @@ const ReceivedVoucher = () => {
                     Expense Head <span className="text-red-500">*</span>
                   </th>
                   <th className="p-2 border text-left text-sm">Ref.</th>
-                  <th className="p-2 border text-left text-sm">
-                    Amount (FC)
-                  </th>
-                  <th className="p-2 border text-left text-sm">
-                    Con. Rate
-                  </th>
+                  {selectedCurrency !== "BDT" && (
+                    <>
+                      <th className="p-2 border text-left text-sm">
+                        Amount (FC)
+                      </th>
+                      <th className="p-2 border text-left text-sm">
+                        Con. Rate
+                      </th>
+                    </>
+                  )}
                   <th className="p-2 border text-left text-sm">
                     Amount (BDT) <span className="text-red-500">*</span>
                   </th>
@@ -173,26 +177,28 @@ const ReceivedVoucher = () => {
                         className="w-full p-1 border border-gray-200 rounded"
                       />
                     </td>
-                    <td className="p-2 border">
-                      <input
-                        {...register(`voucherRows.${index}.amountFC`)}
-                        disabled={selectedCurrency === "BDT"}
-                        onChange={() => calculateBDTAmount(index)}
-                        className={`w-full p-1 border border-gray-200 rounded ${selectedCurrency === "BDT" ? "bg-gray-100" : ""
-                          }`}
-                        placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter amount"}
-                      />
-                    </td>
-                    <td className="p-2 border">
-                      <input
-                        {...register(`voucherRows.${index}.convRate`)}
-                        disabled={selectedCurrency === "BDT"}
-                        onChange={() => calculateBDTAmount(index)}
-                        className={`w-full p-1 border border-gray-200 rounded ${selectedCurrency === "BDT" ? "bg-gray-100" : ""
-                          }`}
-                        placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter rate"}
-                      />
-                    </td>
+                    {selectedCurrency !== "BDT" && (
+                      <>
+                        <td className="p-2 border">
+                          <input
+                            {...register(`voucherRows.${index}.amountFC`)}
+                            onChange={() => calculateBDTAmount(index)}
+                            className={`w-full p-1 border border-gray-200 rounded ${selectedCurrency === "BDT" ? "bg-gray-100" : ""
+                              }`}
+                            placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter amount"}
+                          />
+                        </td>
+                        <td className="p-2 border">
+                          <input
+                            {...register(`voucherRows.${index}.convRate`)}
+                            onChange={() => calculateBDTAmount(index)}
+                            className={`w-full p-1 border border-gray-200 rounded ${selectedCurrency === "BDT" ? "bg-gray-100" : ""
+                              }`}
+                            placeholder={selectedCurrency === "BDT" ? "N/A" : "Enter rate"}
+                          />
+                        </td>
+                      </>
+                    )}
                     <td className="p-2 border">
                       <input
                         {...register(`voucherRows.${index}.amountBDT`)}
@@ -327,7 +333,7 @@ const ReceivedVoucher = () => {
           </div>
         </div>
       </div>
-      <TodayReceivedVouchersTable/>
+      <TodayReceivedVouchersTable />
     </div>
   );
 };

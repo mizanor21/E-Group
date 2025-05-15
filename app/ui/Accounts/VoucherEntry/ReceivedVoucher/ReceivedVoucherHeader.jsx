@@ -243,12 +243,12 @@ export const ReceivedVoucherHeader = ({ control, register, watch, setValue }) =>
         />
 
         <Controller
-          name="paidFromBank"
+          name="receivedFrom"
           control={control}
           render={({ field, fieldState: { error } }) => (
             <div className="w-full space-y-1">
               <label className="block text-sm">
-                Paid From <span className="text-red-500">*</span>
+                Received From <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -272,7 +272,7 @@ export const ReceivedVoucherHeader = ({ control, register, watch, setValue }) =>
             Balance
           </label>
           <p className="w-full p-2 border rounded-md border-green-300 bg-gray-50">
-            {watch("paidFromBank") === "Petty Cash" ? "100,000 BDT" : "3,000,000 BDT"}
+            {watch("receivedFrom") === "Petty Cash" ? "100,000 BDT" : "3,000,000 BDT"}
           </p>
         </div>
 
