@@ -22,10 +22,10 @@ const VoucherManagementUI = () => {
       label: "Voucher List",
       icon: <FaListAlt className="text-lg" />,
     },
-    {
-      label: "Fund Transfer",
-      icon: <FaExchangeAlt className="text-lg" />,
-    },
+    // {
+    //   label: "Fund Transfer",
+    //   icon: <FaExchangeAlt className="text-lg" />,
+    // },
   ];
 
   const renderActiveTab = () => {
