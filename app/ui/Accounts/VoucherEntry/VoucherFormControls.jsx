@@ -248,7 +248,7 @@ export const VoucherFormHeader = ({ control, register, watch, setValue }) => {
           render={({ field, fieldState: { error } }) => (
             <div className="w-full space-y-1">
               <label className="block text-sm">
-                Paid From Bank <span className="text-red-500">*</span>
+                Paid From <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select

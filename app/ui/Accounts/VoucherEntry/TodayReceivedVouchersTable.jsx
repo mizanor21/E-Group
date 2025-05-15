@@ -3,7 +3,7 @@ import { useVouchersData } from "@/app/data/DataFetch";
 import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, DollarSign } from "lucide-react";
 import { useState } from "react";
 
-const TodayVouchersTable = () => {
+const TodayReceivedVouchersTable = () => {
   const { data } = useVouchersData([]);
   const [expandedVoucher, setExpandedVoucher] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({
@@ -75,7 +75,7 @@ const TodayVouchersTable = () => {
         <div className="flex items-center">
           <span className="w-2 h-6 bg-blue-500 rounded mr-2"></span>
           <h3 className="text-lg font-semibold text-gray-800">
-            Today's Payments Vouchers
+            Today's Received Vouchers
             <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
               {data?.length || 0} vouchers
             </span>
@@ -237,4 +237,4 @@ const TodayVouchersTable = () => {
   );
 };
 
-export default TodayVouchersTable;
+export default TodayReceivedVouchersTable;
