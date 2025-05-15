@@ -1,11 +1,10 @@
 'use client'
 import { useState } from "react";
 import { FaMoneyCheckAlt, FaRegFileAlt, FaListAlt, FaExchangeAlt } from "react-icons/fa";
-import TodayVouchersTable from "./TodayVouchersTable";
-import VoucherEntryForm from "./VoucherEntryForm";
-import ReceivedVoucher from "./ReceivedVoucher";
-import FundTransfer from "./FundTransfer";
-import VoucherList from "./VoucherList";
+import PaymentsVoucher from "./PaymentsVoucher/PaymentsVoucher";
+import VoucherList from "./VoucherList/VoucherList";
+import FundTransfer from "./FundTransfer/FundTransfer";
+import ReceivedVoucher from "./ReceivedVoucher/ReceivedVoucher";
 
 const VoucherManagementUI = () => {
   const [activeTab, setActiveTab] = useState("Payment Voucher");
@@ -32,7 +31,7 @@ const VoucherManagementUI = () => {
   const renderActiveTab = () => {
     switch (activeTab) {
       case "Payment Voucher":
-        return <VoucherEntryForm />;
+        return <PaymentsVoucher />;
       case "Received Voucher":
         return <ReceivedVoucher />;
       case "Voucher List":
@@ -40,7 +39,7 @@ const VoucherManagementUI = () => {
       case "Fund Transfer":
         return <FundTransfer />;
       default:
-        return <VoucherEntryForm />;
+        return <PaymentsVoucher />;
     }
   };
 

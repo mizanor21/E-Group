@@ -1,11 +1,11 @@
 'use client'
 import { Controller, useFormContext } from "react-hook-form";
 import { ChevronDown } from "lucide-react";
-import DateSelector from "../../component/DateSelector/DateSelector";
+import DateSelector from "../../../component/DateSelector/DateSelector";
 import { useEffect } from "react";
 import { useProjectData } from "@/app/data/DataFetch";
 
-export const VoucherFormHeader = ({ control, register, watch, setValue }) => {
+export const PaymentsVoucherHeader = ({ control, register, watch, setValue }) => {
   const { data } = useProjectData([]);
 
   const selectedGroup = watch("group");

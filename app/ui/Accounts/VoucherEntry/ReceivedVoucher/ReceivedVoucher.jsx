@@ -2,10 +2,10 @@
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { costCenterOptions, expenseHeadOptions } from "./constants";
-import { VoucherFormHeader } from "./VoucherFormControls";
+import { costCenterOptions, expenseHeadOptions } from "../constants";
 import TodayReceivedVouchersTable from "./TodayReceivedVouchersTable";
 import { useReceivedVouchersData } from "@/app/data/DataFetch";
+import { ReceivedVoucherHeader } from "./ReceivedVoucherHeader";
 
 const ReceivedVoucher = () => {
   const {mutate} = useReceivedVouchersData([])
@@ -49,7 +49,7 @@ const ReceivedVoucher = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await fetch('/api/recived-vouchers', {
+      const response = await fetch('/api/received-vouchers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const ReceivedVoucher = () => {
         <div>
           <h2 className="text-xl font-bold mb-4">Received Voucher</h2>
 
-          <VoucherFormHeader
+          <ReceivedVoucherHeader
             control={control}
             register={register}
             watch={watch}

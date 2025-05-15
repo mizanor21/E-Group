@@ -2,12 +2,12 @@
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { costCenterOptions, expenseHeadOptions } from "./constants";
-import { VoucherFormHeader } from "./VoucherFormControls";
-import TodayVouchersTable from "./TodayVouchersTable";
+import { costCenterOptions, expenseHeadOptions } from "../constants";
+import { PaymentsVoucherHeader } from "./PaymentsVoucherHeader";
 import { usePaymentVouchersData } from "@/app/data/DataFetch";
+import TodayPaymentsVouchersTable from "./TodayPaymentsVouchersTable";
 
-const VoucherEntryForm = () => {
+const PaymentsVoucher = () => {
   const {mutate} = usePaymentVouchersData([])
   const { register, control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
@@ -49,7 +49,7 @@ const VoucherEntryForm = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await fetch('/api/vouchers', {
+      const response = await fetch('/api/payment-vouchers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const VoucherEntryForm = () => {
         <div>
           <h2 className="text-xl font-bold mb-4">Payment Voucher</h2>
 
-          <VoucherFormHeader
+          <PaymentsVoucherHeader
             control={control}
             register={register}
             watch={watch}
@@ -327,9 +327,9 @@ const VoucherEntryForm = () => {
           </div>
         </div>
       </div>
-      <TodayVouchersTable/>
+      <TodayPaymentsVouchersTable/>
     </div>
   );
 };
 
-export default VoucherEntryForm;
+export default PaymentsVoucher;

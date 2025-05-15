@@ -79,11 +79,11 @@ export const useLoginUserData = () => {
 };
 
 export const usePaymentVouchersData = () => {
-  const { data, error, mutate } = useSWR(`${API_URL}/api/vouchers`, fetcher);
+  const { data, error, mutate } = useSWR(`${API_URL}/api/payment-vouchers`, fetcher);
   return { data, error, isLoading: !data && !error, mutate };
 };
 
 export const useReceivedVouchersData = () => {
-  const { data, error, mutate } = useSWR(`${API_URL}/api/recived-vouchers`, fetcher);
+  const { data, error, mutate } = useSWR(`${API_URL}/api/received-vouchers`, fetcher);
   return { data, error, isLoading: !data && !error, mutate };
 }

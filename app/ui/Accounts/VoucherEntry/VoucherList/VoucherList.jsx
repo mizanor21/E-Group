@@ -1,5 +1,5 @@
-import TodayReceivedVouchersTable from "./TodayReceivedVouchersTable";
-import TodayVouchersTable from "./TodayVouchersTable";
+import TodayReceivedVouchersTable from "../ReceivedVoucher/TodayReceivedVouchersTable";
+import TodayVouchersTable from "../PaymentsVoucher/TodayPaymentsVouchersTable";
 
 const VoucherList = () => {
     return(

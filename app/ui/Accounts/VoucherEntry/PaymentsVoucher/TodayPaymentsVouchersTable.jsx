@@ -3,7 +3,7 @@ import { usePaymentVouchersData } from "@/app/data/DataFetch";
 import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, DollarSign } from "lucide-react";
 import { useState } from "react";
 
-const TodayVouchersTable = () => {
+const TodayPaymentsVouchersTable = () => {
   const { data } = usePaymentVouchersData([]);
   const [expandedVoucher, setExpandedVoucher] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({
@@ -237,4 +237,4 @@ const TodayVouchersTable = () => {
   );
 };
 
-export default TodayVouchersTable;
+export default TodayPaymentsVouchersTable;
