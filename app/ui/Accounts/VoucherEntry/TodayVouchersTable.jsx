@@ -4,7 +4,7 @@ import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, Do
 import { useState } from "react";
 
 const TodayVouchersTable = () => {
-  const { data, mutate } = usePaymentVouchersData([]);
+  const { data } = usePaymentVouchersData([]);
   const [expandedVoucher, setExpandedVoucher] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({
     date: true,
@@ -70,7 +70,7 @@ const TodayVouchersTable = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md mt-6 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md mt-6">
       <div className="border-b border-gray-200 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 flex justify-between items-center">
         <div className="flex items-center">
           <span className="w-2 h-6 bg-blue-500 rounded mr-2"></span>
@@ -85,7 +85,7 @@ const TodayVouchersTable = () => {
           <button className="text-gray-500 hover:text-gray-800 bg-white p-2 rounded-md shadow-sm border border-gray-200">
             <FileText size={16} />
           </button>
-          <div className="absolute right-0 overflow-scroll max-h-[250px] bg-white shadow-lg rounded-md p-3 pb-5 hidden group-hover:block z-10 w-48">
+          <div className="absolute right-0 bg-white shadow-lg rounded-md p-3 pb-5 hidden group-hover:block z-10 w-48">
             <p className="text-xs text-gray-500 mb-2">Toggle Columns</p>
             {Object.keys(visibleColumns).map(col => (
               <label key={col} className="flex items-center mb-1 cursor-pointer">
