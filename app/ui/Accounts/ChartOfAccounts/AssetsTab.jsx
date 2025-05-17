@@ -128,7 +128,7 @@ export default function AssetsTab({ data, mutate }) {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const filteredData = data.filter(item =>
+    const filteredData = data?.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.code.includes(searchTerm)
     );
