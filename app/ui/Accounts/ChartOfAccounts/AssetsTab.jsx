@@ -7,7 +7,7 @@ import {
     ChevronDown, ChevronRight, X, Loader2, Check,
     Save
 } from 'lucide-react';
-import { useLoginUserData, useUsersData } from '@/app/data/DataFetch';
+import { useLoginUserData } from '@/app/data/DataFetch';
 
 // Utility function to build account hierarchy
 const buildAccountHierarchy = (accounts) => {
@@ -129,7 +129,7 @@ export default function AssetsTab({ data, mutate }) {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
-    const {data: userLoginData} = useLoginUserData([]);
+    const { data: userLoginData } = useLoginUserData([]);
 
     const filteredData = data?.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -209,18 +209,20 @@ export default function AssetsTab({ data, mutate }) {
         try {
             const completeData = {
                 ...formData,
-                createdBy: {
-                    name: userLoginData?.fullName,
-                    email: userLoginData?.email
-                },
-                editedBy: "user@example.com"
+                createdBy: editAccount
+                    ? undefined
+                    : {
+                        name: userLoginData?.fullName,
+                        email: userLoginData?.email
+                    },
+                editedBy: editAccount ? userLoginData?.email : undefined
             };
 
             const url = editAccount
                 ? `/api/chart-of-accounts/${editAccount._id}`
                 : '/api/chart-of-accounts';
 
-            const method = editAccount ? 'PATCH' : 'post';
+            const method = editAccount ? 'patch' : 'post';
 
             await axios[method](url, completeData);
 

@@ -47,7 +47,6 @@ const chartOfAccountsSchema = new mongoose.Schema(
     },
     editedBy: {
       type: String,
-      required: true
     },
   },
   {
