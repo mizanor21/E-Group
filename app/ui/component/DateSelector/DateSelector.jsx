@@ -117,7 +117,7 @@ const DateSelector = ({ control, name, label, watch, required = true }) => {
         }
       }}
       render={({ field, fieldState: { error: fieldError } }) => {
-        const [calendarDate, setCalendarDate] = useState(field.value ? new Date(field.value) : new Date());
+        const [calendarDate, setCalendarDate] = useState(() => (field.value ? new Date(field.value) : new Date()));
         const daysInCalendar = generateCalendarDays(calendarDate);
         
         const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];

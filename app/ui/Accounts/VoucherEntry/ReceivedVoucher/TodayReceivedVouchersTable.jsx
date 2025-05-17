@@ -75,7 +75,7 @@ const TodayReceivedVouchersTable = () => {
         <div className="flex items-center">
           <span className="w-2 h-6 bg-blue-500 rounded mr-2"></span>
           <h3 className="text-lg font-semibold text-gray-800">
-            Today's Received Vouchers
+            Today&apos;s Received Vouchers
             <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
               {data?.length || 0} vouchers
             </span>
