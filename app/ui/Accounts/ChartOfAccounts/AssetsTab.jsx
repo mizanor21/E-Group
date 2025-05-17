@@ -7,6 +7,7 @@ import {
     ChevronDown, ChevronRight, X, Loader2, Check,
     Save
 } from 'lucide-react';
+import { useLoginUserData, useUsersData } from '@/app/data/DataFetch';
 
 // Utility function to build account hierarchy
 const buildAccountHierarchy = (accounts) => {
@@ -128,6 +129,8 @@ export default function AssetsTab({ data, mutate }) {
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
+    const {data: userLoginData} = useLoginUserData([]);
+
     const filteredData = data?.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.code.includes(searchTerm)
@@ -207,8 +210,8 @@ export default function AssetsTab({ data, mutate }) {
             const completeData = {
                 ...formData,
                 createdBy: {
-                    name: "Current User",
-                    email: "user@example.com"
+                    name: userLoginData?.fullName,
+                    email: userLoginData?.email
                 },
                 editedBy: "user@example.com"
             };
