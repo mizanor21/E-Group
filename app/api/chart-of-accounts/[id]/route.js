@@ -1,11 +1,12 @@
-import { LedgerAccount } from "@/app/lib/ChartOfAccount/model";
+
+import { ChartOfAccounts } from "@/app/lib/ChartOfAccount/model";
 import { connectToDB } from "@/app/lib/connectToDB";
 import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
   const { id } = params;
   await connectToDB();
-  const data = await LedgerAccount.findOne({ _id: id });
+  const data = await ChartOfAccounts.findOne({ _id: id });
   if (!data) {
     return NextResponse.json(
       { message: "data not found" },
@@ -22,7 +23,7 @@ export async function PATCH(req, { params }) {
   await connectToDB();
 
   try {
-    const updated = await LedgerAccount.findByIdAndUpdate(id, data, {
+    const updated = await ChartOfAccounts.findByIdAndUpdate(id, data, {
       new: true, // Returns the updated document
       runValidators: true, // Ensures model validation
     });
