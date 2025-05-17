@@ -75,12 +75,6 @@ const AccountRow = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
-                        <button
-                            title="View"
-                            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                        >
-                            <Eye className="w-5 h-5" />
-                        </button>
                         {account.editable && (
                             <button
                                 title="Edit"
