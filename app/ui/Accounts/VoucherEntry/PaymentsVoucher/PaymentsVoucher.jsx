@@ -26,7 +26,8 @@ const PaymentsVoucher = () => {
       paidFrom: "Petty Cash",
       voucherRows: [
         {
-          expenseHead: "Mobile Bill-HO",
+          expenseHead: "",
+          accountHead: "",
           ref: "",
           amountFC: "",
           convRate: "",
@@ -123,6 +124,7 @@ const PaymentsVoucher = () => {
                   <th className="p-2 border text-left text-sm">
                     Expense Head <span className="text-red-500">*</span>
                   </th>
+                  <th className="p-2 border text-left text-sm">Account Head</th>
                   <th className="p-2 border text-left text-sm">Ref.</th>
                   {selectedCurrency !== "BDT" && (
                     <>
@@ -171,6 +173,15 @@ const PaymentsVoucher = () => {
                         <ChevronDown className="absolute right-2 top-1.5 h-4 w-4 text-gray-500" />
                       </div>
                     </td>
+                    
+                    <td className="p-2 border">
+                      <input
+                        {...register(`voucherRows.${index}.accountHead`)}
+                        placeholder="Account Head"
+                        className="w-full p-1 border border-gray-200 rounded"
+                      />
+                    </td>
+
                     <td className="p-2 border">
                       <input
                         {...register(`voucherRows.${index}.ref`)}
