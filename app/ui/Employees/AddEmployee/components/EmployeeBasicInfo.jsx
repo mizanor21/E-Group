@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Fragment } from "react"
 import { useFormContext } from "react-hook-form"
 import {
   UserIcon,
@@ -14,6 +14,9 @@ import {
   BriefcaseIcon,
 } from "@heroicons/react/24/outline"
 import { useEmployeeRequiredFieldData, useEmployeeRoleData, useProjectData } from "@/app/data/DataFetch"
+import { Plus } from "lucide-react"
+import { Dialog, Transition } from '@headlessui/react'; // or your preferred modal library
+import toast from "react-hot-toast"
 
 const generateUID = () => {
   return Math.floor(1000 + Math.random() * 9000) // 4-digit number
@@ -92,7 +95,6 @@ const EmployeeBasicInfo = () => {
   const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([])
   const { data } = useProjectData([])
   const { data: roleData, mutate } = useEmployeeRoleData([])
-  console.log("Employee Role Data:", roleData)
   const {
     register,
     formState: { errors },
@@ -110,6 +112,34 @@ const EmployeeBasicInfo = () => {
   const selectedGroup = watch("group")
   const selectedCompany = watch("company")
   const selectedProject = watch("project"); // Add this line
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newRole, setNewRole] = useState('');
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const handleAddRole = async () => {
+    if (!newRole.trim()) return;
+    try {
+      const res = await fetch('/api/employee-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeRole: newRole.trim() }),
+      });
+      if (res.ok) {
+        toast.success("Role added successfully!");
+        mutate(); // Refresh roles list
+        setNewRole('');
+        closeModal();
+      } else {
+        // Handle error (optional: show error message)
+        console.error('Failed to add role');
+      }
+    } catch (err) {
+      console.error('Error adding role:', err);
+    }
+  };
 
   // Extract field requirements from API data
   const getFieldRequirement = (fieldId) => {
@@ -312,7 +342,7 @@ const EmployeeBasicInfo = () => {
             validation={createValidation("employeeID")}
             error={errors.employeeID}
             isRequired={getFieldRequirement("employeeID")}
-            // disabled={employeeIdGenerated}
+          // disabled={employeeIdGenerated}
           />
           <SelectField
             id="gender"
@@ -526,20 +556,98 @@ const EmployeeBasicInfo = () => {
             error={errors.actualJob}
             isRequired={getFieldRequirement("actualJob")}
           />
-          <SelectField
-            id="role"
-            label="Role"
-            options={[
-              { value: "", label: "Select Role" },
-              ...(roleData?.map(role => ({
-                value: role.employeeRole,
-                label: role.employeeRole
-              })) || [])
-            ]}
-            validation={createValidation("role")}
-            error={errors.role}
-            isRequired={getFieldRequirement("role")}
-          />
+
+          <div className="flex justify-center items-center">
+            <SelectField
+              id="role"
+              label="Role"
+              options={[
+                { value: "", label: "Select Role" },
+                ...(roleData?.map(role => ({
+                  value: role.employeeRole,
+                  label: role.employeeRole
+                })) || [])
+              ]}
+              validation={createValidation("role")}
+              error={errors.role}
+              isRequired={getFieldRequirement("role")}
+            />
+
+            <button
+              className="pt-4"
+              onClick={openModal}
+              aria-label="Add new role"
+            >
+              <Plus />
+            </button>
+
+            {/* Modern Modal */}
+            <Transition appear show={isModalOpen} as={Fragment}>
+              <Dialog as="div" className="relative z-50" onClose={closeModal}>
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 overflow-y-auto">
+                  <div className="flex min-h-full items-center justify-center p-4 text-center">
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="opacity-0 scale-95"
+                      enterTo="opacity-100 scale-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="opacity-100 scale-100"
+                      leaveTo="opacity-0 scale-95"
+                    >
+                      <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                        <Dialog.Title
+                          as="h3"
+                          className="text-lg font-medium leading-6 text-gray-900"
+                        >
+                          Add New Role
+                        </Dialog.Title>
+
+                        <div className="mt-4">
+                          <input
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter role name"
+                            value={newRole}
+                            onChange={(e) => setNewRole(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="mt-6 flex justify-end space-x-3">
+                          <button
+                            type="button"
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            onClick={closeModal}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            onClick={handleAddRole}
+                          >
+                            Add Role
+                          </button>
+                        </div>
+                      </Dialog.Panel>
+                    </Transition.Child>
+                  </div>
+                </div>
+              </Dialog>
+            </Transition>
+          </div>
           <InputField
             id="accommodation"
             label="Accommodation"
