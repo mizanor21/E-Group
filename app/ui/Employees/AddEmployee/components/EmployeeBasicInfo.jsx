@@ -13,14 +13,11 @@ import {
   AcademicCapIcon,
   BriefcaseIcon,
 } from "@heroicons/react/24/outline"
-import { useEmployeeRequiredFieldData, useEmployeeRoleData, useProjectData } from "@/app/data/DataFetch"
+import { useEmployeeData, useEmployeeRequiredFieldData, useEmployeeRoleData, useProjectData } from "@/app/data/DataFetch"
 import { Plus } from "lucide-react"
 import { Dialog, Transition } from '@headlessui/react'; // or your preferred modal library
 import toast from "react-hot-toast"
 
-const generateUID = () => {
-  return Math.floor(1000 + Math.random() * 9000) // 4-digit number
-}
 
 const InputField = ({ id, label, type, icon: Icon, validation, error, disabled = false, isRequired }) => (
   <div className="w-full">
@@ -92,6 +89,7 @@ const SelectField = ({ id, label, options, validation, error, onChange, isRequir
 )
 
 const EmployeeBasicInfo = () => {
+  const { data: employeeData } = useEmployeeData()
   const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([])
   const { data } = useProjectData([])
   const { data: roleData, mutate } = useEmployeeRoleData([])
@@ -196,8 +194,23 @@ const EmployeeBasicInfo = () => {
     }
   }, [selectedCompany, setValue])
 
-  // State to track the sequential ID
-  const [sequentialId, setSequentialId] = useState(1000); // Starting from 01000
+  // At the top with your other state
+  const [sequentialId, setSequentialId] = useState(1000);
+
+  // Calculate next ID based on existing employees
+  useEffect(() => {
+    if (employeeData && employeeData.length > 0) {
+      // Get all numeric parts from existing IDs
+      const allNumbers = employeeData.map(emp => {
+        const parts = emp.employeeID?.split('-');
+        return parts && parts.length === 4 ? parseInt(parts[3], 10) : 0;
+      }).filter(num => !isNaN(num));
+
+      // Find the highest number and add 1
+      const maxNumber = Math.max(...allNumbers, 999); // Default to 999 if no valid numbers
+      setSequentialId(maxNumber + 1);
+    }
+  }, [employeeData]);
 
   // Function to get the first 3 letters in uppercase
   const getFirstThreeLetters = (str) => {
@@ -342,7 +355,7 @@ const EmployeeBasicInfo = () => {
             validation={createValidation("employeeID")}
             error={errors.employeeID}
             isRequired={getFieldRequirement("employeeID")}
-          // disabled={employeeIdGenerated}
+            disabled={employeeIdGenerated}
           />
           <SelectField
             id="gender"
