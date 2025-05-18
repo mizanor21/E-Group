@@ -27,6 +27,11 @@ export const useEmployeeData = () => {
   return { data, error, isLoading: !data && !error };
 };
 
+export const useEmployeeRoleData = () => {
+  const { data, error, mutate } = useSWR(`${API_URL}/api/employee-role`, fetcher);
+  return { data, error, isLoading: !data && !error, mutate };
+}
+
 export const useEmployeeRequiredFieldData = () => {
   const { data, error } = useSWR(`${API_URL}/api/required-field`, fetcher);
   return { data, error, isLoading: !data && !error };

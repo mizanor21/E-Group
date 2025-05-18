@@ -13,7 +13,7 @@ import {
   AcademicCapIcon,
   BriefcaseIcon,
 } from "@heroicons/react/24/outline"
-import { useEmployeeRequiredFieldData, useProjectData } from "@/app/data/DataFetch"
+import { useEmployeeRequiredFieldData, useEmployeeRoleData, useProjectData } from "@/app/data/DataFetch"
 
 const generateUID = () => {
   return Math.floor(1000 + Math.random() * 9000) // 4-digit number
@@ -91,6 +91,8 @@ const SelectField = ({ id, label, options, validation, error, onChange, isRequir
 const EmployeeBasicInfo = () => {
   const { data: requiredFieldData, isLoading } = useEmployeeRequiredFieldData([])
   const { data } = useProjectData([])
+  const { data: roleData, mutate } = useEmployeeRoleData([])
+  console.log("Employee Role Data:", roleData)
   const {
     register,
     formState: { errors },
@@ -529,9 +531,10 @@ const EmployeeBasicInfo = () => {
             label="Role"
             options={[
               { value: "", label: "Select Role" },
-              { value: "employee", label: "Employee" },
-              { value: "manager", label: "Manager" },
-              { value: "admin", label: "Admin" },
+              ...(roleData?.map(role => ({
+                value: role.employeeRole,
+                label: role.employeeRole
+              })) || [])
             ]}
             validation={createValidation("role")}
             error={errors.role}
