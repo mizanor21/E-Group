@@ -74,7 +74,7 @@ const AccountRow = ({
                     </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
+                            <div className="flex justify-end space-x-2">
                         {account.editable && (
                             <button
                                 title="Edit"
