@@ -97,3 +97,11 @@ export const useReceivedVouchersData = () => {
   const { data, error, mutate } = useSWR(`${API_URL}/api/received-vouchers`, fetcher);
   return { data, error, isLoading: !data && !error, mutate };
 }
+
+export const useReceivedVouchersByYearData = ({ params }) => {
+  const { data, error } = useSWR(
+    params?.year ? `${API_URL}/api/received-vouchers/${params.year}` : null,
+    fetcher
+  );
+  return { data, error, isLoading: !data && !error };
+};
