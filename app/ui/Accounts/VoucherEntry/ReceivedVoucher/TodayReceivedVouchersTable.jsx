@@ -121,7 +121,7 @@ const TodayReceivedVouchersTable = () => {
               {visibleColumns.voucherNo && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Tr. No</th>}
               {visibleColumns.transitionType && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Tr. Type</th>}
               {visibleColumns.project && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Project</th>}
-              {visibleColumns.expenseHead && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Expense Head</th>}
+              {visibleColumns.expenseHead && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Income Head</th>}
               {visibleColumns.paidTo && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Paid To</th>}
               {visibleColumns.amount && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Amount (BDT)</th>}
               {visibleColumns.rowStatus && <th className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Row Status</th>}

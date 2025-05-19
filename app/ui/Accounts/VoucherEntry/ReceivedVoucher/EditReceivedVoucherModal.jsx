@@ -33,7 +33,6 @@ const EditReceivedVoucherModal = ({ voucher, onClose, onUpdate }) => {
   }, [voucher, reset]);
 
   const onSubmit = async (data) => {
-    console.log(' data:', voucher.date.split('-')[0]);
     try {
       const response = await fetch(`/api/received-vouchers/${voucher.date.split('-')[0]}/${voucher._id}`, {
         method: 'PATCH',

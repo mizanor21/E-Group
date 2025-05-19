@@ -121,7 +121,7 @@ const ReceivedVoucher = () => {
               <thead>
                 <tr className="bg-gray-50">
                   <th className="p-2 border text-left text-sm">
-                    Expense Head <span className="text-red-500">*</span>
+                    Income Head <span className="text-red-500">*</span>
                   </th>
                   <th className="p-2 border text-left text-sm">Ref.</th>
                   {selectedCurrency !== "BDT" && (
@@ -159,7 +159,7 @@ const ReceivedVoucher = () => {
                               {...field}
                               className="w-full p-1 border border-gray-200 rounded appearance-none pr-8"
                             >
-                              <option value="">Select Expense Head</option>
+                              <option value="">Select Income Head</option>
                               {expenseHeadOptions.map(option => (
                                 <option key={option.value} value={option.value}>
                                   {option.label}
