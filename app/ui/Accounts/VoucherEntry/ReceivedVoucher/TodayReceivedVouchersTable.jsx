@@ -2,9 +2,11 @@
 import { useReceivedVouchersData } from "@/app/data/DataFetch";
 import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, DollarSign } from "lucide-react";
 import { useState } from "react";
+import EditReceivedVoucherModal from "./EditReceivedVoucherModal";
 
 const TodayReceivedVouchersTable = () => {
-  const { data } = useReceivedVouchersData([]);
+  const { data, mutate } = useReceivedVouchersData([]);
+  const [editingVoucher, setEditingVoucher] = useState(null);
   const [expandedVoucher, setExpandedVoucher] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({
     date: true,
@@ -40,13 +42,13 @@ const TodayReceivedVouchersTable = () => {
     if (voucher.status === true) {
       return 'Approved';
     }
-    
+
     // Otherwise, check individual row status
     return row.status ? 'Approved' : 'Pending';
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Approved':
         return <CheckCircle size={16} className="text-green-600" />;
       case 'Review':
@@ -69,6 +71,15 @@ const TodayReceivedVouchersTable = () => {
     }
   };
 
+  const handleEditClick = (voucher) => {
+    setEditingVoucher(voucher);
+  };
+
+  const handleUpdateSuccess = (updatedVoucher) => {
+    mutate(data.map(v => v._id === updatedVoucher._id ? updatedVoucher : v));
+    setEditingVoucher(null);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md mt-6">
       <div className="border-b border-gray-200 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 flex justify-between items-center">
@@ -89,10 +100,10 @@ const TodayReceivedVouchersTable = () => {
             <p className="text-xs text-gray-500 mb-2">Toggle Columns</p>
             {Object.keys(visibleColumns).map(col => (
               <label key={col} className="flex items-center mb-1 cursor-pointer">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={visibleColumns[col]}
-                  onChange={() => setVisibleColumns({...visibleColumns, [col]: !visibleColumns[col]})}
+                  onChange={() => setVisibleColumns({ ...visibleColumns, [col]: !visibleColumns[col] })}
                   className="mr-2"
                 />
                 <span className="text-sm capitalize">{col.replace(/([A-Z])/g, ' $1')}</span>
@@ -101,7 +112,7 @@ const TodayReceivedVouchersTable = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
@@ -125,11 +136,11 @@ const TodayReceivedVouchersTable = () => {
                 const totalAmount = calculateTotalAmount(voucher.voucherRows);
                 const voucherStatus = getVoucherStatus(voucher);
                 const isExpanded = expandedVoucher === voucher._id;
-                
+
                 return (
                   <>
-                    <tr 
-                      key={voucher._id} 
+                    <tr
+                      key={voucher._id}
                       className={`cursor-pointer hover:bg-gray-50 ${isExpanded ? 'bg-blue-50' : ''}`}
                       onClick={() => toggleVoucherExpand(voucher._id)}
                     >
@@ -137,11 +148,10 @@ const TodayReceivedVouchersTable = () => {
                       {visibleColumns.voucherNo && <td className="p-3 whitespace-nowrap font-medium text-gray-800">{voucher.lastVoucher}</td>}
                       {visibleColumns.transitionType && (
                         <td className="p-3 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            voucher.transitionType.includes('Cash') 
-                              ? 'bg-amber-100 text-amber-800' 
-                              : 'bg-violet-100 text-violet-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${voucher.transitionType.includes('Cash')
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-violet-100 text-violet-800'
+                            }`}>
                             {voucher.transitionType}
                           </span>
                         </td>
@@ -161,11 +171,10 @@ const TodayReceivedVouchersTable = () => {
                       )}
                       {visibleColumns.voucherStatus && (
                         <td className="p-3 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            voucherStatus === 'Approved' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${voucherStatus === 'Approved'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                            }`}>
                             {getStatusIcon(voucherStatus)}
                             <span className="ml-1">{voucherStatus}</span>
                           </span>
@@ -174,9 +183,25 @@ const TodayReceivedVouchersTable = () => {
                       {visibleColumns.action && (
                         <td className="p-3 whitespace-nowrap">
                           <div className="flex space-x-1">
-                            <button className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition">
+                            {/* <button className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition">
+                              <Edit size={14} />
+                            </button> */}
+                            {/* Modify your action buttons */}
+                            <button
+                              onClick={() => handleEditClick(voucher)}
+                              className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition"
+                            >
                               <Edit size={14} />
                             </button>
+
+                            {/* Add the modal at the bottom */}
+                            {editingVoucher && (
+                              <EditReceivedVoucherModal
+                                voucher={editingVoucher}
+                                onClose={() => setEditingVoucher(null)}
+                                onUpdate={handleUpdateSuccess}
+                              />
+                            )}
                             <button className="bg-cyan-500 text-white p-1 rounded-md hover:bg-cyan-600 transition">
                               <Eye size={14} />
                             </button>
@@ -203,9 +228,8 @@ const TodayReceivedVouchersTable = () => {
                           {visibleColumns.amount && <td className="p-3 whitespace-nowrap text-sm font-medium">{row.amountBDT}</td>}
                           {visibleColumns.rowStatus && (
                             <td className="p-3 whitespace-nowrap">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                rowStatus === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                              }`}>
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${rowStatus === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                                }`}>
                                 {getStatusIcon(rowStatus)}
                                 <span className="ml-1">{rowStatus}</span>
                               </span>
