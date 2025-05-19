@@ -93,15 +93,23 @@ export const usePaymentVouchersData = () => {
   return { data, error, isLoading: !data && !error, mutate };
 };
 
+export const usePaymentVouchersByYearData = ({ params }) => {
+  const { data, error, mutate } = useSWR(
+    params?.year ? `${API_URL}/api/payment-vouchers/${params.year}` : null,
+    fetcher
+  );
+  return { data, error, mutate, isLoading: !data && !error };
+};
+
 export const useReceivedVouchersData = () => {
   const { data, error, mutate } = useSWR(`${API_URL}/api/received-vouchers`, fetcher);
   return { data, error, isLoading: !data && !error, mutate };
 }
 
 export const useReceivedVouchersByYearData = ({ params }) => {
-  const { data, error } = useSWR(
+  const { data, error, mutate } = useSWR(
     params?.year ? `${API_URL}/api/received-vouchers/${params.year}` : null,
     fetcher
   );
-  return { data, error, isLoading: !data && !error };
+  return { data, error, mutate, isLoading: !data && !error };
 };

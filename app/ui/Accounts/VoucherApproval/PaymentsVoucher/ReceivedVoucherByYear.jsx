@@ -1,14 +1,14 @@
 'use client'
 
+import { usePaymentVouchersByYearData } from '@/app/data/DataFetch';
 import { useState } from 'react';
-import { useReceivedVouchersByYearData } from "@/app/data/DataFetch";
 
-const ReceivedVoucherByYear = () => {
+const PaymentVoucherByYear = () => {
   const [selectedYear, setSelectedYear] = useState(
     new Date().getFullYear().toString()
   );
   
-  const { data, error, isLoading, mutate } = useReceivedVouchersByYearData({
+  const { data, error, isLoading, mutate } = usePaymentVouchersByYearData({
     params: { year: selectedYear }
   });
 
@@ -41,7 +41,7 @@ const ReceivedVoucherByYear = () => {
       {data && (
         <div className="mt-6">
           <h2 className="text-xl font-semibold mb-4">
-            Received Vouchers for {selectedYear}
+            Payment Vouchers for {selectedYear}
           </h2>
           {data.length}
         </div>
@@ -50,4 +50,4 @@ const ReceivedVoucherByYear = () => {
   );
 };
 
-export default ReceivedVoucherByYear;
+export default PaymentVoucherByYear;
