@@ -415,7 +415,7 @@ export default function LiabilitiesTab({ data, mutate }) {
 
             <div className="p-3 border-b text-sm text-gray-500">
                 {debouncedSearchTerm ? (
-                    <p>Found {filteredHierarchy.length} {filteredHierarchy.length === 1 ? 'account' : 'accounts'} matching "{debouncedSearchTerm}"</p>
+                    <p>Found {filteredHierarchy.length} {filteredHierarchy.length === 1 ? 'account' : 'accounts'} matching &quot;{debouncedSearchTerm}&quot;</p>
                 ) : (
                     <p>Showing {filteredHierarchy.length} {filteredHierarchy.length === 1 ? 'account' : 'accounts'}</p>
                 )}
