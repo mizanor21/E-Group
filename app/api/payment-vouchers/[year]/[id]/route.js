@@ -1,49 +1,52 @@
-import { getVoucherModelByYear } from "@/app/lib/Accounts/voucherModel";
-import { connectToDB } from "@/app/lib/connectToDB";
+// app/api/payment-vouchers/[year]/[id]/route.js
 
+import { getVoucherModelByYear } from '@/app/lib/Accounts/voucherModel';
+import { connectToDB } from '@/app/lib/connectToDB';
 
-export async function PATCH(request, { params }) {
+export async function PATCH(req, { params }) {
   try {
     await connectToDB();
     const { year, id } = params;
-    const updates = await request.json();
+    const updateData = await req.json();
 
-    // Get the correct model for the year
+    if (!id) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: "Voucher ID is required"
+      }), { status: 400 });
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: "No update data provided"
+      }), { status: 400 });
+    }
+
     const Voucher = getVoucherModelByYear(year);
-
-    // Validate updates
-    if (!updates || (updates.status !== undefined && typeof updates.status !== 'boolean')) {
-      return Response.json({ error: 'Invalid update data' }, { status: 400 });
-    }
-
-    // Handle voucher rows updates
-    if (updates.voucherRows) {
-      const voucher = await Voucher.findById(id);
-      if (!voucher) {
-        return Response.json({ error: 'Voucher not found' }, { status: 404 });
-      }
-
-      // Merge existing rows with updates
-      const updatedRows = voucher.voucherRows.map(row => {
-        const rowUpdate = updates.voucherRows.find(r => r._id?.toString() === row._id.toString());
-        return rowUpdate ? { ...row.toObject(), ...rowUpdate } : row;
-      });
-
-      updates.voucherRows = updatedRows;
-    }
-
     const updatedVoucher = await Voucher.findByIdAndUpdate(
       id,
-      { $set: updates },
-      { new: true }
+      { $set: updateData },
+      { new: true, runValidators: true }
     );
 
     if (!updatedVoucher) {
-      return Response.json({ error: 'Voucher not found' }, { status: 404 });
+      return new Response(JSON.stringify({
+        success: false,
+        message: `Voucher with ID ${id} not found in ${year} collection`
+      }), { status: 404 });
     }
 
-    return Response.json(updatedVoucher);
+    return new Response(JSON.stringify({
+      success: true,
+      data: updatedVoucher
+    }), { status: 200 });
+
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return new Response(JSON.stringify({
+      success: false,
+      message: error.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    }), { status: 500 });
   }
 }
