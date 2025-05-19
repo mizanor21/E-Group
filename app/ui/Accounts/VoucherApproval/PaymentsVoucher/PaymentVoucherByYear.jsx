@@ -16,7 +16,7 @@ const PaymentVoucherByYear = () => {
   const yearOptions = Array.from({ length: 52 }, (_, i) => currentYear + i);
 
   return (
-    <div className="space-y-4 border">
+    <div className="space-y-4 border mb-3">
       <div className="flex justify-between items-center gap-4">
         {data && (
           <div className="mt-6">
