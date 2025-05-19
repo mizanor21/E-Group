@@ -18,13 +18,12 @@ const PaymentVoucherByYear = () => {
   return (
     <div className="space-y-4 border mb-3">
       <div className="flex justify-between items-center gap-4">
-        {data && (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Payment Vouchers for {selectedYear}
-            </h2>
-          </div>
-        )}
+
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-4">
+            Payment Vouchers for {selectedYear}
+          </h2>
+        </div>
         <div className="">
           <select
             id="year-select"
