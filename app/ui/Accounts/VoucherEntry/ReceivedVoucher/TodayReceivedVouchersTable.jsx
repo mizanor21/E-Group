@@ -183,9 +183,6 @@ const TodayReceivedVouchersTable = () => {
                       {visibleColumns.action && (
                         <td className="p-3 whitespace-nowrap">
                           <div className="flex space-x-1">
-                            {/* <button className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition">
-                              <Edit size={14} />
-                            </button> */}
                             {/* Modify your action buttons */}
                             <button
                               onClick={() => handleEditClick(voucher)}
@@ -202,12 +199,6 @@ const TodayReceivedVouchersTable = () => {
                                 onUpdate={handleUpdateSuccess}
                               />
                             )}
-                            <button className="bg-cyan-500 text-white p-1 rounded-md hover:bg-cyan-600 transition">
-                              <Eye size={14} />
-                            </button>
-                            <button className="bg-green-500 text-white p-1 rounded-md hover:bg-green-600 transition">
-                              <Check size={14} />
-                            </button>
                             <button className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600 transition">
                               <Trash2 size={14} />
                             </button>
