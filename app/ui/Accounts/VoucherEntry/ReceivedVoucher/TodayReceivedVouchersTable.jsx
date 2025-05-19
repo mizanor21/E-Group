@@ -3,10 +3,13 @@ import { useReceivedVouchersData } from "@/app/data/DataFetch";
 import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, DollarSign } from "lucide-react";
 import { useState } from "react";
 import EditReceivedVoucherModal from "./EditReceivedVoucherModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import toast from "react-hot-toast";
 
 const TodayReceivedVouchersTable = () => {
   const { data, mutate } = useReceivedVouchersData([]);
   const [editingVoucher, setEditingVoucher] = useState(null);
+  const [deletingVoucher, setDeletingVoucher] = useState(null);
   const [expandedVoucher, setExpandedVoucher] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({
     date: true,
@@ -78,6 +81,35 @@ const TodayReceivedVouchersTable = () => {
   const handleUpdateSuccess = (updatedVoucher) => {
     mutate(data.map(v => v._id === updatedVoucher._id ? updatedVoucher : v));
     setEditingVoucher(null);
+  };
+
+  const handleDeleteClick = (voucher) => {
+    setDeletingVoucher(voucher);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingVoucher) return;
+
+    try {
+      const year = new Date(deletingVoucher.date).getFullYear();
+      const response = await fetch(`/api/received-vouchers/${year}?id=${deletingVoucher._id}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success('Voucher deleted successfully!');
+        mutate(data.filter(v => v._id !== deletingVoucher._id));
+      } else {
+        toast.error(result.message || 'Failed to delete voucher');
+      }
+    } catch (error) {
+      toast.error('Error deleting voucher');
+      console.error('Delete error:', error);
+    } finally {
+      setDeletingVoucher(null);
+    }
   };
 
   return (
@@ -183,15 +215,24 @@ const TodayReceivedVouchersTable = () => {
                       {visibleColumns.action && (
                         <td className="p-3 whitespace-nowrap">
                           <div className="flex space-x-1">
-                            {/* Modify your action buttons */}
-                            <button
-                              onClick={() => handleEditClick(voucher)}
-                              className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition"
-                            >
-                              <Edit size={14} />
-                            </button>
+                            <td className="p-3 whitespace-nowrap">
+                              <div className="flex space-x-1">
+                                <button
+                                  onClick={() => handleEditClick(voucher)}
+                                  className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition"
+                                >
+                                  <Edit size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteClick(voucher)}
+                                  className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600 transition"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
 
-                            {/* Add the modal at the bottom */}
+                            {/* Add the edit  modal */}
                             {editingVoucher && (
                               <EditReceivedVoucherModal
                                 voucher={editingVoucher}
@@ -199,9 +240,15 @@ const TodayReceivedVouchersTable = () => {
                                 onUpdate={handleUpdateSuccess}
                               />
                             )}
-                            <button className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600 transition">
-                              <Trash2 size={14} />
-                            </button>
+
+                            {/* Add the delete confirmation modal */}
+                            <DeleteConfirmationModal
+                              isOpen={!!deletingVoucher}
+                              onClose={() => setDeletingVoucher(null)}
+                              onConfirm={handleDeleteConfirm}
+                              itemName={`voucher ${deletingVoucher?.lastVoucher}`}
+                            />
+
                           </div>
                         </td>
                       )}
