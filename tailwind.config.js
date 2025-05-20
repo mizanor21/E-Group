@@ -1,10 +1,12 @@
+const {heroui} = require('@heroui/theme');
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     darkMode: ["class"],
-    content: [
+  content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@heroui/theme/dist/components/(date-input|form).js"
   ],
   daisyui: {
     themes: ["light"],
@@ -21,5 +23,5 @@ module.exports = {
   		}
   	}
   },
-  plugins: [require("daisyui"), require("tailwindcss-animate")],
+  plugins: [require("daisyui"),require("tailwindcss-animate"),heroui()],
 };
