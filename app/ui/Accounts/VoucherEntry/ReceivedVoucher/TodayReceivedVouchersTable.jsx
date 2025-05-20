@@ -3,7 +3,7 @@ import { useReceivedVouchersData } from "@/app/data/DataFetch";
 import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, DollarSign } from "lucide-react";
 import { useState } from "react";
 import EditReceivedVoucherModal from "./EditReceivedVoucherModal";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import DeleteConfirmationModal from "../DeleteConfirmationModal";
 import toast from "react-hot-toast";
 
 const TodayReceivedVouchersTable = () => {

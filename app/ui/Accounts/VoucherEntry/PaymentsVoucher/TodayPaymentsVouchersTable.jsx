@@ -2,9 +2,14 @@
 import { usePaymentVouchersData } from "@/app/data/DataFetch";
 import { Edit, Eye, Check, Trash2, Clock, CheckCircle, AlertCircle, FileText, DollarSign } from "lucide-react";
 import { useState } from "react";
+import EditPaymentVoucherModal from "./EditPaymentVoucherModal";
+import toast from 'react-hot-toast';
+import DeleteConfirmationModal from "../DeleteConfirmationModal";
 
 const TodayPaymentsVouchersTable = () => {
-  const { data } = usePaymentVouchersData([]);
+  const { data, mutate } = usePaymentVouchersData([]);
+  const [editingVoucher, setEditingVoucher] = useState(null);
+  const [deletingVoucher, setDeletingVoucher] = useState(null);
   const [expandedVoucher, setExpandedVoucher] = useState(null);
   const [visibleColumns, setVisibleColumns] = useState({
     date: true,
@@ -29,31 +34,20 @@ const TodayPaymentsVouchersTable = () => {
     });
   };
 
-  // Use the actual voucher status from the data
   const getVoucherStatus = (voucher) => {
     return voucher.status ? 'Approved' : 'Pending';
   };
 
-  // Get row status based on voucher's global status and individual row status
   const getRowStatus = (voucher, row) => {
-    // If voucher is globally approved, all rows are approved
-    if (voucher.status === true) {
-      return 'Approved';
-    }
-    
-    // Otherwise, check individual row status
+    if (voucher.status === true) return 'Approved';
     return row.status ? 'Approved' : 'Pending';
   };
 
   const getStatusIcon = (status) => {
     switch(status) {
-      case 'Approved':
-        return <CheckCircle size={16} className="text-green-600" />;
-      case 'Review':
-        return <AlertCircle size={16} className="text-amber-600" />;
-      case 'Pending':
-      default:
-        return <Clock size={16} className="text-blue-600" />;
+      case 'Approved': return <CheckCircle size={16} className="text-green-600" />;
+      case 'Review': return <AlertCircle size={16} className="text-amber-600" />;
+      default: return <Clock size={16} className="text-blue-600" />;
     }
   };
 
@@ -62,10 +56,44 @@ const TodayPaymentsVouchersTable = () => {
   };
 
   const toggleVoucherExpand = (voucherId) => {
-    if (expandedVoucher === voucherId) {
-      setExpandedVoucher(null);
-    } else {
-      setExpandedVoucher(voucherId);
+    setExpandedVoucher(prev => prev === voucherId ? null : voucherId);
+  };
+
+  const handleEditClick = (voucher) => {
+    setEditingVoucher(voucher);
+  };
+
+  const handleUpdateSuccess = (updatedVoucher) => {
+    mutate(data.map(v => v._id === updatedVoucher._id ? updatedVoucher : v));
+    setEditingVoucher(null);
+  };
+
+  const handleDeleteClick = (voucher) => {
+    setDeletingVoucher(voucher);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingVoucher) return;
+
+    try {
+      const year = new Date(deletingVoucher.date).getFullYear();
+      const response = await fetch(`/api/payment-vouchers/${year}?id=${deletingVoucher._id}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success('Payment voucher deleted successfully!');
+        mutate(data.filter(v => v._id !== deletingVoucher._id));
+      } else {
+        toast.error(result.message || 'Failed to delete voucher');
+      }
+    } catch (error) {
+      toast.error('Error deleting payment voucher');
+      console.error('Delete error:', error);
+    } finally {
+      setDeletingVoucher(null);
     }
   };
 
@@ -75,7 +103,7 @@ const TodayPaymentsVouchersTable = () => {
         <div className="flex items-center">
           <span className="w-2 h-6 bg-blue-500 rounded mr-2"></span>
           <h3 className="text-lg font-semibold text-gray-800">
-            Today&apos;s Payments Vouchers
+            Today&apos;s Payment Vouchers
             <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
               {data?.length || 0} vouchers
             </span>
@@ -101,7 +129,7 @@ const TodayPaymentsVouchersTable = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
@@ -125,7 +153,7 @@ const TodayPaymentsVouchersTable = () => {
                 const totalAmount = calculateTotalAmount(voucher.voucherRows);
                 const voucherStatus = getVoucherStatus(voucher);
                 const isExpanded = expandedVoucher === voucher._id;
-                
+
                 return (
                   <>
                     <tr 
@@ -174,16 +202,22 @@ const TodayPaymentsVouchersTable = () => {
                       {visibleColumns.action && (
                         <td className="p-3 whitespace-nowrap">
                           <div className="flex space-x-1">
-                            <button className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditClick(voucher);
+                              }}
+                              className="bg-blue-500 text-white p-1 rounded-md hover:bg-blue-600 transition"
+                            >
                               <Edit size={14} />
                             </button>
-                            <button className="bg-cyan-500 text-white p-1 rounded-md hover:bg-cyan-600 transition">
-                              <Eye size={14} />
-                            </button>
-                            <button className="bg-green-500 text-white p-1 rounded-md hover:bg-green-600 transition">
-                              <Check size={14} />
-                            </button>
-                            <button className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600 transition">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(voucher);
+                              }}
+                              className="bg-red-500 text-white p-1 rounded-md hover:bg-red-600 transition"
+                            >
                               <Trash2 size={14} />
                             </button>
                           </div>
@@ -225,7 +259,7 @@ const TodayPaymentsVouchersTable = () => {
                 <td colSpan={Object.values(visibleColumns).filter(Boolean).length} className="p-6 text-center text-gray-500">
                   <div className="flex flex-col items-center justify-center">
                     <AlertCircle size={40} className="text-gray-300 mb-2" />
-                    <p>No vouchers found</p>
+                    <p>No payment vouchers found</p>
                   </div>
                 </td>
               </tr>
@@ -233,6 +267,24 @@ const TodayPaymentsVouchersTable = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Edit Voucher Modal */}
+      {editingVoucher && (
+        <EditPaymentVoucherModal
+          voucher={editingVoucher}
+          onClose={() => setEditingVoucher(null)}
+          onUpdate={handleUpdateSuccess}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={!!deletingVoucher}
+        onClose={() => setDeletingVoucher(null)}
+        onConfirm={handleDeleteConfirm}
+        itemName={`payment voucher ${deletingVoucher?.lastVoucher}`}
+        description="This will permanently delete the payment voucher and all its associated rows."
+      />
     </div>
   );
 };

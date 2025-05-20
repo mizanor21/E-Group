@@ -7,6 +7,9 @@ export async function PATCH(req, { params }) {
   try {
     await connectToDB();
     const { year, id } = params;
+
+    console.log("Year:", year);
+    console.log("ID:", id);
     const updateData = await req.json();
 
     if (!id) {
