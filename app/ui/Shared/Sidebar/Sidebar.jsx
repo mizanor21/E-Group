@@ -33,6 +33,7 @@ const Sidebar = () => {
     { href: "/dashboard/accounts-new/budget", icon: <MdAttachMoney className="text-green-600" />, title: "Accounts Budget" },
     { href: "/dashboard/accounts-new/bank-create", icon: <BsBank2 className="text-purple-600" />, title: "Bank Account Create" },
     { href: "/dashboard/accounts-new/cheque-book", icon: <MdAccountBox className="text-red-500" />, title: "Cheque Book Create" },
+    { href: "/dashboard/accounts-new/accounting-report", icon: <MdAccountBalanceWallet className="text-cyan-600" />, title: "Accounting Report" },
   ];
 
   const MenuLink = ({ href, icon, title, className = "" }) => {
